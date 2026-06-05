@@ -432,7 +432,7 @@ function standOf(elm){ try{ var box=elm.closest(".vnmsg"); return box?box.queryS
 function typeWriter(elm, text, deptId){
   var log=document.querySelector(".c-log");
   var stand=standOf(elm);
-  if(text.length>500){ elm.textContent=text; if(log) log.scrollTop=log.scrollHeight; return; }
+  if(text.length>500){ elm.textContent=text; if(log) log.scrollTop=log.scrollHeight; setTalking(stand,true); setTimeout(function(){ setTalking(stand,false); },7000); return; }
   var i=0; elm.textContent=""; setTalking(stand,true);
   var t=setInterval(function(){
     i++; elm.textContent=text.slice(0,i);
@@ -860,7 +860,7 @@ function consoleMessages(){
     if(m.role==="route"){ var head=m.phase==="opinion"?'💭 의견 수렴 → ':(m.direct?'🎯 직접 지목 → ':'👑 총괄 → '); var tail=m.phase==="opinion"?' 의견 요청':(m.direct?(m.depts.length>1?' 협업':' 담당 응답'):(m.depts.length>1?' 동시 분배·협업':' 배정')); return '<div class="msg"><div class="route">'+head+m.depts.map(function(d){ var mn=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[d])?' '+DEPT_MEMBERS[d]:''; return '<span style="color:'+AGENTS[d].c+';font-weight:700">'+AGENTS[d].no+' '+AGENTS[d].kr+mn+'</span>'; }).join(' + ')+tail+'</div></div>'; }
     if(m.role==="opinion"){ var ao=AGENTS[m.deptId]; var mno=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[m.deptId])?' '+DEPT_MEMBERS[m.deptId]:''; return '<div class="msg"><div class="opinionmsg">'+avatar(m.deptId,26)+'<div><div style="font-size:11px;font-weight:700;color:'+ao.c+'">'+ao.no+' '+ao.kr+mno+' 의견</div><div style="font-size:12px;color:#4a5562;line-height:1.6;white-space:pre-wrap">'+escapeHtml(m.text)+'</div></div></div></div>'; }
     if(m.role==="plan"){ return '<div class="msg"><div class="planmsg">👑 <b>총괄 협의 결과</b><br>'+escapeHtml(m.text)+'<div style="margin-top:6px;font-size:11px;color:#7c8696">→ 실행: '+(m.depts||[]).map(function(d){ return AGENTS[d].no+' '+AGENTS[d].kr+((typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[d])?'('+DEPT_MEMBERS[d]+')':''); }).join(', ')+'</div></div></div>'; }
-    if(m.role==="agent"){ var a2=AGENTS[m.deptId]; var mn=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[m.deptId])?DEPT_MEMBERS[m.deptId]:""; var exp=(STATE.deptExp&&STATE.deptExp[m.deptId])||0; var lv=Math.floor(exp/5)+1; var prog=Math.round((exp%5)/5*100); var stand=(typeof DEPT_STANDING!=="undefined"&&DEPT_STANDING[m.deptId])?DEPT_STANDING[m.deptId]:""; return '<div class="msg vnmsg"><div class="vn-stand">'+(((STATE.deptClips&&STATE.deptClips[m.deptId])?'<video src="'+escapeHtml(STATE.deptClips[m.deptId])+'" muted loop playsinline preload="auto"></video>':'')+(stand?'<img src="'+stand+'">':avatar(m.deptId,72)))+'</div><div class="vn-box" style="--dc:'+a2.c+'"><div class="vn-name"><span class="vn-nm">'+(mn||a2.kr)+'</span><span class="vn-role">'+a2.no+' '+a2.kr+'</span><button class="vn-say" data-say="'+m._i+'" title="대사 듣기">🔊</button><span class="vn-intim"><span class="vn-lv">친밀도 Lv.'+lv+'</span><span class="vn-gauge"><i style="width:'+prog+'%;background:'+a2.c+'"></i></span></span></div><div class="vn-text"'+((m._new&&STATE.typeFx)?' data-typing="'+m._i+'"':'')+'>'+((m._new&&STATE.typeFx)?'':escapeHtml(m.text))+'</div>'+pubControls(m)+'</div></div>'; }
+    if(m.role==="agent"){ var a2=AGENTS[m.deptId]; var mn=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[m.deptId])?DEPT_MEMBERS[m.deptId]:""; var exp=(STATE.deptExp&&STATE.deptExp[m.deptId])||0; var lv=Math.floor(exp/5)+1; var prog=Math.round((exp%5)/5*100); var stand=(typeof DEPT_STANDING!=="undefined"&&DEPT_STANDING[m.deptId])?DEPT_STANDING[m.deptId]:""; return '<div class="msg vnmsg"><div class="vn-stand">'+(((STATE.deptClips&&STATE.deptClips[m.deptId])?'<video src="'+escapeHtml(STATE.deptClips[m.deptId])+'" muted loop playsinline preload="auto"></video>':'')+(stand?'<img src="'+stand+'">':avatar(m.deptId,72)))+'</div><div class="vn-box" style="--dc:'+a2.c+'"><div class="vn-name"><span class="vn-nm">'+(mn||a2.kr)+'</span><span class="vn-role">'+a2.no+' '+a2.kr+'</span><button class="vn-say" data-say="'+m._i+'" title="대사 듣기">🔊</button><span class="vn-intim"><span class="vn-lv">친밀도 Lv.'+lv+'</span><span class="vn-gauge"><i style="width:'+prog+'%;background:'+a2.c+'"></i></span></span></div><div class="vn-text"'+(m._new?(STATE.typeFx?' data-typing="'+m._i+'"':' data-fresh="'+m._i+'"'):'')+'>'+((m._new&&STATE.typeFx)?'':escapeHtml(m.text))+'</div>'+pubControls(m)+'</div></div>'; }
     if(m.role==="publish") return '<div class="msg"><div class="pubmsg'+(m.warn?' warn':'')+'">'+(m.warn?'⚠️ ':'✅ ')+escapeHtml(m.text)+'</div></div>';
     if(m.role==="video") return '<div class="msg"><div class="amsg"><div class="abody" style="width:100%"><div class="aname" style="color:#f5a623">🎬 생성된 영상</div><video src="'+escapeHtml(m.url)+'" controls playsinline style="width:100%;max-width:320px;border-radius:10px;margin-top:6px;background:#000"></video><div style="display:flex;gap:6px;margin-top:8px"><button class="pubbtn" data-vsave="'+escapeHtml(m.url)+'">⬇️ 갤러리에 저장</button></div></div></div></div>';
     return '<div class="msg"><div class="route" style="color:#ff5d8f">⚠️ 처리 실패 · API 연결 확인 ('+escapeHtml(m.text)+')</div></div>';
@@ -1041,6 +1041,12 @@ function bindPublish(){
     var mi=+elm.getAttribute("data-typing"); var msg=STATE.messages[mi]; if(!msg) return;
     msg._new=false;
     typeWriter(elm, msg.text, msg.deptId);
+  });
+  document.querySelectorAll("[data-fresh]").forEach(function(elm){
+    var mi=+elm.getAttribute("data-fresh"); var msg=STATE.messages[mi]; if(!msg) return;
+    msg._new=false;
+    var st=standOf(elm);
+    if(st){ setTalking(st,true); setTimeout(function(){ setTalking(st,false); },7000); }
   });
   document.querySelectorAll("[data-say]").forEach(function(b){
     b.addEventListener("click", function(){ var mi=+b.getAttribute("data-say"); var msg=STATE.messages[mi]; if(msg) speak(msg.text, msg.deptId, standOf(b)); });
