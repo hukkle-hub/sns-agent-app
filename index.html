@@ -588,6 +588,14 @@ function stopAllSpeech(){
   if(SPEECH.audio){ try{ SPEECH.audio.pause(); }catch(e){} SPEECH.audio=null; }
   MSPEAK.on=false;
 }
+
+var _ttsWarnedAt=0;
+function ttsFailNotice(e){
+  var now=Date.now(); if(now-_ttsWarnedAt<8000) return; _ttsWarnedAt=now; // 연속 알림 방지
+  var msg=String((e&&e.message)||e||"알 수 없는 오류");
+  alert("🔇 진짜 성우 음성 실패:\n"+msg+"\n\n설정의 자체 점검을 실행하면 백엔드 오류 기록에서 자세한 원인을 볼 수 있어요. 음성 모드를 '기기 음성'으로 바꾸면 즉시 소리는 나옵니다.");
+  try{ logAct("voice","진짜 성우 실패", false, msg.slice(0,120)); }catch(_){}
+}
 async function ttsFetch(text, dept){
   var r=await fetch(backendOrigin()+"/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ text:text, dept:dept })});
   var d=await r.json();
@@ -619,7 +627,7 @@ function speak(text, deptId, standEl){
     stopAllSpeech(); if(speak._stand){ setTalking(speak._stand,false); speak._stand=null; }
     if(same){ speak._last=null; return; }
     speak._last=text; speak._stand=standEl||null; setTalking(standEl,true);
-    ttsFetch(text, deptId).then(playUrl).catch(function(){}).then(function(){ setTalking(standEl,false); if(speak._stand===standEl) speak._stand=null; });
+    ttsFetch(text, deptId).then(playUrl).catch(function(e){ ttsFailNotice(e); }).then(function(){ setTalking(standEl,false); if(speak._stand===standEl) speak._stand=null; });
     return;
   }
   if(!("speechSynthesis" in window)){ alert("이 브라우저는 음성 읽기를 지원하지 않아요."); return; }
@@ -1657,7 +1665,7 @@ function speakMeeting(id){
     (function nextStudio(){
       if(!MSPEAK.on||k>=items.length){ MSPEAK.on=false; if(STATE.view==="meeting") render(); return; }
       var it=items[k++];
-      ttsFetch(it.x, it.d).then(playUrl).catch(function(){}).then(function(){ nextStudio(); });
+      ttsFetch(it.x, it.d).then(playUrl).catch(function(e){ ttsFailNotice(e); MSPEAK.on=false; }).then(function(){ nextStudio(); });
     })();
     if(STATE.view==="meeting") render();
     return;
