@@ -354,6 +354,41 @@
 .rchart .bar{height:8px;border-radius:4px;background:linear-gradient(90deg,#e8b931,#c9a44c)}
 .rchart .dt{flex:0 0 48px;color:#9aa3b3}
 textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;border:1px solid #d4dae6;border-radius:9px;color:#1c2433;padding:9px 11px;font-size:12px;font-family:'JetBrains Mono',monospace;margin-bottom:9px}
+.mroom-top{user-select:none}
+.mr-chev{display:inline-flex;color:#9aa3b3;transition:transform .2s;transform:rotate(90deg)}
+.mroom.collapsed .mr-chev{transform:rotate(0deg)}
+.mroom.collapsed{padding-bottom:13px}
+.mr-sched{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:9px;padding-top:10px;border-top:1px dashed #eef1f6}
+.mr-sched select,.mr-sched input[type=time],.mr-sched input[type=number]{background:#fff;border:1px solid #d4dae6;border-radius:9px;color:#1c2433;padding:7px 8px;font-size:11px;font-family:'JetBrains Mono',monospace}
+.mr-wd{display:inline-flex;gap:3px}
+.mwd{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #d4dae6;border-radius:7px;font-size:10px;color:#7c8696;cursor:pointer;user-select:none}
+.mwd.on{background:#0e1726;border-color:#0e1726;color:#fff}
+.mr-cont{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:#3c4759;cursor:pointer}
+.mr-cont input{width:14px;height:14px;accent-color:#34e0a1}
+.mr-done-bar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:10px;padding:9px 11px;background:#f0fbf6;border:1px solid #bdeeda;border-radius:10px;font-size:11px;color:#13905f}
+/* 팀에이전트 탭 — 회의 런처 */
+.cmeet{margin:0 0 2px;background:#ffffff;border:1px solid #e2e7f0;border-bottom:none}
+.cmeet-hd{display:flex;align-items:center;gap:7px;padding:11px 14px;cursor:pointer;user-select:none;font-size:13px;color:#1c2433}
+.cmeet-hd .mr-chev{display:inline-flex;color:#9aa3b3;transition:transform .2s}
+.cmeet-cnt{margin-left:auto;font-size:10px;color:#7c8696;background:#f1f4f9;border:1px solid #e2e7f0;border-radius:999px;padding:3px 9px}
+.cmeet-body{padding:0 14px 13px}
+.cmeet-note{font-size:10.5px;color:#7c8696;margin:2px 0 9px;line-height:1.6}
+.cmeet-rooms{display:flex;flex-direction:column;gap:8px}
+.cmroom{display:grid;grid-template-columns:1fr auto;gap:6px 8px;align-items:center}
+.cmrun{grid-column:1;display:flex;align-items:center;gap:8px;background:#f7f9fc;border:1px solid #e9edf4;border-radius:10px;padding:9px 12px;cursor:pointer;font-family:'JetBrains Mono',monospace;text-align:left;transition:border-color .15s}
+.cmrun:hover{border-color:#34e0a1}
+.cmrun:disabled{opacity:.7;cursor:default}
+.cmdot{width:8px;height:8px;border-radius:50%;background:#c7ced8;flex-shrink:0}
+.cmdot.run{background:#3b6fd8;animation:mpulse 1.3s infinite}
+.cmdot.done{background:#13905f}
+.cmtopic{flex:1;font-size:12.5px;font-weight:700;color:#1c2433;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmplay{color:#0f9d6c;font-size:10px;display:inline-flex;align-items:center}
+.cmcont{grid-column:2;background:#fff;border:1px solid #d4dae6;border-radius:10px;padding:0 11px;cursor:pointer;color:#3c4759;display:inline-flex;align-items:center}
+.cmsub{grid-column:1 / -1;font-size:9.5px;color:#9aa3b3;margin:-2px 0 0 4px}
+.cmeet-sec{font-size:10px;letter-spacing:.6px;color:#5a6677;margin:14px 0 8px;display:flex;align-items:center;gap:6px;text-transform:uppercase}
+.ctsched{display:flex;align-items:center;gap:7px;background:#f7f9fc;border:1px solid #e9edf4;border-radius:9px;padding:8px 11px;margin-bottom:6px;font-size:11px;color:#3c4759}
+.ctwhen{color:#1c2433}.ctwhen b{color:#0f9d6c}
+.cttopic{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#5a6677}
 </style>
 </head>
 <body>
@@ -1604,17 +1639,88 @@ function consoleMessages(){
   else if(STATE.busy) html += '<div class="msg"><div class="route">👑 총괄이 부서를 배정 중…</div></div>';
   return html;
 }
+function meetingLauncherHtml(){
+  var rooms=STATE.meetingRooms||[];
+  var open = STATE.consoleMeetOpen===true; // 기본 접힘 (펼친 적 있으면 유지)
+  var h='<div class="cmeet"><div class="cmeet-hd" data-cmtoggle="1">'
+    + '<span class="mr-chev" style="'+(open?'transform:rotate(90deg)':'transform:rotate(0)')+'">'+mIcon("arrow",12)+'</span>'
+    + mIcon("talk",13)+' <b>회의 실행 · 일정</b>'
+    + '<span class="cmeet-cnt">'+rooms.length+'개 룸</span></div>';
+  if(open){
+    h+='<div class="cmeet-body">';
+    if(!rooms.length){
+      h+='<div class="note">아직 회의룸이 없어요. <a href="#" data-cmgo="1" style="color:#0f9d6c">회의 탭</a>에서 룸을 만들면 여기서 주제를 지명해 바로 실행할 수 있어요.</div>';
+    } else {
+      h+='<div class="cmeet-note">회의 주제를 지명해 실행하세요. 진행 결과는 회의 탭에서 실시간으로 볼 수 있어요.</div>';
+      h+='<div class="cmeet-rooms">';
+      rooms.forEach(function(r,i){
+        var dot = r.status==="running" ? '<span class="cmdot run"></span>' : (r.status==="done" ? '<span class="cmdot done"></span>' : '<span class="cmdot"></span>');
+        var sub = (MODE_LABELS[r.mode]||"협의")+" · "+r.depts.map(function(d){return AGENTS[d]?AGENTS[d].kr:d;}).slice(0,3).join(", ")+(r.depts.length>3?" 외":"");
+        h+='<div class="cmroom">'
+          +'<button class="cmrun" data-cmrun="'+i+'" '+(r.status==="running"?"disabled":"")+'>'
+            + dot + '<span class="cmtopic">'+escapeHtml(r.topic)+'</span>'
+            + '<span class="cmplay">'+(r.status==="running"?'진행 중':mIcon("play",12))+'</span>'
+          +'</button>'
+          +(r.status==="done"?'<button class="cmcont" data-cmcont="'+i+'" title="이어서 진행">'+mIcon("repeat",12)+'</button>':'')
+          +'<div class="cmsub">'+escapeHtml(sub)+'</div>'
+          +'</div>';
+      });
+      h+='</div>';
+    }
+    // 예약 일정 (따로 표기)
+    h+='<div class="cmeet-sec">'+mIcon("clock",12)+' 예약된 회의 일정</div><div id="ct-scheds"><div class="note">불러오는 중…</div></div>';
+    h+='</div>';
+  }
+  return h+'</div>';
+}
+function fillConsoleScheds(){
+  var el=document.getElementById("ct-scheds"); if(!el) return;
+  if(!useBackend()){ el.innerHTML='<div class="note">백엔드 연결 시 예약 일정이 표시돼요.</div>'; return; }
+  fetch(backendOrigin()+"/api/meeting-schedules").then(function(r){return r.json();}).then(function(list){
+    MEET_SCHEDULES=list||[];
+    if(!MEET_SCHEDULES.length){ el.innerHTML='<div class="note">예약된 회의가 없어요. 회의 탭에서 룸 주기를 정해 예약하세요.</div>'; return; }
+    var wd=["일","월","화","수","목","금","토"];
+    // 다음 실행이 임박한 순으로 정렬(주기형은 nextAt, 시각형은 시각)
+    var rows=MEET_SCHEDULES.slice().sort(function(a,b){ return (a.time||"99:99").localeCompare(b.time||"99:99"); });
+    el.innerHTML=rows.map(function(sc){
+      var rl = sc.repeat==="weekly" ? ("매주 "+(sc.days||[]).map(function(d){return wd[d];}).join("·"))
+             : sc.repeat==="interval" ? ("매 "+(sc.everyN||1)+(sc.everyUnit==="day"?"일":"시간")+"마다")
+             : sc.repeat==="once" ? "1회" : "매일";
+      var when = sc.repeat==="interval" ? rl : ('<b>'+escapeHtml(sc.time)+'</b> · '+rl);
+      return '<div class="ctsched">'+mIcon("cal",12)+'<span class="ctwhen">'+when+'</span>'
+        +(sc.continueLast?'<span class="mbadge">이어가기</span>':'')
+        +'<span class="cttopic">'+escapeHtml(sc.topic)+'</span></div>';
+    }).join("");
+  }).catch(function(){ el.innerHTML='<div class="note">예약 일정을 불러오지 못했어요.</div>'; });
+}
+function bindConsoleMeetings(){
+  var tg=document.querySelector('[data-cmtoggle]');
+  if(tg) tg.onclick=function(){ STATE.consoleMeetOpen=(STATE.consoleMeetOpen!==true); saveState(); render(); };
+  document.querySelectorAll('[data-cmrun]').forEach(function(b){
+    b.onclick=function(){ var i=+b.getAttribute("data-cmrun"); var r=STATE.meetingRooms[i]; if(r) r.prevSummary=""; runRoomMeeting(i); };
+  });
+  document.querySelectorAll('[data-cmcont]').forEach(function(b){
+    b.onclick=function(){ var i=+b.getAttribute("data-cmcont"); var r=STATE.meetingRooms[i]; if(!r) return;
+      var last=(STATE.meetings||[]).filter(function(x){return x.id===r.lastMeetingId;})[0];
+      r.prevSummary=(last&&last.summary)||""; runRoomMeeting(i); };
+  });
+  var go=document.querySelector('[data-cmgo]');
+  if(go) go.onclick=function(e){ e.preventDefault(); STATE.view="meeting"; saveState(); render(); };
+  fillConsoleScheds();
+}
 function renderConsole(){
   viewEl.innerHTML = '<div class="c-wrap"><div class="c-hd"><div class="c-logo">팀 에이전트</div></div>'
+    +meetingLauncherHtml()
     +'<div class="c-log" id="logScroll">'+consoleMessages()+'</div>'
     +'<div class="composer"><div id="attachBar" class="attbar" style="display:none"></div><div class="inrow"><button class="attbtn" id="attBtn" title="사진·영상 첨부">📎</button><textarea id="inp" rows="1" placeholder="부서에 지시를 입력하세요…"></textarea><button class="send" id="snd">▶</button></div><input type="file" id="attInput" accept="image/*,video/*" multiple style="display:none"></div></div>';
-  scrollLog(); bindPublish();
+  scrollLog(); bindPublish(); bindConsoleMeetings();
 }
 function renderMobile(){
-  viewEl.innerHTML = '<div class="m-wrap"><div class="phone"><div class="notch"></div><div class="m-hd"><div class="m-title">👑 에이전트 콘솔</div></div>'
+  viewEl.innerHTML = '<div class="m-wrap"><div class="phone"><div class="notch"></div><div class="m-hd"><div class="m-title">에이전트 콘솔</div></div>'
+    +meetingLauncherHtml()
     +'<div class="m-log" id="logScroll">'+consoleMessages()+'</div>'
     +'<div class="composer"><div id="attachBar" class="attbar" style="display:none"></div><div class="inrow"><button class="attbtn" id="attBtn" title="사진·영상 첨부">📎</button><textarea id="inp" rows="1" placeholder="지시 입력…"></textarea><button class="send" id="snd">▶</button></div><input type="file" id="attInput" accept="image/*,video/*" multiple style="display:none"></div></div></div>';
-  scrollLog(); bindPublish();
+  scrollLog(); bindPublish(); bindConsoleMeetings();
 }
 function analyticsInner(){
   var m = STATE.metrics, cal = STATE.calendar;
@@ -1676,6 +1782,27 @@ function mChips(sel, attr){
 
 
 
+
+// ===== 오세라 팀 평가 — 결과를 상태로 보관해 재렌더에도 유지 =====
+var REVIEW = { status:"idle" }; // idle | loading | done | error
+function opsReviewHtml(){
+  if(REVIEW.status==="loading") return '<div class="note" style="margin-top:8px">'+mIcon("crown",12)+' 오세라가 전 부서의 자율수행·학습 수준을 평가하는 중… (10~40초 정도 걸려요. 이 화면을 벗어나도 결과는 유지됩니다)</div>';
+  if(REVIEW.status==="error") return '<div class="note sc-bad" style="margin-top:8px">✗ 팀 평가 실패: '+escapeHtml(REVIEW.msg||"원인 미상")+'</div>';
+  if(REVIEW.status!=="done") return "";
+  var h='<div class="mt-sum" style="margin:8px 0">'+mIcon("crown",12)+' 오세라 팀 평가\n'+escapeHtml(REVIEW.report||"")+'</div>';
+  var sg=REVIEW.suggestions||[];
+  if(sg.length){
+    h+='<div class="note">오세라의 자율수행 지시 조정 제안 '+sg.length+'건:</div>';
+    sg.forEach(function(s){ if(AGENTS[s.dept]) h+='<div class="schedrow"><b>'+AGENTS[s.dept].kr+'</b><span style="flex:1">'+escapeHtml(s.directive)+'</span></div>'; });
+    if(REVIEW.applied){
+      h+='<div class="sc-ok" style="margin-top:6px">'+mIcon("check",11)+' 적용됨 — 각 부서가 다음 자율수행 주기부터 새 지시로 움직여요.</div>';
+    } else {
+      h+='<label class="mr-runtoggle" style="display:flex;align-items:center;gap:7px;margin:9px 0 7px;font-size:11px;color:#3c4759;cursor:pointer"><input type="checkbox" id="mr-runtog" style="width:15px;height:15px;accent-color:#34e0a1"> 적용 후 <b>팀에이전트 탭에서 바로 실행</b>까지</label>';
+      h+='<button class="cbtn conn" id="mr-applydir">'+mIcon("check",11)+' 제안 전부 적용</button>';
+    }
+  }
+  return h;
+}
 // ===== 회의 탭 라인 아이콘 (이모지 대체, 고급 라인 스타일) =====
 function mIcon(name, size){
   size=size||13;
@@ -1857,24 +1984,46 @@ function renderMeeting(){
   // 룸 카드들
   rooms.forEach(function(r,i){
     var liveM=r.status==="running"?(STATE.meetings||[]).filter(function(x){return x.id===r.lastMeetingId;})[0]:null;
-    var st = r.status==="running" ? '<span class="mr-stat run">'+mIcon('live',11)+' 진행 중 · 발언 '+((liveM&&liveM.transcript)?liveM.transcript.length:0)+'</span>' : (r.status==="done" ? '<span class="mr-stat done">최근 회의 완료</span>' : '<span class="mr-stat">대기</span>');
+    var st = r.status==="running" ? '<span class="mr-stat run">'+mIcon('live',11)+' 진행 중 · 발언 '+((liveM&&liveM.transcript)?liveM.transcript.length:0)+'</span>' : (r.status==="done" ? '<span class="mr-stat done">'+mIcon('check',10)+' 완료</span>' : '<span class="mr-stat">대기</span>');
     var meta=[(MODE_LABELS[r.mode]||"협의")];
     if(r.chair&&AGENTS[r.chair]) meta.push("의장 "+AGENTS[r.chair].kr);
     if(r.agenda&&r.agenda.length) meta.push("안건 "+r.agenda.length);
     if(r.prevSummary) meta.push("이어가기");
     meta.push((r.rounds||2)+"R");
-    h+='<div class="mroom" data-room="'+r.id+'">'
-      +'<div class="mroom-top"><div class="mroom-name">'+mIcon('talk',14)+escapeHtml(r.topic)+'</div>'+st+'</div>'
+    // 펼침 여부: 완료된 회의는 기본 접힘(자리 양보), 그 외엔 펼침. r.open이 명시되면 우선.
+    var expanded = (typeof r.open==="boolean") ? r.open : (r.status!=="done");
+    var wd=["일","월","화","수","목","금","토"];
+    var rep=r.schedRepeat||"daily";
+    h+='<div class="mroom'+(expanded?'':' collapsed')+'" data-room="'+r.id+'">'
+      +'<div class="mroom-top" data-mtoggle="'+i+'" style="cursor:pointer">'
+        +'<span class="mr-chev">'+mIcon('arrow',12)+'</span>'
+        +'<div class="mroom-name">'+escapeHtml(r.topic)+'</div>'+st+'</div>'
+      +'<div class="mr-body" style="display:'+(expanded?'block':'none')+'">'
       +'<div class="mr-avs">'+r.depts.map(function(d){return avatar(d,26);}).join("")+'<span class="nm2">'+r.depts.map(function(d){return AGENTS[d].kr;}).join(", ")+' · '+meta.join(" · ")+'</span></div>'
       +'<div class="mfb-row" style="margin-top:6px"><input data-mnote="'+i+'" placeholder="개입 지침(선택): 이번 회의 방향을 한마디로" value="'+escapeHtml(r.note||"")+'"></div>'
       +'<div class="mr-btns">'
       +'<button class="cbtn conn" data-mrun="'+i+'" '+(r.status==="running"?"disabled":"")+'>'+mIcon('play',11)+' 지금 회의</button>'
-      +'<input type="time" data-mtime="'+i+'" value="'+(r.schedTime||"")+'">'
-      +'<select data-mrep="'+i+'"><option value="daily">매일</option><option value="once">1회</option></select>'
-      +'<button class="cbtn" data-msched="'+i+'">'+mIcon('clock',11)+' 예약</button>'
+      +(r.status==="done"?'<button class="cbtn" data-mcontrun="'+i+'">'+mIcon('repeat',11)+' 이어서 진행</button>':'')
       +'<button class="cbtn" data-mlog="'+i+'">'+mIcon('doc',11)+' 기록</button>'
       +'<button class="cbtn disc" data-mdel="'+i+'">'+mIcon('trash',11)+'</button></div>'
-      +'<div data-mtr="'+i+'" style="display:'+(r.open?'block':'none')+';margin-top:10px">'+roomTranscriptHtml(r)+'</div>'
+      // 예약 설정 줄 (주기 다양화)
+      +'<div class="mr-sched">'
+        +'<select data-mrep="'+i+'">'
+          +'<option value="daily"'+(rep==="daily"?" selected":"")+'>매일</option>'
+          +'<option value="weekly"'+(rep==="weekly"?" selected":"")+'>매주</option>'
+          +'<option value="interval"'+(rep==="interval"?" selected":"")+'>주기마다</option>'
+          +'<option value="once"'+(rep==="once"?" selected":"")+'>1회</option>'
+        +'</select>'
+        +'<input type="time" data-mtime="'+i+'" value="'+(r.schedTime||"")+'" style="display:'+(rep==="interval"?"none":"inline-block")+'" data-timefield>'
+        +'<span data-mweekly="'+i+'" class="mr-wd" style="display:'+(rep==="weekly"?"inline-flex":"none")+'">'
+          + wd.map(function(w,wi){ return '<span class="mwd'+((r.schedDays||[]).indexOf(wi)>=0?' on':'')+'" data-mwd="'+i+'_'+wi+'">'+w+'</span>'; }).join("")
+        +'</span>'
+        +'<span data-minterval="'+i+'" style="display:'+(rep==="interval"?"inline-flex":"none")+';align-items:center;gap:4px">매 <input type="number" min="1" data-meveryn="'+i+'" value="'+(r.schedEveryN||6)+'" style="width:46px"><select data-meveryunit="'+i+'"><option value="hour"'+((r.schedEveryUnit||"hour")==="hour"?" selected":"")+'>시간</option><option value="day"'+(r.schedEveryUnit==="day"?" selected":"")+'>일</option></select></span>'
+        +'<label class="mr-cont"><input type="checkbox" data-mcont="'+i+'"'+(r.schedContinue?" checked":"")+'> 이어가기</label>'
+        +'<button class="cbtn" data-msched="'+i+'">'+mIcon('clock',11)+' 예약</button>'
+      +'</div>'
+      +'<div data-mtr="'+i+'" style="margin-top:10px">'+roomTranscriptHtml(r)+'</div>'
+      +'</div>'
       +'</div>';
   });
   // 예약 목록
@@ -1958,9 +2107,15 @@ async function loadMeetSchedules(){
   var el=document.getElementById("mt-scheds"); if(!el) return;
   if(!MEET_SCHEDULES.length){ el.innerHTML='<div class="note">예약된 회의가 없어요. 룸에서 시간을 고르고 예약을 누르세요.</div>'; return; }
   el.innerHTML=MEET_SCHEDULES.map(function(sc){
-    return '<div class="schedrow"><b>'+escapeHtml(sc.time)+'</b> <span>'+(sc.repeat==="daily"?"매일":"1회")+'</span>'
+    var wd=["일","월","화","수","목","금","토"];
+    var rl = sc.repeat==="weekly" ? ("매주 "+(sc.days||[]).map(function(d){return wd[d];}).join("·"))
+           : sc.repeat==="interval" ? ("매 "+(sc.everyN||1)+(sc.everyUnit==="day"?"일":"시간")+"마다")
+           : sc.repeat==="once" ? "1회" : "매일";
+    var when = sc.repeat==="interval" ? rl : (escapeHtml(sc.time)+" · "+rl);
+    return '<div class="schedrow"><b>'+mIcon("clock",11)+'</b> <span>'+when+'</span>'
+      +(sc.continueLast?'<span class="mbadge">이어가기</span>':'')
       +'<span style="flex:1">'+escapeHtml(sc.topic)+' ('+(sc.depts||[]).map(function(d){return AGENTS[d]?AGENTS[d].kr:d;}).join(", ")+')</span>'
-      +'<button class="cbtn disc" data-scdel="'+sc.id+'">삭제</button></div>';
+      +'<button class="cbtn disc" data-scdel="'+sc.id+'">'+mIcon("trash",11)+'</button></div>';
   }).join("");
   el.querySelectorAll("[data-scdel]").forEach(function(b){
     b.onclick=async function(){
@@ -2005,7 +2160,7 @@ function pollMeeting(meetingId, roomId){
         var newLen=(m.transcript||[]).length + (m.status==="done"?1:0);
         var room=(STATE.meetingRooms||[]).filter(function(x){return x.id===roomId;})[0];
         if(m.status==="done"){
-          if(room){ room.status="done"; room.prevSummary=""; }
+          if(room){ room.status="done"; room.prevSummary=""; room.open=false; } // 완료 → 접어서 자리 양보
           saveState(); delete MPOLLS[meetingId];
           try{ logAct("meeting","회의 완료: "+m.topic, true, (MODE_LABELS[m.mode]||"협의")+" · "+(m.depts||[]).length+"개 부서"); }catch(e){}
           if(STATE.view==="meeting") render();
@@ -2033,81 +2188,35 @@ function bindMeeting(){
   var rv=document.getElementById("mr-review");
   if(rv) rv.onclick=async function(){
     if(!useBackend()){ alert("팀 평가에는 AI 백엔드 연결이 필요해요."); return; }
-    var box=document.getElementById("mr-reviewout");
-    rv.disabled=true; box.innerHTML='<div class="note">👑 오세라가 전 부서의 자율수행·학습 수준을 평가하는 중…</div>';
+    if(REVIEW.status==="loading") return;
+    REVIEW={ status:"loading" }; render();
     try{
       var r=await fetch(backendOrigin()+"/api/ops/review",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
       var d=await r.json();
       if(d.error) throw new Error(d.error);
-      var h2='<div class="mt-sum" style="margin:8px 0">👑 오세라 팀 평가\n'+escapeHtml(d.report||"")+'</div>';
-      if(d.suggestions && d.suggestions.length){
-        h2+='<div class="note">오세라의 자율수행 지시 조정 제안 '+d.suggestions.length+'건:</div>';
-        d.suggestions.forEach(function(sg){ if(AGENTS[sg.dept]) h2+='<div class="schedrow"><b>'+AGENTS[sg.dept].kr+'</b><span style="flex:1">'+escapeHtml(sg.directive)+'</span></div>'; });
-        h2+='<button class="cbtn conn" id="mr-applydir">제안 전부 적용</button>';
-      }
-      box.innerHTML=h2;
-      var ap=document.getElementById("mr-applydir");
-      if(ap) ap.onclick=function(){
-        d.suggestions.forEach(function(sg){ if(AGENTS[sg.dept]) STATE.deptDirective[sg.dept]=sg.directive; });
-        saveState(); try{ pushState(); }catch(e){}
-        ap.outerHTML='<span class="sc-ok">✓ 적용됨 — 각 부서가 다음 자율수행 주기부터 새 지시로 움직여요.</span>';
-        try{ logAct("ops","오세라 지시 조정", true, d.suggestions.length+"개 부서"); }catch(e){}
-      };
-      try{ logAct("ops","오세라 팀 평가", true, ""); }catch(e){}
-    }catch(e){ box.innerHTML='<div class="note sc-bad">✗ '+escapeHtml(e.message||String(e))+'</div>'; }
-    rv.disabled=false;
+      REVIEW={ status:"done", report:d.report||"", suggestions:(d.suggestions||[]), applied:false };
+      try{ logAct("ops","오세라 팀 평가", true, (d.suggestions||[]).length+"개 조정 제안"); }catch(e){}
+    }catch(e){ REVIEW={ status:"error", msg:String(e.message||e) }; }
+    if(STATE.view==="meeting") render();
   };
-  var nb=document.getElementById("mr-newbtn");
-  if(nb) nb.onclick=function(){ var f=document.getElementById("mr-form"); f.style.display=f.style.display==="none"?"block":"none"; };
-  var cancel=document.getElementById("mr-cancel");
-  if(cancel) cancel.onclick=function(){ document.getElementById("mr-form").style.display="none"; };
-  viewEl.querySelectorAll("[data-mc]").forEach(function(c){ c.onclick=function(){ c.classList.toggle("on"); }; });
-  var cr=document.getElementById("mr-create");
-  if(cr) cr.onclick=function(){
-    var topic=(document.getElementById("mr-topic").value||"").trim();
-    var agenda=(document.getElementById("mr-agenda").value||"").split(/\n/).map(function(x){return x.trim();}).filter(Boolean).slice(0,4);
-    var depts=[].map.call(viewEl.querySelectorAll("[data-mc].on"),function(c){return c.dataset.mc;});
-    if(!topic && !agenda.length){ alert("회의 제목이나 안건을 입력하세요."); return; }
-    if(!topic) topic=agenda[0];
-    if(depts.length<2){ alert("부서를 2개 이상 선택하세요."); return; }
-    if((STATE.meetingRooms||[]).length>=5){ alert("회의룸은 최대 5개입니다."); return; }
-    var chair=document.getElementById("mr-chair").value;
-    if(chair && depts.indexOf(chair)<0) depts.push(chair); // 의장은 참여시킴
-    STATE.meetingRooms.push({ id:Date.now(), topic:topic, depts:depts, rounds:+document.getElementById("mr-rounds").value||2, mode:document.getElementById("mr-mode").value||"discuss", chair:chair, agenda:agenda, note:"", status:"idle", open:false });
-    saveState(); render();
+  var ap=document.getElementById("mr-applydir");
+  if(ap) ap.onclick=function(){
+    var runTog=document.getElementById("mr-runtog");
+    var doRun = runTog && runTog.checked;
+    var sg=REVIEW.suggestions||[];
+    sg.forEach(function(s2){ if(AGENTS[s2.dept]) STATE.deptDirective[s2.dept]=s2.directive; });
+    REVIEW.applied=true; saveState(); try{ pushState(); }catch(e){}
+    try{ logAct("ops","오세라 지시 조정 적용", true, sg.length+"개 부서"+(doRun?" · 팀에이전트 실행":"")); }catch(e){}
+    if(doRun){
+      // 팀에이전트 탭으로 이동해 적용된 지시를 즉시 실행
+      var instr="오세라 팀 평가에 따라 자율수행 지시가 갱신되었습니다. 다음 부서들이 새 지시대로 즉시 업무를 진행하세요:\n"
+        + sg.map(function(s2){ return "· "+AGENTS[s2.dept].kr+": "+s2.directive; }).join("\n");
+      STATE.view="console"; saveState(); render();
+      try{ submit(instr, "ops"); }catch(e){ var inp=document.getElementById("inp"); if(inp){ inp.value=instr; inp.focus(); } }
+    } else {
+      if(STATE.view==="meeting") render();
+    }
   };
-  viewEl.querySelectorAll("[data-mrun]").forEach(function(b){ b.onclick=function(){ runRoomMeeting(+b.dataset.mrun); }; });
-  viewEl.querySelectorAll("[data-mdel]").forEach(function(b){ b.onclick=function(){ if(confirm("이 회의룸을 삭제할까요? (회의 기록은 남아요)")){ STATE.meetingRooms.splice(+b.dataset.mdel,1); saveState(); render(); } }; });
-  viewEl.querySelectorAll("[data-mlog]").forEach(function(b){ b.onclick=function(){ var r=STATE.meetingRooms[+b.dataset.mlog]; r.open=!r.open; saveState(); render(); }; });
-  viewEl.querySelectorAll("[data-msched]").forEach(function(b){
-    b.onclick=async function(){
-      var i=+b.dataset.msched, r=STATE.meetingRooms[i];
-      var t=viewEl.querySelector('[data-mtime="'+i+'"]').value;
-      var rep=viewEl.querySelector('[data-mrep="'+i+'"]').value;
-      if(!t){ alert("예약 시간을 먼저 고르세요."); return; }
-      if(!useBackend()){ alert("예약 회의에는 AI 백엔드 연결이 필요해요."); return; }
-      r.schedTime=t; saveState();
-      try{
-        var res=await fetch(backendOrigin()+"/api/meeting-schedule",{method:"POST",headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({ topic:r.topic, depts:r.depts, rounds:r.rounds||2, time:t, repeat:rep, room:r.topic })});
-        var d=await res.json();
-        if(d.error) throw new Error(d.error);
-        alert("⏰ 예약 완료: 매"+(rep==="daily"?"일 ":"")+t+"에 회의가 자동 진행돼요.");
-        loadMeetSchedules();
-      }catch(e){ alert("예약 실패: "+(e.message||e)); }
-    };
-  });
-  viewEl.querySelectorAll("[data-mrec]").forEach(function(b){
-    b.onclick=function(){ var el=viewEl.querySelector('[data-mrecbody="'+b.dataset.mrec+'"]'); el.style.display=el.style.display==="none"?"block":"none"; };
-  });
-  viewEl.querySelectorAll("[data-mstar]").forEach(function(st){ st.onclick=function(){ var p=st.dataset.mstar.split(":"); rateMeeting(+p[0], +p[1]); }; });
-  viewEl.querySelectorAll("[data-mfbsave]").forEach(function(b){ b.onclick=function(){ var id=+b.dataset.mfbsave; var inp=viewEl.querySelector('[data-mfb="'+id+'"]'); var m=(STATE.meetings||[]).filter(function(x){return x.id===id;})[0]; rateMeeting(id, (m&&m.rating)||3, inp?inp.value:""); }; });
-  viewEl.querySelectorAll("[data-msave]").forEach(function(b){ b.onclick=function(){ downloadMeeting(+b.dataset.msave); }; });
-  viewEl.querySelectorAll("[data-mexec]").forEach(function(b){ b.onclick=function(){ execMeeting(+b.dataset.mexec); }; });
-  viewEl.querySelectorAll("[data-mshare]").forEach(function(b){ b.onclick=function(){ shareMeeting(+b.dataset.mshare); }; });
-  viewEl.querySelectorAll("[data-mspeak]").forEach(function(b){ b.onclick=function(){ speakMeeting(+b.dataset.mspeak); }; });
-  viewEl.querySelectorAll("[data-mcont]").forEach(function(b){ b.onclick=function(){ continueMeeting(+b.dataset.mcont); }; });
-  viewEl.querySelectorAll("[data-mact]").forEach(function(c){ c.onchange=function(){ var p=c.dataset.mact.split(":"); toggleAction(+p[0], +p[1]); }; });
   // 회의 기록 검색·필터 (재렌더 없이 표시 토글 → 입력 포커스 유지)
   function applyFilter(){
     var q=(document.getElementById("mr-q")&&document.getElementById("mr-q").value||"").toLowerCase().trim();
@@ -2120,6 +2229,70 @@ function bindMeeting(){
   }
   var qel=document.getElementById("mr-q"); if(qel) qel.oninput=applyFilter;
   var fdel=document.getElementById("mr-fdept"); if(fdel) fdel.onchange=applyFilter;
+  // ===== 회의룸 버튼 바인딩 =====
+  viewEl.querySelectorAll('[data-mtoggle]').forEach(function(hd){
+    hd.onclick=function(){ var r=STATE.meetingRooms[+hd.getAttribute("data-mtoggle")]; if(!r) return;
+      var exp=(typeof r.open==="boolean")?r.open:(r.status!=="done"); r.open=!exp; saveState(); render(); };
+  });
+  viewEl.querySelectorAll('[data-mrun]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var i=+b.getAttribute("data-mrun"); var r=STATE.meetingRooms[i]; if(r) r.prevSummary=""; runRoomMeeting(i); };
+  });
+  viewEl.querySelectorAll('[data-mcontrun]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var i=+b.getAttribute("data-mcontrun"); var r=STATE.meetingRooms[i]; if(!r) return;
+      var last=(STATE.meetings||[]).filter(function(x){return x.id===r.lastMeetingId;})[0];
+      r.prevSummary=(last&&last.summary)||""; r.note=""; runRoomMeeting(i); };
+  });
+  viewEl.querySelectorAll('[data-mlog]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var r=STATE.meetingRooms[+b.getAttribute("data-mlog")]; if(!r) return; r.open=true; saveState(); render(); };
+  });
+  viewEl.querySelectorAll('[data-mdel]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var i=+b.getAttribute("data-mdel"); var r=STATE.meetingRooms[i];
+      if(!confirm("'"+(r?r.topic:"")+"' 회의룸을 삭제할까요?")) return;
+      STATE.meetingRooms.splice(i,1); saveState(); try{ pushState(); }catch(e2){} render(); };
+  });
+  // 주기 셀렉트 변경 → 관련 입력 표시 토글 (전체 재렌더 없이)
+  viewEl.querySelectorAll('[data-mrep]').forEach(function(sel){
+    sel.onchange=function(){ var i=sel.getAttribute("data-mrep"); var v=sel.value;
+      var r=STATE.meetingRooms[+i]; if(r) r.schedRepeat=v;
+      var tf=viewEl.querySelector('[data-mtime="'+i+'"]'); if(tf) tf.style.display=(v==="interval")?"none":"inline-block";
+      var wk=viewEl.querySelector('[data-mweekly="'+i+'"]'); if(wk) wk.style.display=(v==="weekly")?"inline-flex":"none";
+      var iv=viewEl.querySelector('[data-minterval="'+i+'"]'); if(iv) iv.style.display=(v==="interval")?"inline-flex":"none";
+    };
+  });
+  // 요일 토글
+  viewEl.querySelectorAll('[data-mwd]').forEach(function(c){
+    c.onclick=function(){ var parts=c.getAttribute("data-mwd").split("_"); var r=STATE.meetingRooms[+parts[0]]; var wi=+parts[1];
+      if(!r) return; r.schedDays=r.schedDays||[]; var k=r.schedDays.indexOf(wi);
+      if(k>=0){ r.schedDays.splice(k,1); c.classList.remove("on"); } else { r.schedDays.push(wi); c.classList.add("on"); }
+      saveState(); };
+  });
+  viewEl.querySelectorAll('[data-mcont]').forEach(function(c){
+    c.onchange=function(){ var r=STATE.meetingRooms[+c.getAttribute("data-mcont")]; if(r){ r.schedContinue=c.checked; saveState(); } };
+  });
+  // 예약 등록
+  viewEl.querySelectorAll('[data-msched]').forEach(function(b){
+    b.onclick=async function(e){ e.stopPropagation();
+      if(!useBackend()){ alert("예약에는 AI 백엔드 연결이 필요해요."); return; }
+      var i=b.getAttribute("data-msched"); var r=STATE.meetingRooms[+i]; if(!r) return;
+      var rep=(viewEl.querySelector('[data-mrep="'+i+'"]')||{}).value||"daily";
+      var time=(viewEl.querySelector('[data-mtime="'+i+'"]')||{}).value||"";
+      var everyN=+(viewEl.querySelector('[data-meveryn="'+i+'"]')||{}).value||1;
+      var everyUnit=(viewEl.querySelector('[data-meveryunit="'+i+'"]')||{}).value||"hour";
+      var cont=(viewEl.querySelector('[data-mcont="'+i+'"]')||{}).checked||false;
+      var days=r.schedDays||[];
+      if(rep!=="interval" && !/^\d{2}:\d{2}$/.test(time)){ alert("시각(시:분)을 골라주세요."); return; }
+      if(rep==="weekly" && !days.length){ alert("매주 반복할 요일을 하나 이상 선택하세요."); return; }
+      r.schedTime=time; r.schedRepeat=rep; r.schedEveryN=everyN; r.schedEveryUnit=everyUnit; saveState();
+      var bodyObj={ topic:r.topic, depts:r.depts, rounds:r.rounds||2, mode:r.mode||"discuss", chair:r.chair||"", agenda:r.agenda||[], clientNote:r.note||"", time:time, repeat:rep, days:days, everyN:everyN, everyUnit:everyUnit, continueLast:cont, room:r.topic };
+      b.disabled=true; var ot=b.innerHTML; b.innerHTML="예약 중…";
+      try{ var res=await fetch(backendOrigin()+"/api/meeting-schedule",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(bodyObj)});
+        var d=await res.json(); if(d.error) throw new Error(d.error);
+        try{ logAct("meeting","회의 예약: "+r.topic, true, rep); }catch(e2){}
+        loadMeetSchedules();
+      }catch(err){ alert("예약 실패: "+(err.message||err)); }
+      b.disabled=false; b.innerHTML=ot;
+    };
+  });
   resumeMeetingPolls();
   loadMeetSchedules();
 }
