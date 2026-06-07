@@ -1710,17 +1710,15 @@ function bindConsoleMeetings(){
 }
 function renderConsole(){
   viewEl.innerHTML = '<div class="c-wrap"><div class="c-hd"><div class="c-logo">팀 에이전트</div></div>'
-    +meetingLauncherHtml()
     +'<div class="c-log" id="logScroll">'+consoleMessages()+'</div>'
     +'<div class="composer"><div id="attachBar" class="attbar" style="display:none"></div><div class="inrow"><button class="attbtn" id="attBtn" title="사진·영상 첨부">📎</button><textarea id="inp" rows="1" placeholder="부서에 지시를 입력하세요…"></textarea><button class="send" id="snd">▶</button></div><input type="file" id="attInput" accept="image/*,video/*" multiple style="display:none"></div></div>';
-  scrollLog(); bindPublish(); bindConsoleMeetings();
+  scrollLog(); bindPublish();
 }
 function renderMobile(){
   viewEl.innerHTML = '<div class="m-wrap"><div class="phone"><div class="notch"></div><div class="m-hd"><div class="m-title">에이전트 콘솔</div></div>'
-    +meetingLauncherHtml()
     +'<div class="m-log" id="logScroll">'+consoleMessages()+'</div>'
     +'<div class="composer"><div id="attachBar" class="attbar" style="display:none"></div><div class="inrow"><button class="attbtn" id="attBtn" title="사진·영상 첨부">📎</button><textarea id="inp" rows="1" placeholder="지시 입력…"></textarea><button class="send" id="snd">▶</button></div><input type="file" id="attInput" accept="image/*,video/*" multiple style="display:none"></div></div></div>';
-  scrollLog(); bindPublish(); bindConsoleMeetings();
+  scrollLog(); bindPublish();
 }
 function analyticsInner(){
   var m = STATE.metrics, cal = STATE.calendar;
@@ -1962,6 +1960,16 @@ function execMeeting(id){
   else { var inp=document.getElementById("inp"); if(inp){ inp.value=instr; inp.focus(); try{ inp.dispatchEvent(new Event("input")); }catch(e){} } }
   try{ logAct("meeting","회의 결론 실행 이관: "+m.topic, true, run?"바로 실행":"작성칸 전달"); }catch(e){}
 }
+
+// 회의 내용을 수행 지시로 만들어 팀에이전트 탭에서 실행
+function execMeetingToConsole(m, auto){
+  if(!m) return;
+  var acts=(m.actions||[]).filter(function(a){return a;}).map(function(a){return "· "+(a.text||a);}).join("\n");
+  var instr="다음은 '"+(m.topic||"회의")+"' 회의의 결론입니다. 각 부서가 이 결론과 액션을 실제 업무로 수행해, 바로 쓸 수 있는 완성된 결과물을 만들어 주세요.\n\n[회의 결론]\n"+(m.summary||"(결론 없음)")+(acts?("\n\n[액션 항목]\n"+acts):"");
+  STATE.view="console"; saveState(); render();
+  try{ submit(instr, "meeting"); }catch(e){ var inp=document.getElementById("inp"); if(inp){ inp.value=instr; inp.focus(); } }
+  try{ logAct("meeting",(auto?"회의 자동 실행 이관: ":"회의 실행 보내기: ")+(m.topic||""), true, "팀에이전트 탭에서 수행"); }catch(e){}
+}
 function renderMeeting(){
   var rooms = STATE.meetingRooms||[];
   var h='<div class="s-wrap"><div class="s-sec">'+mIcon('talk')+' 회의룸 <span style="font-size:11px;color:#8a93a6">'+rooms.length+'/5</span></div>';
@@ -2003,9 +2011,13 @@ function renderMeeting(){
       +'<div class="mfb-row" style="margin-top:6px"><input data-mnote="'+i+'" placeholder="개입 지침(선택): 이번 회의 방향을 한마디로" value="'+escapeHtml(r.note||"")+'"></div>'
       +'<div class="mr-btns">'
       +'<button class="cbtn conn" data-mrun="'+i+'" '+(r.status==="running"?"disabled":"")+'>'+mIcon('play',11)+' 지금 회의</button>'
-      +(r.status==="done"?'<button class="cbtn" data-mcontrun="'+i+'">'+mIcon('repeat',11)+' 이어서 진행</button>':'')
+      +(r.status==="done"&&r.lastMeetingId?'<button class="cbtn conn" data-mexecroom="'+i+'">'+mIcon('arrow',11)+' 실행</button>':'')
+      +(r.status==="done"?'<button class="cbtn" data-mcontrun="'+i+'">'+mIcon('repeat',11)+' 이어하기</button>':'')
+      +(r.status==="done"?'<button class="cbtn" data-mfinish="'+i+'">'+mIcon('check',11)+' 마무리</button>':'')
       +'<button class="cbtn" data-mlog="'+i+'">'+mIcon('doc',11)+' 기록</button>'
       +'<button class="cbtn disc" data-mdel="'+i+'">'+mIcon('trash',11)+'</button></div>'
+      +(r.status==="done"?'<div class="mr-done-bar"><b>'+mIcon('check',11)+' 회의 완료</b><span style="flex:1;color:#0f7a52">실행=팀에이전트 탭에서 수행 · 이어하기=다음 회의 일정 결정 · 마무리=닫기</span></div>':'')
+      +(r.status==="done"&&r.schedContinue?'<div class="note" style="color:#3b6fd8;margin-top:4px">'+mIcon('cal',11)+' 다음 \'이어가기\' 회의 일정을 아래에서 정해 예약하세요.</div>':'')
       // 예약 설정 줄 (주기 다양화)
       +'<div class="mr-sched">'
         +'<select data-mrep="'+i+'">'
@@ -2160,7 +2172,7 @@ function pollMeeting(meetingId, roomId){
         var newLen=(m.transcript||[]).length + (m.status==="done"?1:0);
         var room=(STATE.meetingRooms||[]).filter(function(x){return x.id===roomId;})[0];
         if(m.status==="done"){
-          if(room){ room.status="done"; room.prevSummary=""; room.open=false; } // 완료 → 접어서 자리 양보
+          if(room){ room.status="done"; room.open=false; } // 완료 → 접어서 주제만 보이게 (펼치면 실행·이어하기·마무리)
           saveState(); delete MPOLLS[meetingId];
           try{ logAct("meeting","회의 완료: "+m.topic, true, (MODE_LABELS[m.mode]||"협의")+" · "+(m.depts||[]).length+"개 부서"); }catch(e){}
           if(STATE.view==="meeting") render();
@@ -2239,8 +2251,11 @@ function bindMeeting(){
   });
   viewEl.querySelectorAll('[data-mcontrun]').forEach(function(b){
     b.onclick=function(e){ e.stopPropagation(); var i=+b.getAttribute("data-mcontrun"); var r=STATE.meetingRooms[i]; if(!r) return;
+      // 이어하기 = 다음 회의 일정을 결정 (이어가기 모드로 예약 준비)
       var last=(STATE.meetings||[]).filter(function(x){return x.id===r.lastMeetingId;})[0];
-      r.prevSummary=(last&&last.summary)||""; r.note=""; runRoomMeeting(i); };
+      r.prevSummary=(last&&last.summary)||""; r.schedContinue=true; r.open=true; saveState(); render();
+      setTimeout(function(){ var tf=viewEl.querySelector('[data-mtime="'+i+'"]'); if(tf){ try{ tf.scrollIntoView({block:"center",behavior:"smooth"}); }catch(_){} tf.focus(); } }, 60);
+    };
   });
   viewEl.querySelectorAll('[data-mlog]').forEach(function(b){
     b.onclick=function(e){ e.stopPropagation(); var r=STATE.meetingRooms[+b.getAttribute("data-mlog")]; if(!r) return; r.open=true; saveState(); render(); };
@@ -2268,6 +2283,15 @@ function bindMeeting(){
   });
   viewEl.querySelectorAll('[data-mcont]').forEach(function(c){
     c.onchange=function(){ var r=STATE.meetingRooms[+c.getAttribute("data-mcont")]; if(r){ r.schedContinue=c.checked; saveState(); } };
+  });
+  viewEl.querySelectorAll('[data-mexecroom]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var r=STATE.meetingRooms[+b.getAttribute("data-mexecroom")]; if(!r) return;
+      var mtg=(STATE.meetings||[]).filter(function(x){return x.id===r.lastMeetingId;})[0];
+      if(mtg) execMeetingToConsole(mtg, false); };
+  });
+  viewEl.querySelectorAll('[data-mfinish]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var r=STATE.meetingRooms[+b.getAttribute("data-mfinish")]; if(!r) return;
+      r.open=false; r.prevSummary=""; saveState(); render(); };
   });
   // 예약 등록
   viewEl.querySelectorAll('[data-msched]').forEach(function(b){
@@ -2819,9 +2843,22 @@ function renderRecord(){
     meetHtml = '<div class="note">아직 회의록이 없습니다. 여러 부서가 함께 처리하는 복합 지시를 내리면 협업 세션이 회의록으로 저장됩니다.</div>';
   } else {
     meetHtml = STATE.meetings.slice().reverse().map(function(m){
-      return '<div class="plat"><div class="plat-top"><div class="plat-name" style="font-size:12px">📋 '+escapeHtml(m.instruction.length>30?m.instruction.slice(0,30)+"…":m.instruction)+'</div><div class="plat-dept">'+m.time+'</div></div>'
-        +'<div style="font-size:9.5px;color:#7c8696;margin-bottom:6px">참여: '+m.depts.map(d=>AGENTS[d].no+" "+AGENTS[d].kr).join(" → ")+'</div>'
-        + m.exchanges.map(function(e){ return '<div style="font-size:10.5px;line-height:1.5;padding:4px 0;border-top:1px solid #e6eaf2"><b style="color:'+AGENTS[e.dept].c+'">'+AGENTS[e.dept].kr+'</b> · '+escapeHtml(e.text&&e.text.length>90?e.text.slice(0,90)+"…":e.text||"")+'</div>'; }).join("")
+      // 옛 형식(instruction/exchanges)과 새 형식(topic/transcript) 모두 안전 처리
+      var title = m.topic || m.instruction || "회의";
+      var when = m.time || (m.at ? new Date(m.at).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "");
+      var deptsArr = (m.depts||[]).filter(function(d){ return AGENTS[d]; });
+      var lines = Array.isArray(m.exchanges) ? m.exchanges
+                : Array.isArray(m.transcript) ? m.transcript
+                : [];
+      var body = lines.map(function(e){
+        var ag = AGENTS[e.dept]; if(!ag) return "";
+        var tx = e.text||"";
+        return '<div style="font-size:10.5px;line-height:1.5;padding:4px 0;border-top:1px solid #e6eaf2"><b style="color:'+(ag.c||"#2c3744")+'">'+ag.kr+'</b> · '+escapeHtml(tx.length>90?tx.slice(0,90)+"…":tx)+'</div>';
+      }).join("");
+      if(!body && m.summary) body='<div style="font-size:10.5px;line-height:1.5;padding:4px 0;border-top:1px solid #e6eaf2;white-space:pre-wrap">'+escapeHtml(m.summary.length>200?m.summary.slice(0,200)+"…":m.summary)+'</div>';
+      return '<div class="plat"><div class="plat-top"><div class="plat-name" style="font-size:12px">📋 '+escapeHtml(title.length>30?title.slice(0,30)+"…":title)+'</div><div class="plat-dept">'+escapeHtml(when)+'</div></div>'
+        +(deptsArr.length?'<div style="font-size:9.5px;color:#7c8696;margin-bottom:6px">참여: '+deptsArr.map(function(d){return AGENTS[d].no+" "+AGENTS[d].kr;}).join(" → ")+'</div>':"")
+        + body
         +'</div>';
     }).join("");
   }
@@ -2833,6 +2870,22 @@ function renderRecord(){
           +'<div style="font-size:11px;color:#3a4452;line-height:1.6;white-space:pre-wrap">'+escapeHtml((c.text||"").slice(0,400))+'</div></div>';
       }).join("");
   }
+  // 실행 결과(액션 로그) 요약 + 최근 항목 — 기록·분석 탭에 함께 표기
+  var rlog=(STATE.activityLog||[]).slice().reverse();
+  var rok=rlog.filter(function(x){return x.ok===true;}).length, rpend=rlog.filter(function(x){return x.ok==="pending";}).length, rfail=rlog.length-rok-rpend;
+  var resultsHtml='<div class="s-sec" style="margin-top:16px">🚀 실행 결과 <span style="font-size:11px;color:#8a93a6">성공 '+rok+' · 대기 '+rpend+' · 실패 '+rfail+'</span></div>';
+  if(!rlog.length) resultsHtml+='<div class="note">아직 실행한 작업이 없어요. 콘텐츠 발행·이미지/영상 생성 결과가 여기 쌓여요.</div>';
+  else {
+    resultsHtml+=rlog.slice(0,12).map(function(x){
+      var ic=(x.ok==="pending"?"⏳":(ACT_ICON[x.kind]||"•"));
+      return '<div class="resrow '+(x.ok==="pending"?"pend":(x.ok?"ok":"fail"))+'">'
+        +'<div class="res-ic">'+ic+'</div>'
+        +'<div class="res-mid"><div class="res-label">'+escapeHtml(x.label)+(x.ok==="pending"?' <span class="res-b" style="background:#fff3d6;color:#9a7400">⏳ 대기</span>':(x.ok?' <span class="res-b ok">✅</span>':' <span class="res-b fail">❌</span>'))+'</div>'
+        +(x.note?'<div class="res-note">'+escapeHtml(x.note.length>80?x.note.slice(0,80)+"…":x.note)+'</div>':'')
+        +'</div><div class="res-time">'+(x.time||"")+'</div></div>';
+    }).join("");
+    if(rlog.length>12) resultsHtml+='<button class="cbtn" id="recGoResults" style="margin-top:7px">실행 결과 전체 보기 ('+rlog.length+'건) →</button>';
+  }
   viewEl.innerHTML = '<div class="s-wrap">'
     +'<div class="s-sec">🧠 부서별 작업·수집 기록</div>'
     + learnHtml
@@ -2841,6 +2894,7 @@ function renderRecord(){
     +'<div class="s-sec">📋 회의록 (부서 협업 세션)</div>'
     + meetHtml
     +'<button class="savebig" id="saveMeet">💾 회의록 저장(.txt)</button>'
+    + resultsHtml
     + analyticsInner()
     +'<div class="note">학습·회의 기록은 새로고침 시 사라지므로, 보관하려면 저장하세요. (백엔드 연결 시 서버 DB에 영구 저장 — 연동설계 7번 참고)</div>'
     +'</div>';
@@ -2848,6 +2902,7 @@ function renderRecord(){
 function bindRecord(){
   var l=document.getElementById("saveLearn"); if(l) l.addEventListener("click", saveLearning);
   var m=document.getElementById("saveMeet"); if(m) m.addEventListener("click", saveMeetings);
+  var rg=document.getElementById("recGoResults"); if(rg) rg.onclick=function(){ STATE.view="results"; saveState(); render(); };
   bindAnalytics();
 }
 function saveLearning(){
