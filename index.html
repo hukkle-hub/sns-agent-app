@@ -589,6 +589,8 @@ function makeUtter(text, deptId){
 var SPEECH = { audio:null };
 function studioVoice(){ return STATE.voiceMode==="studio" && useBackend(); }
 function stopAllSpeech(){
+  SPEECH.token=(SPEECH.token||0)+1; // 진행 중 파이프라인 무효화
+  SPEECH.active=false;
   try{ if(window.speechSynthesis) window.speechSynthesis.cancel(); }catch(e){}
   if(SPEECH.audio){ try{ SPEECH.audio.pause(); }catch(e){} SPEECH.audio=null; }
   MSPEAK.on=false;
@@ -607,13 +609,49 @@ async function ttsFetch(text, dept){
   if(d.error) throw new Error(d.error);
   return "data:"+(d.mime||"audio/wav")+";base64,"+d.audio;
 }
-function playUrl(url){
+function playUrl(url, tok){
   return new Promise(function(res){
+    if(tok!=null && tok!==SPEECH.token) return res(); // 이미 정지/교체됨 — 유령 재생 차단
     var a=new Audio(url); SPEECH.audio=a;
     a.onended=function(){ if(SPEECH.audio===a) SPEECH.audio=null; res(); };
     a.onerror=function(){ if(SPEECH.audio===a) SPEECH.audio=null; res(); };
-    a.play().catch(function(){ res(); });
+    a.play().then(function(){
+      if(tok!=null && tok!==SPEECH.token){ try{ a.pause(); }catch(e){} if(SPEECH.audio===a) SPEECH.audio=null; res(); }
+    }).catch(function(){ res(); });
   });
+}
+// 긴 텍스트를 문장 경계로 ~160자 조각으로 묶기 (첫 조각은 짧게 → 빠른 첫 재생)
+function chunkForTts(text){
+  var sents=splitSentences(String(text||""));
+  if(!sents.length) return [];
+  var chunks=[], cur="";
+  var firstLimit=90, limit=170;
+  sents.forEach(function(sn){
+    var lim = chunks.length===0 ? firstLimit : limit;
+    if(cur && (cur.length+sn.length+1)>lim){ chunks.push(cur); cur=sn; }
+    else cur = cur ? cur+" "+sn : sn;
+  });
+  if(cur) chunks.push(cur);
+  return chunks;
+}
+// 조각 i 재생 중에 조각 i+1을 미리 생성하는 파이프라인. 같은 토큰일 때만 진행.
+SPEECH.token=0;
+async function studioSay(text, dept){
+  var tok=++SPEECH.token;
+  SPEECH.active=true; // 생성~재생 전 구간을 하나의 세션으로 (조각 사이 틈 포함)
+  try{
+    var chunks=chunkForTts(text);
+    if(!chunks.length) return;
+    var next=ttsFetch(chunks[0], dept);
+    for(var i=0;i<chunks.length;i++){
+      var url;
+      try{ url=await next; }catch(e){ if(tok===SPEECH.token) ttsFailNotice(e); return; }
+      if(tok!==SPEECH.token) return; // 다른 재생이 시작됨/정지됨
+      if(i+1<chunks.length) next=ttsFetch(chunks[i+1], dept); // 재생과 동시에 다음 조각 생성
+      await playUrl(url, tok);
+      if(tok!==SPEECH.token) return;
+    }
+  } finally { if(tok===SPEECH.token) SPEECH.active=false; }
 }
 function splitSentences(text){
   var t=String(text||"").replace(/[#*>_`~|]/g," ").replace(/\s+/g," ").trim();
@@ -628,11 +666,11 @@ function splitSentences(text){
 function speak(text, deptId, standEl){
   // 진짜 성우 모드: Gemini TTS로 재생
   if(studioVoice()){
-    var same=(speak._last===text && SPEECH.audio);
+    var same=(speak._last===text && SPEECH.active);
     stopAllSpeech(); if(speak._stand){ setTalking(speak._stand,false); speak._stand=null; }
     if(same){ speak._last=null; return; }
     speak._last=text; speak._stand=standEl||null; setTalking(standEl,true);
-    ttsFetch(text, deptId).then(playUrl).catch(function(e){ ttsFailNotice(e); }).then(function(){ setTalking(standEl,false); if(speak._stand===standEl) speak._stand=null; });
+    studioSay(text, deptId).then(function(){ setTalking(standEl,false); if(speak._stand===standEl) speak._stand=null; });
     return;
   }
   if(!("speechSynthesis" in window)){ alert("이 브라우저는 음성 읽기를 지원하지 않아요."); return; }
@@ -1711,11 +1749,11 @@ function speakMeeting(id){
     var items=[];
     (m.transcript||[]).forEach(function(t){ if(AGENTS[t.dept] && t.text) items.push({ d:t.dept, x:t.text }); });
     if(m.summary) items.push({ d:(m.chair||m.depts[0]), x:m.summary });
-    MSPEAK.on=true; var k=0;
+    MSPEAK.on=true; MSPEAK.sid=(MSPEAK.sid||0)+1; var sid=MSPEAK.sid; var k=0;
     (function nextStudio(){
-      if(!MSPEAK.on||k>=items.length){ MSPEAK.on=false; if(STATE.view==="meeting") render(); return; }
+      if(!MSPEAK.on||MSPEAK.sid!==sid||k>=items.length){ if(MSPEAK.sid===sid) MSPEAK.on=false; if(STATE.view==="meeting") render(); return; }
       var it=items[k++];
-      ttsFetch(it.x, it.d).then(playUrl).catch(function(e){ ttsFailNotice(e); MSPEAK.on=false; }).then(function(){ nextStudio(); });
+      studioSay(it.x, it.d).then(function(){ nextStudio(); });
     })();
     if(STATE.view==="meeting") render();
     return;
@@ -1730,9 +1768,9 @@ function speakMeeting(id){
     if(ss.length){ ss[0]=AGENTS[t.dept].kr+", "+ss[0]; ss.forEach(function(x){ queue.push({ d:t.dept, x:x }); }); }
   });
   if(m.summary){ var cs=splitSentences(m.summary); if(cs.length){ cs[0]="의장 결론. "+cs[0]; cs.forEach(function(x){ queue.push({ d:(m.chair||m.depts[0]), x:x }); }); } }
-  MSPEAK.on=true; var i=0;
+  MSPEAK.on=true; MSPEAK.sid=(MSPEAK.sid||0)+1; var sid=MSPEAK.sid; var i=0;
   function next(){
-    if(!MSPEAK.on||i>=queue.length){ MSPEAK.on=false; if(STATE.view==="meeting") render(); return; }
+    if(!MSPEAK.on||MSPEAK.sid!==sid||i>=queue.length){ if(MSPEAK.sid===sid) MSPEAK.on=false; if(STATE.view==="meeting") render(); return; }
     var it=queue[i++]; var u=makeUtter(it.x, it.d); u.onend=next; u.onerror=next; synth.speak(u);
   }
   next();
