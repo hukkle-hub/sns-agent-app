@@ -404,6 +404,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v28</span>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
   <div id="view"></div>
@@ -1835,6 +1836,7 @@ function mChips(sel, attr){
 
 // ===== 오세라 팀 평가 — 결과를 상태로 보관해 재렌더에도 유지 =====
 var REVIEW = { status:"idle" }; // idle | loading | done | error
+var MEET_NEW = { depts:[] }; // 새 회의룸 폼에서 선택한 부서
 function opsReviewHtml(){
   if(REVIEW.status==="loading") return '<div class="note" style="margin-top:8px">'+mIcon("crown",12)+' 오세라가 전 부서의 자율수행·학습 수준을 평가하는 중… (10~40초 정도 걸려요. 이 화면을 벗어나도 결과는 유지됩니다)</div>';
   if(REVIEW.status==="error") return '<div class="note sc-bad" style="margin-top:8px">✗ 팀 평가 실패: '+escapeHtml(REVIEW.msg||"원인 미상")+'</div>';
@@ -2303,6 +2305,30 @@ function bindMeeting(){
   }
   var qel=document.getElementById("mr-q"); if(qel) qel.oninput=applyFilter;
   var fdel=document.getElementById("mr-fdept"); if(fdel) fdel.onchange=applyFilter;
+  // ===== 새 회의룸 만들기 폼 =====
+  var nb=document.getElementById("mr-newbtn");
+  if(nb) nb.onclick=function(){ var f=document.getElementById("mr-form"); if(f){ f.style.display="block"; MEET_NEW={depts:[]}; document.querySelectorAll('[data-mc]').forEach(function(c){c.classList.remove("on");}); try{ f.scrollIntoView({block:"center",behavior:"smooth"}); }catch(_){} var t=document.getElementById("mr-topic"); if(t) t.focus(); } };
+  var cancelB=document.getElementById("mr-cancel");
+  if(cancelB) cancelB.onclick=function(){ var f=document.getElementById("mr-form"); if(f) f.style.display="none"; MEET_NEW={depts:[]}; };
+  document.querySelectorAll('[data-mc]').forEach(function(c){
+    c.onclick=function(){ var d=c.getAttribute("data-mc"); MEET_NEW.depts=MEET_NEW.depts||[]; var k=MEET_NEW.depts.indexOf(d);
+      if(k>=0){ MEET_NEW.depts.splice(k,1); c.classList.remove("on"); } else { MEET_NEW.depts.push(d); c.classList.add("on"); } };
+  });
+  var createB=document.getElementById("mr-create");
+  if(createB) createB.onclick=function(){
+    var topic=((document.getElementById("mr-topic")||{}).value||"").trim();
+    var depts=(MEET_NEW.depts||[]).slice();
+    if(!topic){ alert("회의 제목을 입력하세요."); return; }
+    if(depts.length<2){ alert("참여 부서를 2개 이상 선택하세요."); return; }
+    var agenda=(((document.getElementById("mr-agenda")||{}).value||"").split("\n").map(function(x){return x.trim();}).filter(Boolean)).slice(0,4);
+    var mode=(document.getElementById("mr-mode")||{}).value||"discuss";
+    var chair=(document.getElementById("mr-chair")||{}).value||"";
+    var rounds=+((document.getElementById("mr-rounds")||{}).value)||2;
+    STATE.meetingRooms=STATE.meetingRooms||[];
+    STATE.meetingRooms.push({ id:Date.now(), topic:topic, depts:depts, rounds:rounds, mode:mode, chair:chair, agenda:agenda, note:"", prevSummary:"", status:"idle", open:false });
+    MEET_NEW={depts:[]};
+    saveState(); try{ pushState(); }catch(e){} render();
+  };
   // ===== 회의룸 버튼 바인딩 =====
   viewEl.querySelectorAll('[data-mtoggle]').forEach(function(hd){
     hd.onclick=function(){ var r=STATE.meetingRooms[+hd.getAttribute("data-mtoggle")]; if(!r) return;
