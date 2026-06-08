@@ -959,6 +959,17 @@ function pollInstruct(jobId){
     var p=IPOLLS[jobId]; if(!p) return;
     if(Date.now()-p.started > 30*60000){ delete IPOLLS[jobId]; return; } // 30분 안전 정지(완료분은 sync로 수신)
     fetch(backendOrigin()+"/api/instruct/"+jobId).then(function(r){ return r.json(); }).then(function(j){
+      if(j && j.error){ // 작업을 못 찾음(서버 재배포 등) → 몇 번 후 정리
+        p.miss=(p.miss||0)+1;
+        if(p.miss>=3){
+          delete IPOLLS[jobId];
+          STATE.pendingJobs=(STATE.pendingJobs||[]).filter(function(x){return x!==jobId;});
+          STATE.messages=STATE.messages.filter(function(ms){ return ms._waitJob!==jobId; });
+          saveState(); render();
+          return;
+        }
+        setTimeout(tick, 5000); return;
+      }
       if(j && !j.error && j.status!=="running"){
         delete IPOLLS[jobId];
         STATE.pendingJobs=(STATE.pendingJobs||[]).filter(function(x){return x!==jobId;});
@@ -1178,7 +1189,7 @@ async function submit(text, via){
       // 백엔드가 작업을 받아 백그라운드에서 수행 → 앱을 닫아도 진행, 폴링으로 결과 수신
       var start = await instructBackend(text, via, atts);
       if(start && start.status==="running" && start.id){
-        STATE.messages.push({ role:"plan", title:"⏳ 백그라운드 수행 중", text:"부서들이 지시를 수행하고 있어요. 앱을 닫거나 화면을 내려도 서버에서 계속 진행되고, 완료되면 결과가 여기에 도착합니다.", depts:[], _waitJob:start.id });
+        STATE.messages.push({ role:"plan", title:"⏳ 수행 중…", text:"부서들이 답하고 있어요. 곧 결과가 도착해요. (다른 앱을 보거나 화면을 꺼도 서버에서 계속 진행됩니다)", depts:[], _waitJob:start.id });
         STATE.pendingJobs=STATE.pendingJobs||[]; if(STATE.pendingJobs.indexOf(start.id)<0) STATE.pendingJobs.push(start.id);
         saveState(); render();
         pollInstruct(start.id);
