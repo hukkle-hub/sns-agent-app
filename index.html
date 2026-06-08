@@ -387,6 +387,15 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
 .cmsub{grid-column:1 / -1;font-size:9.5px;color:#9aa3b3;margin:-2px 0 0 4px}
 .cmeet-sec{font-size:10px;letter-spacing:.6px;color:#5a6677;margin:14px 0 8px;display:flex;align-items:center;gap:6px;text-transform:uppercase}
 .ctsched{display:flex;align-items:center;gap:7px;background:#f7f9fc;border:1px solid #e9edf4;border-radius:9px;padding:8px 11px;margin-bottom:6px;font-size:11px;color:#3c4759}
+/* 기록·분석 — 부서/수집 아코디언 */
+.recacc{background:#fff;border:1px solid #e2e7f0;border-radius:11px;margin-bottom:8px;overflow:hidden}
+.recacc-hd{display:flex;align-items:center;gap:9px;padding:11px 13px;cursor:pointer;user-select:none}
+.recacc-hd .mr-chev,.recacc-hd svg{flex-shrink:0}
+.recacc .recacc-hd>svg:first-child{color:#9aa3b3;transition:transform .2s;transform:rotate(0)}
+.recacc.open .recacc-hd>svg:first-child{transform:rotate(90deg)}
+.recacc-cnt{margin-left:auto;font-size:10px;color:#7c8696;white-space:nowrap}
+.recacc-sub{font-size:10px;color:#9aa3b3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.recacc-body{padding:2px 13px 11px;border-top:1px solid #f0f2f7}
 .ctwhen{color:#1c2433}.ctwhen b{color:#0f9d6c}
 .cttopic{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#5a6677}
 </style>
@@ -404,7 +413,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v28</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v34</span>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
   <div id="view"></div>
@@ -971,6 +980,18 @@ function pollInstruct(jobId){
         }
         setTimeout(tick, 5000); return;
       }
+      if(j && !j.error && j.status==="running"){
+        // 진행 중 — '현재 작업 내용'으로 자리표시 갱신
+        var pm=STATE.messages.filter(function(ms){return ms._waitJob===jobId;})[0];
+        if(pm){
+          var body=(j.progress||"부서들이 작업 중…");
+          var doneN=(j.results||[]).length;
+          if(doneN) body += "  ·  완료 "+doneN+"건";
+          var newText=body+"\n(앱을 닫거나 화면을 꺼도 서버에서 계속 진행됩니다)";
+          if(pm.text!==newText){ pm.title="⏳ 수행 중…"; pm.text=newText; saveState(); if(STATE.view==="console"||STATE.view==="mobile") render(); }
+        }
+        setTimeout(tick, 4000); return;
+      }
       if(j && !j.error && j.status!=="running"){
         delete IPOLLS[jobId];
         STATE.pendingJobs=(STATE.pendingJobs||[]).filter(function(x){return x!==jobId;});
@@ -1337,6 +1358,7 @@ function renderContent(){
   var total=0; groups.forEach(function(g){ total+=g.items.length; });
   var h='<div class="s-wrap"><div class="s-sec">📦 완성된 콘텐츠 <span style="font-size:11px;color:#8a93a6">'+total+'건 · '+groups.length+'개 작업</span></div>';
   h+='<div class="note" style="margin-bottom:10px">지시별로 총괄이 완료 보고를 올리고, 그 아래에 콘텐츠가 정리돼요. 맨 위가 가장 최근 작업입니다.</div>';
+  if(groups.length) h+='<button class="savebig" id="dlAllContent" style="margin-bottom:10px">💾 전체 콘텐츠 노트앱에 저장 ('+total+'건)</button>';
   if(!groups.length) h+='<div class="empty">아직 완성된 콘텐츠가 없어요. 팀에이전트 탭에서 콘텐츠 제작을 지시해 보세요.</div>';
   groups.forEach(function(g,gi){
     var depts={}; g.items.forEach(function(x){ depts[x.m.deptId]=1; });
@@ -1348,6 +1370,7 @@ function renderContent(){
         +(g.inst?'<div class="rep-line"><b>지시</b> · '+escapeHtml(g.inst)+'</div>':'')
         +'<div class="rep-line"><b>완료</b> · 콘텐츠 '+g.items.length+'건 ('+escapeHtml(who)+')</div>'
         +'<div class="rep-badge">✅ 제작 완료 — 발행 준비됨</div>'
+        +'<button class="cbtn" data-dlgroup="'+gi+'" style="margin-top:8px">'+mIcon("doc",11)+' 이 작업 노트앱에 저장</button>'
       +'</div>';
     g.items.forEach(function(x){
       var a=AGENTS[x.m.deptId]||{no:"",kr:"",c:"#888"}; var mn=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[x.m.deptId])?DEPT_MEMBERS[x.m.deptId]:"";
@@ -1359,8 +1382,65 @@ function renderContent(){
   });
   h+='</div>';
   viewEl.innerHTML=h;
+  CONTENT_GROUPS = groups; // 다운로드용으로 보관
 }
-function bindContent(){ bindBlogButtons(); }
+var CONTENT_GROUPS=[];
+function contentGroupText(g){
+  var lines=[];
+  lines.push("■ 작업: "+(g.inst||"(제목 없음)"));
+  if(g.time) lines.push("시각: "+g.time);
+  lines.push("콘텐츠 "+g.items.length+"건");
+  lines.push("────────────────────");
+  g.items.forEach(function(x){
+    var a=AGENTS[x.m.deptId]||{no:"",kr:""};
+    var mn=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[x.m.deptId])?DEPT_MEMBERS[x.m.deptId]:"";
+    lines.push("");
+    lines.push("◆ "+a.no+" "+a.kr+(mn?(" ("+mn+")"):""));
+    lines.push(x.m.text||"");
+  });
+  return lines.join("\n");
+}
+// 노트 앱에 바로 저장 — 안드로이드: 삼성 노트를 직접 열어 내용 삽입(공유시트 없이). 실패 시 공유→복사→파일 순 폴백
+function saveToNote(title, text, prefix){
+  var full = text || "";
+  var ua = (navigator.userAgent||"");
+  function clip(){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(full).then(function(){ alert("클립보드에 복사했어요. 노트 앱을 열어 붙여넣기 하세요."); }).catch(dl);
+    } else dl();
+  }
+  function shareThen(){
+    if(navigator.share){ navigator.share({ title:title, text:full }).catch(function(e){ if(!(e&&e.name==="AbortError")) clip(); }); }
+    else clip();
+  }
+  function dl(){ downloadTxt(prefix||"콘텐츠", title+"\n\n", full); }
+  // 안드로이드 → 삼성 노트로 바로
+  if(/Android/i.test(ua)){
+    var switched=false;
+    function onHide(){ if(document.hidden) switched=true; }
+    document.addEventListener("visibilitychange", onHide);
+    var intentUrl = "intent:#Intent;action=android.intent.action.SEND;type=text/plain;package=com.samsung.android.app.notes;"
+      + "S.android.intent.extra.SUBJECT="+encodeURIComponent(title)+";"
+      + "S.android.intent.extra.TEXT="+encodeURIComponent(full)+";end";
+    try{ window.location.href = intentUrl; }catch(e){}
+    setTimeout(function(){ document.removeEventListener("visibilitychange", onHide); if(!switched) shareThen(); }, 1500);
+    return;
+  }
+  shareThen();
+}
+function bindContent(){
+  bindBlogButtons();
+  var all=document.getElementById("dlAllContent");
+  if(all) all.onclick=function(){
+    if(!CONTENT_GROUPS.length){ alert("저장할 콘텐츠가 없어요."); return; }
+    var body=CONTENT_GROUPS.map(contentGroupText).join("\n\n════════════════════\n\n");
+    saveToNote("SNS 에이전트 — 완성 콘텐츠", body, "콘텐츠");
+  };
+  document.querySelectorAll('[data-dlgroup]').forEach(function(b){
+    b.onclick=function(){ var g=CONTENT_GROUPS[+b.getAttribute("data-dlgroup")]; if(!g) return;
+      saveToNote((g.inst||"콘텐츠"), contentGroupText(g), "콘텐츠_"+((g.inst||"작업").replace(/[\\/:*?"<>|]/g,"").slice(0,20))); };
+  });
+}
 // ===== 실행 결과 로그 =====
 function logAct(kind, label, ok, note, inst){
   STATE.activityLog = STATE.activityLog || [];
@@ -2065,6 +2145,7 @@ function renderMeeting(){
       +'<div class="mfb-row" style="margin-top:6px"><input data-mnote="'+i+'" placeholder="개입 지침(선택): 이번 회의 방향을 한마디로" value="'+escapeHtml(r.note||"")+'"></div>'
       +'<div class="mr-btns">'
       +'<button class="cbtn conn" data-mrun="'+i+'" '+(r.status==="running"?"disabled":"")+'>'+mIcon('play',11)+' 지금 회의</button>'
+      +(r.status==="running"?'<button class="cbtn disc" data-mstop="'+i+'">'+mIcon('stop',11)+' 중단·초기화</button>':'')
       +(r.status==="done"&&r.lastMeetingId?'<button class="cbtn conn" data-mexecroom="'+i+'">'+mIcon('arrow',11)+' 실행</button>':'')
       +(r.status==="done"?'<button class="cbtn" data-mcontrun="'+i+'">'+mIcon('repeat',11)+' 이어하기</button>':'')
       +(r.status==="done"?'<button class="cbtn" data-mfinish="'+i+'">'+mIcon('check',11)+' 마무리</button>':'')
@@ -2336,6 +2417,14 @@ function bindMeeting(){
   });
   viewEl.querySelectorAll('[data-mrun]').forEach(function(b){
     b.onclick=function(e){ e.stopPropagation(); var i=+b.getAttribute("data-mrun"); var r=STATE.meetingRooms[i]; if(r) r.prevSummary=""; runRoomMeeting(i); };
+  });
+  viewEl.querySelectorAll('[data-mstop]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var i=+b.getAttribute("data-mstop"); var r=STATE.meetingRooms[i]; if(!r) return;
+      if(!confirm("이 회의를 중단하고 룸을 초기화할까요? (멈춘 회의를 풀고 다시 시작할 수 있어요)")) return;
+      if(r.lastMeetingId){ try{ delete MPOLLS[r.lastMeetingId]; }catch(_){}
+        var mi=(STATE.meetings||[]).filter(function(x){return x.id===r.lastMeetingId;})[0]; if(mi && mi.status==="running") mi.status="error"; }
+      r.status="idle"; saveState(); try{ pushState(); }catch(_){} render();
+    };
   });
   viewEl.querySelectorAll('[data-mcontrun]').forEach(function(b){
     b.onclick=function(e){ e.stopPropagation(); var i=+b.getAttribute("data-mcontrun"); var r=STATE.meetingRooms[i]; if(!r) return;
@@ -2912,17 +3001,24 @@ function renderRecord(){
   if(!memDepts.length){
     learnHtml = '<div class="note">아직 표시할 작업·수집 기록이 없습니다. 부서가 실제 콘텐츠를 만들거나 자율 수집을 하면 여기에 "무엇을 했는지"가 쌓입니다.</div>';
   } else {
+    var openD=STATE.recOpenDept||{};
     learnHtml = memDepts.map(function(d){
       var a=AGENTS[d], notes=deptNotes[d];
-      return '<div class="plat"><div class="plat-top"><div class="plat-name">'+avatar(d,28)+' '+a.no+' '+a.kr+'</div><div class="plat-dept">기록 '+notes.length+'건</div></div>'
-        + notes.slice(-4).reverse().map(function(n){
-            var c=classify(n);
-            var head='<span style="display:inline-block;background:'+(c.auto?"#eaf6ee":"#eef2fb")+';color:'+(c.auto?"#1aa251":"#3a5bbf")+';font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:999px;margin-right:5px">'+c.kind+'</span>';
-            var subj=c.subj ? '<b style="color:#2c3744">'+escapeHtml(c.subj.length>40?c.subj.slice(0,40)+"…":c.subj)+'</b>' : '';
-            return '<div style="font-size:11px;color:#5a6677;line-height:1.55;padding:6px 0;border-top:1px solid #e6eaf2">'
-              + '<div style="margin-bottom:2px"><span style="color:#7c8696">'+memTime(n)+'</span> · '+head+subj+'</div>'
-              + '<div style="color:#46505f">'+escapeHtml((n.note||"").slice(0,200))+'</div></div>';
-          }).join("")
+      var open=openD[d]===true;
+      var last=notes[notes.length-1]; var lastSubj=last?(classify(last).subj||last.note||""):"";
+      var body = notes.slice().reverse().map(function(n){
+        var c=classify(n);
+        var head='<span style="display:inline-block;background:'+(c.auto?"#eaf6ee":"#eef2fb")+';color:'+(c.auto?"#1aa251":"#3a5bbf")+';font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:999px;margin-right:5px">'+c.kind+'</span>';
+        var subj=c.subj ? '<b style="color:#2c3744">'+escapeHtml(c.subj.length>50?c.subj.slice(0,50)+"…":c.subj)+'</b>' : '';
+        return '<div style="font-size:11px;color:#5a6677;line-height:1.55;padding:7px 0;border-top:1px solid #e6eaf2">'
+          + '<div style="margin-bottom:3px"><span style="color:#7c8696">'+memTime(n)+'</span> · '+head+subj+'</div>'
+          + '<div style="color:#46505f;white-space:pre-wrap">'+escapeHtml((n.note||"").slice(0,500))+'</div></div>';
+      }).join("");
+      return '<div class="recacc'+(open?' open':'')+'">'
+        +'<div class="recacc-hd" data-recdept="'+d+'">'+mIcon("arrow",12)+avatar(d,26)+'<span style="font-weight:700;font-size:12.5px;color:#1c2433">'+a.no+' '+a.kr+'</span>'
+          +'<span class="recacc-sub">'+escapeHtml(lastSubj.slice(0,30))+'</span>'
+          +'<span class="recacc-cnt">'+notes.length+'건</span></div>'
+        +'<div class="recacc-body" style="display:'+(open?'block':'none')+'">'+body+'</div>'
         +'</div>';
     }).join("");
   }
@@ -2952,10 +3048,16 @@ function renderRecord(){
   }
   var collectHtml = '';
   if(STATE.collections && STATE.collections.length){
+    var openC=STATE.recOpenCol||{};
     collectHtml = '<div class="s-sec">🔎 자동 수집 (탐색·발상)</div>'
-      + STATE.collections.slice(-5).reverse().map(function(c){
-        return '<div class="plat"><div class="plat-top"><div class="plat-name" style="font-size:12px">🔎 '+escapeHtml(c.topic||"트렌드")+'</div><div class="plat-dept">'+new Date(c.at).toLocaleString("ko-KR").slice(5,17)+'</div></div>'
-          +'<div style="font-size:11px;color:#3a4452;line-height:1.6;white-space:pre-wrap">'+escapeHtml((c.text||"").slice(0,400))+'</div></div>';
+      + STATE.collections.slice(-15).reverse().map(function(c,idx){
+        var key=String(c.id||c.at||("i"+idx));
+        var open=openC[key]===true;
+        return '<div class="recacc'+(open?' open':'')+'">'
+          +'<div class="recacc-hd" data-reccol="'+key+'">'+mIcon("arrow",12)+'<span style="font-size:13px">🔎</span><span style="font-weight:700;font-size:12.5px;color:#1c2433">'+escapeHtml(c.topic||"트렌드 수집")+'</span>'
+            +'<span class="recacc-cnt">'+new Date(c.at).toLocaleString("ko-KR").slice(5,17)+'</span></div>'
+          +'<div class="recacc-body" style="display:'+(open?'block':'none')+'"><div style="font-size:11px;color:#3a4452;line-height:1.6;white-space:pre-wrap">'+escapeHtml(c.text||"")+'</div></div>'
+          +'</div>';
       }).join("");
   }
   // 실행 결과(액션 로그) 전체 — 실행 결과 탭을 기록·분석에 통합 (승인 대기 포함)
@@ -2991,6 +3093,12 @@ function renderRecord(){
 function bindRecord(){
   var l=document.getElementById("saveLearn"); if(l) l.addEventListener("click", saveLearning);
   var m=document.getElementById("saveMeet"); if(m) m.addEventListener("click", saveMeetings);
+  document.querySelectorAll('[data-recdept]').forEach(function(hd){
+    hd.onclick=function(){ var d=hd.getAttribute("data-recdept"); STATE.recOpenDept=STATE.recOpenDept||{}; STATE.recOpenDept[d]=!(STATE.recOpenDept[d]===true); saveState(); renderRecord(); bindRecord(); };
+  });
+  document.querySelectorAll('[data-reccol]').forEach(function(hd){
+    hd.onclick=function(){ var k=hd.getAttribute("data-reccol"); STATE.recOpenCol=STATE.recOpenCol||{}; STATE.recOpenCol[k]=!(STATE.recOpenCol[k]===true); saveState(); renderRecord(); bindRecord(); };
+  });
   bindResults(); loadApprovals();
   bindAnalytics();
 }
