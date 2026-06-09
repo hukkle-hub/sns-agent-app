@@ -413,7 +413,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v34</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v35</span>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
   <div id="view"></div>
@@ -2436,6 +2436,11 @@ function bindMeeting(){
   });
   viewEl.querySelectorAll('[data-mlog]').forEach(function(b){
     b.onclick=function(e){ e.stopPropagation(); var r=STATE.meetingRooms[+b.getAttribute("data-mlog")]; if(!r) return; r.open=true; saveState(); render(); };
+  });
+  // 회의 기록 '내용 보기' 토글 (재렌더 없이 펼침/접힘)
+  viewEl.querySelectorAll('[data-mrec]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var i=b.getAttribute("data-mrec"); var body=viewEl.querySelector('[data-mrecbody="'+i+'"]'); if(!body) return;
+      var show=(body.style.display==="none"||!body.style.display); body.style.display=show?"block":"none"; b.innerHTML=mIcon('doc',11)+(show?' 접기':' 내용 보기'); };
   });
   viewEl.querySelectorAll('[data-mdel]').forEach(function(b){
     b.onclick=function(e){ e.stopPropagation(); var i=+b.getAttribute("data-mdel"); var r=STATE.meetingRooms[i];
