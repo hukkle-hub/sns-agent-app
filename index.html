@@ -396,6 +396,26 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
 .recacc-cnt{margin-left:auto;font-size:10px;color:#7c8696;white-space:nowrap}
 .recacc-sub{font-size:10px;color:#9aa3b3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
 .recacc-body{padding:2px 13px 11px;border-top:1px solid #f0f2f7}
+/* 부서 지식 베이스 */
+.lvbadge{font-size:9.5px;font-weight:800;color:#0e7a52;background:#d8f7e9;border-radius:999px;padding:1px 7px;margin-left:6px;white-space:nowrap}
+.kbbox{background:#f3fbf7;border:1px solid #cdeede;border-radius:10px;padding:9px 11px;margin-bottom:9px;font-size:11px;color:#1c5b40}
+.kbbox b{color:#0e7a52}
+.kbtext{margin-top:5px;color:#2c4a3c;white-space:pre-wrap;line-height:1.6}
+/* 회의 상시 참여 */
+.malways{background:#f7f9fc;border:1px solid #e7ecf4;border-radius:11px;padding:10px 12px;margin-bottom:9px}
+.malways-t{font-size:12px;font-weight:700;color:#1c2433;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.malways-chips{display:flex;flex-wrap:wrap;gap:6px}
+/* 회의 이어가기(클라이언트 의견) */
+.mcontbox{margin-top:10px;background:#f6f9ff;border:1px solid #dce6fb;border-radius:11px;padding:10px 12px}
+.mcontbox-t{font-size:11.5px;color:#2c3744;margin-bottom:7px}
+.mcont-row{display:flex;gap:7px;flex-wrap:wrap}
+.mcont-row input{flex:1;min-width:160px;padding:9px 11px;border:1px solid #d5dpetes;border-radius:9px;font-size:12px}
+.mcont-row input{border:1px solid #d5dde8}
+/* Keep-alive 카드 */
+.kacard{margin-top:10px;background:#f7f9fc;border:1px solid #e7ecf4;border-radius:11px;padding:11px 12px}
+.kacard-t{font-size:12.5px;font-weight:700;color:#1c2433;margin-bottom:6px}
+.ka-url{display:flex;gap:7px;align-items:center}
+.ka-url code{flex:1;min-width:0;overflow:auto;white-space:nowrap;background:#0e1726;color:#7ef0c6;padding:8px 10px;border-radius:8px;font-size:11px}
 .ctwhen{color:#1c2433}.ctwhen b{color:#0f9d6c}
 .cttopic{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#5a6677}
 </style>
@@ -413,7 +433,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v35</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v42</span>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
   <div id="view"></div>
@@ -542,7 +562,7 @@ function avatar(id, size){
 var STATE = {
   view:"console", messages:[], busy:false, busyDept:null,
   autoPublish:false,
-  deptMemory:{}, meetings:[], meetingRooms:[], deptExp:{},
+  deptMemory:{}, deptKnowledge:{}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"],
   autoBackup:0, savedAt:null, lastSync:null,
   schedule:{ mode:"hours", start:"09:00", end:"18:00", workMin:40, restMin:20 },
   safety:{ audit:false, dailyLimit:0, requireApproval:false },
@@ -813,7 +833,7 @@ function kakaoWebhookUrl(){
 var STORE_KEY = "agentPlatformState";
 var STORE_KEY_BAK = "agentPlatformState_bak";
 function stateSnapshot(){
-  return { v:2, savedAt:Date.now(), messages:STATE.messages, deptMemory:STATE.deptMemory, deptExp:STATE.deptExp, meetings:STATE.meetings, meetingRooms:STATE.meetingRooms,
+  return { v:2, savedAt:Date.now(), messages:STATE.messages, deptMemory:STATE.deptMemory, deptKnowledge:STATE.deptKnowledge, deptExp:STATE.deptExp, meetings:STATE.meetings, meetingRooms:STATE.meetingRooms, meetingAlways:STATE.meetingAlways,
     platforms:STATE.platforms, autoPublish:STATE.autoPublish, autoBackup:STATE.autoBackup, lastSync:STATE.lastSync, schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, deliberate:STATE.deliberate, voiceAuto:STATE.voiceAuto, voiceMode:STATE.voiceMode, typeFx:STATE.typeFx, deptClips:STATE.deptClips, blog:STATE.blog, customTargets:STATE.customTargets, activityLog:STATE.activityLog, profile:STATE.profile, deptDirective:STATE.deptDirective, videoAuto:STATE.videoAuto, collections:(STATE.collections||[]).slice(-60), authToken:STATE.authToken, backendUrl:STATE.backendUrl, seenJobIds:STATE.seenJobIds.slice(-200) };
 }
 async function saveState(){
@@ -841,13 +861,13 @@ function applyLoadedState(d, isMerge){
     if(d.meetings && (!isMerge || d.meetings.length>=STATE.meetings.length)) STATE.meetings=d.meetings;
     if(Array.isArray(d.meetingRooms)) STATE.meetingRooms=d.meetingRooms.slice(0,5);
     if(d.platforms) STATE.platforms=d.platforms;
-    STATE.autoPublish=!!d.autoPublish; STATE.autoBackup=d.autoBackup||0; STATE.lastSync=d.lastSync||STATE.lastSync;
+    STATE.autoPublish=!!d.autoPublish; STATE.autoBackup=d.autoBackup||0; STATE.lastSync=d.lastSync||STATE.lastSync; if(Array.isArray(d.meetingAlways)) STATE.meetingAlways=d.meetingAlways;
     if(d.schedule) STATE.schedule=Object.assign({ mode:"hours", start:"09:00", end:"18:00", workMin:40, restMin:20 }, d.schedule);
     if(d.safety) STATE.safety=Object.assign({ audit:false, dailyLimit:0, requireApproval:false }, d.safety);
     if(d.collect) STATE.collect=Object.assign({ everyMin:0, topic:"" }, d.collect);
     if(typeof d.deliberate==="boolean") STATE.deliberate=d.deliberate;
     if(typeof d.voiceAuto==="boolean") STATE.voiceAuto=d.voiceAuto;
-    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx;
+    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge;
     if(d.deptClips && typeof d.deptClips==="object") STATE.deptClips=Object.assign({},STATE.deptClips,d.deptClips);
     if(d.blog && typeof d.blog==="object") STATE.blog=Object.assign({naverId:"",tistory:"",wp:""},d.blog);
     if(Array.isArray(d.customTargets)) STATE.customTargets=d.customTargets;
@@ -1037,20 +1057,29 @@ function applyJob(j){
   pushJobMessages(j);
   return true;
 }
-async function syncBackend(){
-  if(!useBackend()) return;
+async function syncBackend(full){
+  if(!useBackend()) return {jobs:0,meetings:0,collections:0};
   try{ resumePendingJobs(); }catch(e){}
+  var cnt={jobs:0,meetings:0,collections:0};
   try{
-    var r = await fetch(backendOrigin()+"/api/sync?since="+(STATE.lastSync||0));
+    var since = full ? 0 : (STATE.lastSync||0);
+    var r = await fetch(backendOrigin()+"/api/sync?since="+since);
     var d = await r.json();
     var added=false;
-    (d.jobs||[]).forEach(function(j){ if(j.type==="instruct" && applyJob(j)) added=true; });
+    (d.jobs||[]).forEach(function(j){ if(j.type==="instruct" && applyJob(j)){ added=true; cnt.jobs++; } });
     if(d.deptMemory && typeof d.deptMemory==="object"){
       // 덮어쓰지 않고 병합: 부서별로 항목이 더 많은 쪽(누적 보존)을 유지
       STATE.deptMemory = STATE.deptMemory || {};
       Object.keys(d.deptMemory).forEach(function(dep){
         var serverArr=d.deptMemory[dep]||[], localArr=STATE.deptMemory[dep]||[];
         if(serverArr.length >= localArr.length) STATE.deptMemory[dep]=serverArr;
+      });
+    }
+    if(d.deptKnowledge && typeof d.deptKnowledge==="object"){
+      STATE.deptKnowledge = STATE.deptKnowledge || {};
+      Object.keys(d.deptKnowledge).forEach(function(dep){
+        var sv=d.deptKnowledge[dep]||{}, lo=STATE.deptKnowledge[dep]||{};
+        if((sv.at||0) >= (lo.at||0)) STATE.deptKnowledge[dep]=sv;
       });
     }
     if(d.exp && typeof d.exp==="object"){
@@ -1060,12 +1089,12 @@ async function syncBackend(){
     }
     if(Array.isArray(d.collections) && d.collections.length){
       var cids = STATE.collections.map(x=>x.id);
-      d.collections.forEach(function(c){ if(cids.indexOf(c.id)<0){ STATE.collections.push(c); added=true; } });
+      d.collections.forEach(function(c){ if(cids.indexOf(c.id)<0){ STATE.collections.push(c); added=true; cnt.collections++; } });
     }
     if(Array.isArray(d.meetings) && d.meetings.length){
       d.meetings.forEach(function(m){
         var idx=-1; STATE.meetings.forEach(function(x,k){ if(x.id===m.id) idx=k; });
-        if(idx<0) STATE.meetings.push(m);
+        if(idx<0){ STATE.meetings.push(m); cnt.meetings++; }
         else {
           var loc=STATE.meetings[idx];
           // 서버 쪽이 더 진행됐으면 갱신 (실시간/완료 반영)
@@ -1080,6 +1109,7 @@ async function syncBackend(){
     saveState();
     if(added) render();
   }catch(e){ /* 오프라인 등은 조용히 무시 */ }
+  return cnt;
 }
 async function pushState(){
   if(!useBackend()) return;
@@ -1916,6 +1946,7 @@ function mChips(sel, attr){
 
 // ===== 오세라 팀 평가 — 결과를 상태로 보관해 재렌더에도 유지 =====
 var REVIEW = { status:"idle" }; // idle | loading | done | error
+var SHARE = { status:"idle" }; // 부서 간 지식 공유·성장 세션
 var MEET_NEW = { depts:[] }; // 새 회의룸 폼에서 선택한 부서
 function opsReviewHtml(){
   if(REVIEW.status==="loading") return '<div class="note" style="margin-top:8px">'+mIcon("crown",12)+' 오세라가 전 부서의 자율수행·학습 수준을 평가하는 중… (10~40초 정도 걸려요. 이 화면을 벗어나도 결과는 유지됩니다)</div>';
@@ -1932,6 +1963,19 @@ function opsReviewHtml(){
       h+='<label class="mr-runtoggle" style="display:flex;align-items:center;gap:7px;margin:9px 0 7px;font-size:11px;color:#3c4759;cursor:pointer"><input type="checkbox" id="mr-runtog" style="width:15px;height:15px;accent-color:#34e0a1"> 적용 후 <b>팀에이전트 탭에서 바로 실행</b>까지</label>';
       h+='<button class="cbtn conn" id="mr-applydir">'+mIcon("check",11)+' 제안 전부 적용</button>';
     }
+  }
+  return h;
+}
+function knowledgeShareHtml(){
+  if(SHARE.status==="loading") return '<div class="note" style="margin-top:8px">'+mIcon("repeat",12)+' 부서들이 서로의 전문성을 공유하며 배우는 중… (고레벨 부서가 가르치고 각 부서가 적용점을 정해요. 10~40초)</div>';
+  if(SHARE.status==="error") return '<div class="note sc-bad" style="margin-top:8px">✗ 지식 공유 실패: '+escapeHtml(SHARE.msg||"원인 미상")+'</div>';
+  if(SHARE.status!=="done") return "";
+  var h='<div class="mt-sum" style="margin:8px 0">'+mIcon("repeat",12)+' 부서 간 지식 공유·성장 세션\n'+escapeHtml(SHARE.report||"")+'</div>';
+  var lr=SHARE.learnings||[];
+  if(lr.length){
+    h+='<div class="note">이번 세션에서 '+lr.length+'개 부서가 서로에게 배워 적용했어요:</div>';
+    lr.forEach(function(x){ if(AGENTS[x.dept]) h+='<div class="schedrow"><b>'+avatar(x.dept,18)+' '+AGENTS[x.dept].kr+'</b><span style="flex:1">'+escapeHtml(x.learn)+'</span></div>'; });
+    h+='<div class="sc-ok" style="margin-top:6px">'+mIcon("check",11)+' 각 부서 학습에 반영됐어요 — 다음 작업부터 적용돼요. (기록·분석 탭에서 확인)</div>';
   }
   return h;
 }
@@ -2036,13 +2080,20 @@ function speakMeeting(id){
   if(STATE.view==="meeting") render();
 }
 // 이전 회의 이어가기 → 새 룸 생성(결론을 맥락으로)
-function continueMeeting(id){
+function continueMeeting(id, clientNote, autorun){
   var m=(STATE.meetings||[]).filter(function(x){return x.id===id;})[0]; if(!m) return;
   if((STATE.meetingRooms||[]).length>=5){ alert("회의룸이 5개라 더 못 만들어요. 안 쓰는 룸을 삭제하세요."); return; }
-  STATE.meetingRooms.push({ id:Date.now(), topic:"(이어서) "+m.topic, depts:m.depts.slice(), rounds:m.rounds||2, mode:m.mode||"discuss", chair:m.chair||"", agenda:[], note:"", prevSummary:m.summary||"", status:"idle", open:false });
+  var room={ id:Date.now(), topic:"(이어서) "+m.topic, depts:m.depts.slice(), rounds:m.rounds||2, mode:m.mode||"discuss", chair:m.chair||"", agenda:[], note:(clientNote||""), prevSummary:m.summary||"", status:"idle", open:true };
+  STATE.meetingRooms.push(room);
   saveState();
-  alert("'"+m.topic+"' 결론을 이어받는 새 회의룸을 만들었어요. 위 룸에서 ▶ 지금 회의를 누르면 이어집니다.");
-  render();
+  if(autorun){
+    var idx=STATE.meetingRooms.length-1;
+    render();
+    runRoomMeeting(idx); // 의견을 반영해 즉시 이어서 진행
+  } else {
+    alert("'"+m.topic+"' 결론을 이어받는 새 회의룸을 만들었어요. ▶ 지금 회의를 누르면 이어집니다.");
+    render();
+  }
 }
 // 만족도 추이 차트
 function ratingChartHtml(){
@@ -2108,9 +2159,14 @@ function renderMeeting(){
   var rooms = STATE.meetingRooms||[];
   var h='<div class="s-wrap"><div class="s-sec">'+mIcon('talk')+' 회의룸 <span style="font-size:11px;color:#8a93a6">'+rooms.length+'/5</span></div>';
   h+='<div class="note">모드·의장·안건을 정해 회의를 진행하고, 결과는 자동 기록·학습됩니다. 같은 부서원이 여러 룸에 동시에 들어갈 수 있어요. 예약 회의는 백엔드가 지정 시각(한국시간)에 자동 진행합니다.</div>';
+  // 상시 참여·진행 에이전트 (룸 구성과 무관하게 항상 합류, 첫 번째가 진행/의장)
+  var alw=STATE.meetingAlways||[];
+  h+='<div class="malways"><div class="malways-t">'+mIcon('crown',12)+' 회의 상시 참여·진행 <span style="font-weight:400;color:#8a93a6;font-size:10px">(항상 합류 · 맨 앞이 진행자)</span></div>'
+    +'<div class="malways-chips">'+Object.keys(AGENTS).map(function(d){return '<span class="mchip'+(alw.indexOf(d)>=0?' on':'')+'" data-malways="'+d+'">'+avatar(d,18)+AGENTS[d].kr+'</span>';}).join(" ")+'</div></div>';
   if(rooms.length<5) h+='<button class="cbtn conn" id="mr-newbtn">'+mIcon('plus')+' 회의룸 만들기</button>';
   else h+='<div class="note">회의룸은 최대 5개입니다. 안 쓰는 룸을 삭제하면 새로 만들 수 있어요.</div>';
   h+=' <button class="cbtn" id="mr-review">'+mIcon('crown')+' 팀 평가 (오세라)</button>';
+  h+=' <button class="cbtn" id="mr-share">'+mIcon('repeat')+' 지식 공유·성장</button>';
   h+='<div id="mr-reviewout"></div>';
   // 새 룸 폼
   h+='<div id="mr-form" style="display:none;margin-top:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:12px">'
@@ -2188,8 +2244,9 @@ function renderMeeting(){
       +'<div class="mroom-top"><div class="mroom-name">'+escapeHtml(m.topic)+(m.mode?' <span class="mbadge">'+(MODE_LABELS[m.mode]||m.mode)+'</span>':'')+'</div>'
       +'<span class="mr-stat done">'+new Date(m.at).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})+(m.source==="schedule"?" · 예약":"")+(m.rating?" · ★"+m.rating:"")+'</span></div>'
       +'<div class="mr-avs">'+(m.depts||[]).map(function(d){return AGENTS[d]?avatar(d,22):"";}).join("")+'</div>'
-      +'<button class="cbtn" data-mrec="'+i+'">'+mIcon('doc',11)+' 내용 보기</button>'
-      +'<div data-mrecbody="'+i+'" style="display:none;margin-top:9px">'+meetingTranscriptHtml(m)+'</div></div>';
+      +'<button class="cbtn" data-mrec="'+m.id+'">'+mIcon('doc',11)+((STATE.recMeetOpen||{})[m.id]?' 접기':' 내용 보기')+'</button>'
+      +'<button class="cbtn disc" data-mdelrec="'+m.id+'" style="margin-left:6px">'+mIcon('trash',11)+' 삭제</button>'
+      +'<div data-mrecbody="'+m.id+'" style="display:'+((STATE.recMeetOpen||{})[m.id]?'block':'none')+';margin-top:9px">'+meetingTranscriptHtml(m)+'</div></div>';
   });
   h+='</div>';
   viewEl.innerHTML=h;
@@ -2228,10 +2285,12 @@ function meetingTranscriptHtml(m){
   // 마무리 버튼들
   h+='<div class="mr-btns" style="margin-top:9px">'
     +'<button class="cbtn conn" data-mexec="'+m.id+'">'+mIcon('arrow',11)+' 팀에이전트 실행</button>'
-    +'<button class="cbtn" data-mcont="'+m.id+'">'+mIcon('repeat',11)+' 이어가기</button>'
     +'<button class="cbtn" data-mspeak="'+m.id+'">'+(MSPEAK.on?mIcon('stop',11)+' 정지':mIcon('sound',11)+' 음성')+'</button>'
     +'<button class="cbtn" data-msave="'+m.id+'">'+mIcon('save',11)+' 저장</button>'
     +'<button class="cbtn" data-mshare="'+m.id+'">'+mIcon('share',11)+' 공유</button></div>';
+  // 클라이언트 의견·방향 제시 → 회의 이어가기
+  h+='<div class="mcontbox"><div class="mcontbox-t">'+mIcon('repeat',11)+' 이 회의를 이어가기 — 의견·진행 방향을 제시하면 그 방향으로 회의가 계속돼요</div>'
+    +'<div class="mcont-row"><input data-mcontnote="'+m.id+'" placeholder="예: B안으로 좁혀서 구체적 실행계획까지 정해줘"><button class="cbtn conn" data-mcontgo="'+m.id+'">'+mIcon('repeat',11)+' 의견 반영해 이어가기</button></div></div>';
   // 만족도
   var rv=m.rating||0;
   h+='<div class="mrate"><span class="lbl">회의 만족도</span>';
@@ -2278,7 +2337,10 @@ async function runRoomMeeting(idx){
   r.status="running"; r.open=true; saveState(); render();
   (async function(){
     try{
-      var body={ topic:r.topic, depts:r.depts, rounds:r.rounds||2, mode:r.mode||"discuss", chair:r.chair||"", agenda:r.agenda||[], clientNote:r.note||"", prevSummary:r.prevSummary||"", room:r.topic };
+      var always=(STATE.meetingAlways||[]).filter(function(d){return AGENTS[d];});
+      var mdepts=(r.depts||[]).slice(); always.forEach(function(d){ if(mdepts.indexOf(d)<0) mdepts.push(d); });
+      var mchair=r.chair||(always.indexOf("ops")>=0?"ops":(always[0]||""));
+      var body={ topic:r.topic, depts:mdepts, rounds:r.rounds||2, mode:r.mode||"discuss", chair:mchair, agenda:r.agenda||[], clientNote:r.note||"", prevSummary:r.prevSummary||"", room:r.topic, alwaysJoin:always };
       var res=await fetch(backendOrigin()+"/api/meeting",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
       var d=await res.json();
       if(d.error) throw new Error(d.error);
@@ -2343,6 +2405,24 @@ function resumeMeetingPolls(){
 }
 function bindMeeting(){
   var rv=document.getElementById("mr-review");
+  // 평가·지식공유 결과를 출력 컨테이너에 표시(상태 변화 시 render→여기서 갱신)
+  var rout=document.getElementById("mr-reviewout");
+  if(rout) rout.innerHTML = opsReviewHtml() + knowledgeShareHtml();
+  var sh=document.getElementById("mr-share");
+  if(sh) sh.onclick=async function(){
+    if(!useBackend()){ alert("지식 공유에는 AI 백엔드 연결이 필요해요."); return; }
+    if(SHARE.status==="loading") return;
+    SHARE={ status:"loading" }; render();
+    try{
+      var r=await fetch(backendOrigin()+"/api/knowledge-share",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+      var d=await r.json();
+      if(d.error) throw new Error(d.error);
+      SHARE={ status:"done", report:d.report||"", learnings:(d.learnings||[]) };
+      try{ logAct("ops","부서 간 지식 공유·성장 세션", true, (d.learnings||[]).length+"개 부서 상호학습"); }catch(e){}
+      try{ await syncBackend(true); }catch(e){} // 갱신된 부서 학습을 즉시 반영
+    }catch(e){ SHARE={ status:"error", msg:String(e.message||e) }; }
+    if(STATE.view==="meeting") render();
+  };
   if(rv) rv.onclick=async function(){
     if(!useBackend()){ alert("팀 평가에는 AI 백엔드 연결이 필요해요."); return; }
     if(REVIEW.status==="loading") return;
@@ -2387,6 +2467,10 @@ function bindMeeting(){
   var qel=document.getElementById("mr-q"); if(qel) qel.oninput=applyFilter;
   var fdel=document.getElementById("mr-fdept"); if(fdel) fdel.onchange=applyFilter;
   // ===== 새 회의룸 만들기 폼 =====
+  viewEl.querySelectorAll('[data-malways]').forEach(function(c){
+    c.onclick=function(){ var d=c.getAttribute("data-malways"); STATE.meetingAlways=STATE.meetingAlways||[]; var k=STATE.meetingAlways.indexOf(d);
+      if(k>=0) STATE.meetingAlways.splice(k,1); else STATE.meetingAlways.push(d); saveState(); renderMeeting(); bindMeeting(); };
+  });
   var nb=document.getElementById("mr-newbtn");
   if(nb) nb.onclick=function(){ var f=document.getElementById("mr-form"); if(f){ f.style.display="block"; MEET_NEW={depts:[]}; document.querySelectorAll('[data-mc]').forEach(function(c){c.classList.remove("on");}); try{ f.scrollIntoView({block:"center",behavior:"smooth"}); }catch(_){} var t=document.getElementById("mr-topic"); if(t) t.focus(); } };
   var cancelB=document.getElementById("mr-cancel");
@@ -2437,10 +2521,21 @@ function bindMeeting(){
   viewEl.querySelectorAll('[data-mlog]').forEach(function(b){
     b.onclick=function(e){ e.stopPropagation(); var r=STATE.meetingRooms[+b.getAttribute("data-mlog")]; if(!r) return; r.open=true; saveState(); render(); };
   });
-  // 회의 기록 '내용 보기' 토글 (재렌더 없이 펼침/접힘)
+  // 회의 기록 '내용 보기' 토글 (펼침 상태 기억 → 평가 후 재렌더에도 유지)
   viewEl.querySelectorAll('[data-mrec]').forEach(function(b){
-    b.onclick=function(e){ e.stopPropagation(); var i=b.getAttribute("data-mrec"); var body=viewEl.querySelector('[data-mrecbody="'+i+'"]'); if(!body) return;
-      var show=(body.style.display==="none"||!body.style.display); body.style.display=show?"block":"none"; b.innerHTML=mIcon('doc',11)+(show?' 접기':' 내용 보기'); };
+    b.onclick=function(e){ e.stopPropagation(); var id=b.getAttribute("data-mrec"); var body=viewEl.querySelector('[data-mrecbody="'+id+'"]'); if(!body) return;
+      var show=(body.style.display==="none"||!body.style.display); body.style.display=show?"block":"none"; b.innerHTML=mIcon('doc',11)+(show?' 접기':' 내용 보기');
+      STATE.recMeetOpen=STATE.recMeetOpen||{}; STATE.recMeetOpen[id]=show; saveState(); };
+  });
+  // 회의 기록 삭제 (로컬 + 서버 — 동기화 때 되살아나지 않게)
+  viewEl.querySelectorAll('[data-mdelrec]').forEach(function(b){
+    b.onclick=async function(e){ e.stopPropagation(); var id=+b.getAttribute("data-mdelrec");
+      var mt=(STATE.meetings||[]).filter(function(x){return x.id===id;})[0];
+      if(!confirm("'"+((mt&&mt.topic)||"이 회의")+"' 기록을 삭제할까요? (서버에서도 삭제돼 다른 기기에도 반영돼요)")) return;
+      STATE.meetings=(STATE.meetings||[]).filter(function(x){return x.id!==id;});
+      saveState(); render();
+      if(useBackend()){ try{ await fetch(backendOrigin()+"/api/meeting/delete", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ id:id }) }); }catch(_){} }
+    };
   });
   viewEl.querySelectorAll('[data-mdel]').forEach(function(b){
     b.onclick=function(e){ e.stopPropagation(); var i=+b.getAttribute("data-mdel"); var r=STATE.meetingRooms[i];
@@ -2474,6 +2569,42 @@ function bindMeeting(){
   viewEl.querySelectorAll('[data-mfinish]').forEach(function(b){
     b.onclick=function(e){ e.stopPropagation(); var r=STATE.meetingRooms[+b.getAttribute("data-mfinish")]; if(!r) return;
       r.open=false; r.prevSummary=""; saveState(); render(); };
+  });
+  // ===== 완료 회의 상세 버튼 바인딩 (별점·피드백·이어가기·실행 등) =====
+  function findMeet(id){ return (STATE.meetings||[]).filter(function(x){return x.id===+id;})[0]; }
+  viewEl.querySelectorAll('[data-mexec]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var m=findMeet(b.getAttribute("data-mexec")); if(m) execMeetingToConsole(m, false); };
+  });
+  viewEl.querySelectorAll('[data-mspeak]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var id=+b.getAttribute("data-mspeak"); if(MSPEAK.on){ stopMeetingSpeak(); render(); } else { speakMeeting(id); } };
+  });
+  viewEl.querySelectorAll('[data-msave]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var m=findMeet(b.getAttribute("data-msave")); if(!m) return;
+      var body="■ 회의: "+(m.topic||"")+"\n"+new Date(m.at).toLocaleString("ko-KR")+"\n────────────\n"
+        +(m.transcript||[]).map(function(t){ var a=AGENTS[t.dept]||{kr:""}; return "◆ "+a.kr+(t.member?(" ("+t.member+")"):"")+" ["+t.round+"R]\n"+(t.text||""); }).join("\n\n")
+        +(m.summary?("\n\n=== 결론 ===\n"+m.summary):"");
+      saveToNote("회의 — "+(m.topic||""), body, "회의_"+((m.topic||"회의").replace(/[\\/:*?\"<>|]/g,"").slice(0,20))); };
+  });
+  viewEl.querySelectorAll('[data-mshare]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); shareMeeting(+b.getAttribute("data-mshare")); };
+  });
+  viewEl.querySelectorAll('[data-mstar]').forEach(function(st){
+    st.onclick=function(e){ e.stopPropagation(); var parts=st.getAttribute("data-mstar").split(":"); var id=+parts[0], score=+parts[1];
+      var m=findMeet(id); rateMeeting(id, score, m?m.feedback:""); };
+  });
+  viewEl.querySelectorAll('[data-mfbsave]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var id=+b.getAttribute("data-mfbsave"); var inp=viewEl.querySelector('[data-mfb="'+id+'"]'); var m=findMeet(id);
+      rateMeeting(id, (m&&m.rating)||0, inp?inp.value:""); var ob=b.innerHTML; b.innerHTML="저장됨"; setTimeout(function(){ b.innerHTML=ob; },1200); };
+  });
+  viewEl.querySelectorAll('[data-mact]').forEach(function(c){
+    c.onchange=function(){ var parts=c.getAttribute("data-mact").split(":"); toggleAction(+parts[0], +parts[1]); };
+  });
+  // 클라이언트 의견 반영해 이어가기
+  viewEl.querySelectorAll('[data-mcontgo]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var id=+b.getAttribute("data-mcontgo"); var inp=viewEl.querySelector('[data-mcontnote="'+id+'"]');
+      var note=inp?inp.value.trim():"";
+      if(!useBackend()){ alert("이어가기(회의 진행)에는 AI 백엔드 연결이 필요해요."); return; }
+      continueMeeting(id, note, true); };
   });
   // 예약 등록
   viewEl.querySelectorAll('[data-msched]').forEach(function(b){
@@ -2555,6 +2686,11 @@ function renderSettings(){
       +['끔:0','30분:30','1시간:60','3시간:180','6시간:360'].map(function(p){ var lb=p.split(":")[0],v=p.split(":")[1]; return '<button class="pubbtn" data-every="'+v+'"'+(String(STATE.collect.everyMin||0)===v?' style="background:#5ed4e2;color:#06222a"':'')+'>'+lb+'</button>'; }).join("")
     +'</div>'
     +'<input type="text" id="collectTopic" placeholder="수집 주제 (예: 30대 여성 뷰티 트렌드)" value="'+escapeHtml(STATE.collect.topic||"")+'" style="width:100%;background:#ffffff;border:1px solid #d4dae6;border-radius:8px;padding:9px 11px;color:#1f2a37;font-family:inherit;font-size:12px;outline:none">'
+    +'<button class="cbtn conn" id="autorunNow" style="margin-top:8px">⚡ 지금 자율수행 1회 실행</button>'
+    +'<div class="kacard" id="kacard"><div class="kacard-t">📡 외부 깨우기(Keep-alive) — 근무 시간에 24시간 자율수행</div>'
+      +'<div class="note" style="margin:0 0 7px">무료 서버는 안 쓰면 잠들어요. 외부 핑 서비스(예: cron-job.org·UptimeRobot)로 <b>10분마다</b> 아래 주소를 호출하면, 서버가 깨어있고 <b>근무 시간 동안 자율수행이 자동으로 굴러가요</b>. 핑 서비스의 활성 시간을 근무 시간에 맞추면 무료 사용시간도 아껴요.</div>'
+      +'<div class="ka-url"><code id="kaUrl">'+escapeHtml(backendOrigin()? (backendOrigin()+"/api/ping") : "(설정에서 백엔드 주소를 먼저 연결하세요)")+'</code><button class="cbtn" id="kaCopy">복사</button></div>'
+      +'<div class="note" id="kaStatus" style="margin-top:7px">상태 확인 중…</div></div>'
     +'<div class="note">근무 중 설정 주기마다 부서들이 번갈아 자율 수행해요. 커뮤니티 부서는 시청자 반응을 수집하고, 나머지는 분야 트렌드를 학습해 📚기록·각 부서 모달에 쌓이고 카톡으로 알립니다(백엔드 연결 시). 부서 아이콘을 누르면 그 부서의 자율수행 내용을 볼 수 있어요.</div>'
     +'<div class="s-sec">🧠 협의 모드</div>'
     +'<div class="toggle"><div style="flex:1"><div style="font-size:12.5px;font-weight:700">부서 의견 수렴 후 총괄 재분담</div><div class="note">켜면 지시할 때 관련 부서가 먼저 의견을 내고 → 총괄이 종합해 임무를 재분담한 뒤 → 실행해요. 더 똑똑하지만 AI 호출이 늘어 비용·시간이 증가합니다.<br>끄면 총괄이 바로 배정해 빠르게 실행해요. (부서·이름을 콕 집어 부르면 협의 없이 바로 응답)</div></div><div class="switch'+(STATE.deliberate?' on':'')+'" id="delibsw"></div></div>'
@@ -2922,6 +3058,35 @@ function bindSettings(){
   });
   var ct=document.getElementById("collectTopic");
   if(ct) ct.addEventListener("change", function(){ STATE.collect.topic=ct.value; saveState(); pushState(); });
+  var arun=document.getElementById("autorunNow");
+  if(arun) arun.addEventListener("click", async function(){
+    if(!useBackend()){ alert("자율수행 실행에는 AI 백엔드 연결이 필요해요."); return; }
+    arun.disabled=true; arun.textContent="실행 중… (10~40초)";
+    try{
+      await pushState(); // 최신 부서 지시·주제를 먼저 서버에 반영
+      var r=await fetch(backendOrigin()+"/api/autorun",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      arun.textContent="실행 시작됨 · 잠시 후 동기화";
+      setTimeout(async function(){ try{ await syncBackend(true); }catch(e){} var b=document.getElementById("autorunNow"); if(b){ b.disabled=false; b.textContent="⚡ 지금 자율수행 1회 실행"; } if(STATE.view==="settings"||STATE.view==="record") render(); }, 12000);
+    }catch(e){ alert("자율수행 실행 실패: "+(e.message||e)); arun.disabled=false; arun.textContent="⚡ 지금 자율수행 1회 실행"; }
+  });
+  // 외부 깨우기(Keep-alive) 카드: URL 복사 + 라이브 상태
+  var kaCopy=document.getElementById("kaCopy");
+  if(kaCopy) kaCopy.addEventListener("click", function(){
+    var url=backendOrigin()? (backendOrigin()+"/api/ping"):"";
+    if(!url){ alert("먼저 설정에서 백엔드 주소를 연결하세요."); return; }
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(function(){ kaCopy.textContent="복사됨"; setTimeout(function(){ kaCopy.textContent="복사"; },1200); }); }
+    else { alert(url); }
+  });
+  var kaStatus=document.getElementById("kaStatus");
+  if(kaStatus && useBackend()){
+    fetch(backendOrigin()+"/api/ping").then(function(r){return r.json();}).then(function(d){
+      var au=d.autonomy||{};
+      kaStatus.innerHTML = (d.working?"🟢 지금 근무 시간":"🟡 휴식/근무 외(자율수행 대기)")
+        + " · 자율수행 "+(au.on?("ON("+au.everyMin+"분 주기)"):"OFF")
+        + (au.lastRunMinAgo!=null?(" · 마지막 실행 "+au.lastRunMinAgo+"분 전"):" · 아직 실행 없음");
+    }).catch(function(){ kaStatus.textContent="상태를 불러오지 못했어요(서버 깨우는 중일 수 있어요)."; });
+  } else if(kaStatus){ kaStatus.textContent="백엔드를 연결하면 상태가 표시돼요."; }
   document.querySelectorAll("[data-toggle]").forEach(function(b){
     b.addEventListener("click", function(){
       var i=+b.getAttribute("data-toggle");
@@ -2964,12 +3129,16 @@ function bindSettings(){
   // 지금 동기화 (서버 연결 전: 이 기기 저장본 복원)
   var sync=document.getElementById("syncnow");
   if(sync) sync.addEventListener("click", async function(){
-    sync.textContent="동기화 중…";
-    if(useBackend()){ await syncBackend(); }
-    else { await loadState(); }
-    STATE.lastSync = Date.now();
-    await saveState();
-    render();
+    sync.textContent="동기화 중…"; sync.disabled=true;
+    if(useBackend()){
+      var c = await syncBackend(true); // 서버 기준 전체 받기(기기 간 일치)
+      var n = (c.jobs||0)+(c.meetings||0)+(c.collections||0);
+      sync.textContent = n>0 ? ("동기화 완료 +"+n) : "이미 최신";
+    } else {
+      await loadState(); STATE.lastSync = Date.now(); sync.textContent="복원됨(서버 미연결)";
+    }
+    await saveState(); render();
+    setTimeout(function(){ var b=document.getElementById("syncnow"); if(b){ b.textContent="지금 동기화"; b.disabled=false; } }, 2500);
   });
   var sm=document.getElementById("savememo2");
   if(sm) sm.addEventListener("click", function(){ saveMemo(false); });
@@ -3019,11 +3188,15 @@ function renderRecord(){
           + '<div style="margin-bottom:3px"><span style="color:#7c8696">'+memTime(n)+'</span> · '+head+subj+'</div>'
           + '<div style="color:#46505f;white-space:pre-wrap">'+escapeHtml((n.note||"").slice(0,500))+'</div></div>';
       }).join("");
+      var _exp=(STATE.deptExp&&STATE.deptExp[d])||0; var _lv=Math.floor(_exp/5)+1;
+      var _kb=(STATE.deptKnowledge&&STATE.deptKnowledge[d]&&STATE.deptKnowledge[d].text)||"";
+      var kbHtml=_kb ? ('<div class="kbbox">'+mIcon("crown",12)+' <b>축적 전문성 (Lv'+_lv+')</b><div class="kbtext">'+escapeHtml(_kb)+'</div></div>') : ('<div class="note" style="margin:0 0 6px">아직 압축된 전문성이 없어요. 작업·자율수행이 4회 쌓일 때마다 이 부서의 전문성이 자동 압축·발전돼요.</div>');
       return '<div class="recacc'+(open?' open':'')+'">'
         +'<div class="recacc-hd" data-recdept="'+d+'">'+mIcon("arrow",12)+avatar(d,26)+'<span style="font-weight:700;font-size:12.5px;color:#1c2433">'+a.no+' '+a.kr+'</span>'
-          +'<span class="recacc-sub">'+escapeHtml(lastSubj.slice(0,30))+'</span>'
+          +'<span class="lvbadge">Lv'+_lv+'</span>'
+          +'<span class="recacc-sub">'+escapeHtml(lastSubj.slice(0,24))+'</span>'
           +'<span class="recacc-cnt">'+notes.length+'건</span></div>'
-        +'<div class="recacc-body" style="display:'+(open?'block':'none')+'">'+body+'</div>'
+        +'<div class="recacc-body" style="display:'+(open?'block':'none')+'">'+kbHtml+body+'</div>'
         +'</div>';
     }).join("");
   }
