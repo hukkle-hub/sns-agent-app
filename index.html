@@ -364,6 +364,16 @@
 .rc-snip{color:#8a97a8;font-size:10.5px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rc-x{margin-left:auto;background:transparent;border:none;color:#7c8696;font-size:13px;cursor:pointer;padding:0 4px}
 .op-replyto{font-size:9.5px;color:#3a5bbf;text-align:right;margin-bottom:2px;font-weight:700}
+/* 콘텐츠 의견·소통 */
+.ccomments{margin-top:9px;border-top:1px dashed #e6e9f0;padding-top:8px}
+.ccom-hd{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11.5px;font-weight:700;color:#46505f}
+.ccom-body{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.ccom-op{align-self:flex-end;max-width:88%;background:#0e1726;color:#eafaf3;font-size:11.5px;line-height:1.5;padding:7px 10px;border-radius:12px 12px 4px 12px;white-space:pre-wrap}
+.ccom-op b{color:#7ef0c6;font-size:10px;display:block;margin-bottom:2px}
+.ccom-ag{align-self:flex-start;max-width:88%;background:#f4f6fa;border:1px solid #e7ebf2;color:#2a3344;font-size:11.5px;line-height:1.55;padding:7px 10px;border-radius:12px 12px 12px 4px;white-space:pre-wrap}
+.ccom-ag b{color:#b5701a;font-size:10px;display:block;margin-bottom:2px}
+.ccom-row{display:flex;gap:6px;margin-top:2px}
+.ccom-row input{flex:1;min-width:0;padding:8px 10px;border:1px solid #d5dde8;border-radius:9px;font-size:12px;font-family:inherit}
 /* 팀평가 안 자율지시 조정 제안(접기) */
 .revsug{margin-top:8px;background:#fafbfd;border:1px solid #e8ecf3;border-radius:11px;padding:9px 11px}
 .revsug-hd{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;font-weight:700;color:#46505f}
@@ -475,7 +485,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v50</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v52</span>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
   <div id="view"></div>
@@ -1424,6 +1434,19 @@ function bindBlogButtons(){
     });
   });
 }
+function contentCommentsHtml(m, mi){
+  var cs=m._comments||[];
+  var open=(m._comOpen===true)||(cs.length>0 && m._comOpen!==false);
+  var h='<div class="ccomments"><div class="ccom-hd" data-ccomtoggle="'+mi+'"><span class="prog-chev'+(open?' open':'')+'">▸</span> 💬 의견·소통'+(cs.length?(' ('+cs.length+')'):'')+'</div>';
+  h+='<div class="ccom-body" style="display:'+(open?'block':'none')+'">';
+  cs.forEach(function(c){
+    if(c.role==="op") h+='<div class="ccom-op"><b>나</b> '+escapeHtml(c.text)+'</div>';
+    else h+='<div class="ccom-ag"><b>'+escapeHtml(c.name||"제작부")+'</b> '+escapeHtml(c.text)+'</div>';
+  });
+  h+='<div class="ccom-row"><input data-ccinp="'+mi+'" placeholder="이 콘텐츠에 의견을 적으면 담당 부서가 답해요"><button class="cbtn conn" data-ccsend="'+mi+'">보내기</button></div>';
+  h+='</div></div>';
+  return h;
+}
 function renderContent(){
   var CONTENT_DEPTS={ creation:1, publishing:1 };
   // 완성 콘텐츠가 아니라 "방향을 되묻는 질문/선택 요청"은 제외
@@ -1438,7 +1461,7 @@ function renderContent(){
   var groups=[]; var byId={};
   STATE.messages.forEach(function(m,i){
     if(!(m.role==="agent" && CONTENT_DEPTS[m.deptId])) return;
-    if(isAsk(m.text)) return;
+    if(!m._forceContent && isAsk(m.text)) return;
     var key=(m._jid!=null?("j"+m._jid):("solo"+i));
     if(!byId[key]){ byId[key]={ key:key, inst:(m._inst||""), time:m.time||"", items:[] }; groups.push(byId[key]); }
     byId[key].items.push({m:m,i:i});
@@ -1465,7 +1488,7 @@ function renderContent(){
       var a=AGENTS[x.m.deptId]||{no:"",kr:"",c:"#888"}; var mn=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[x.m.deptId])?DEPT_MEMBERS[x.m.deptId]:"";
       h+='<div class="ccard"><div class="cc-h">'+avatar(x.m.deptId,24)+'<div><b style="color:'+a.c+'">'+a.no+' '+a.kr+'</b> <span style="font-size:11px;color:#8a93a6">'+mn+'</span></div></div>'
         +'<div class="cc-body">'+escapeHtml(x.m.text)+'</div>'
-        + blogButtons(x.i) + '</div>';
+        + blogButtons(x.i) + contentCommentsHtml(x.m, x.i) + '</div>';
     });
     h+='</div>';
   });
@@ -1519,6 +1542,29 @@ function saveToNote(title, text, prefix){
 }
 function bindContent(){
   bindBlogButtons();
+  // 콘텐츠 의견·소통 스레드
+  document.querySelectorAll('[data-ccomtoggle]').forEach(function(b){
+    b.addEventListener("click", function(){ var m=STATE.messages[+b.getAttribute("data-ccomtoggle")]; if(!m) return;
+      var cs=m._comments||[]; var cur=(m._comOpen===true)||(cs.length>0 && m._comOpen!==false); m._comOpen=!cur; saveState(); render(); });
+  });
+  document.querySelectorAll('[data-ccsend]').forEach(function(b){
+    b.addEventListener("click", async function(){ var mi=+b.getAttribute("data-ccsend"); var m=STATE.messages[mi]; if(!m) return;
+      var inp=document.querySelector('[data-ccinp="'+mi+'"]'); var txt=inp?String(inp.value||"").trim():""; if(!txt) return;
+      if(!useBackend()){ alert("의견 소통에는 AI 백엔드 연결이 필요해요 (설정 › AI 백엔드)."); return; }
+      m._comments=m._comments||[]; m._comOpen=true;
+      m._comments.push({ role:"op", text:txt, at:Date.now() });
+      m._comments.push({ role:"agent", text:"…답변 작성 중", at:Date.now(), _pending:true, name:(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[m.deptId])?DEPT_MEMBERS[m.deptId]:(AGENTS[m.deptId]?AGENTS[m.deptId].kr:"제작부") });
+      saveState(); render();
+      try{ await wakeServer(50000);
+        var r=await fetch(backendOrigin()+"/api/content/reply",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ content:m.text||"", comment:txt, dept:m.deptId })});
+        var d=await r.json(); if(d.error) throw new Error(d.error);
+        var pend=m._comments.filter(function(c){return c._pending;})[0];
+        if(pend){ pend.text=d.reply||"(응답 없음)"; pend._pending=false; if(d.dept&&typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[d.dept]) pend.name=DEPT_MEMBERS[d.dept]; }
+        try{ logAct("creation","콘텐츠 의견 소통", true, txt.slice(0,40)); }catch(e){}
+      }catch(err){ var pend2=m._comments.filter(function(c){return c._pending;})[0]; if(pend2){ pend2.text="응답 실패: "+(err.message||err); pend2._pending=false; } }
+      saveState(); if(STATE.view==="content") render();
+    });
+  });
   var all=document.getElementById("dlAllContent");
   if(all) all.onclick=function(){
     if(!CONTENT_GROUPS.length){ alert("저장할 콘텐츠가 없어요."); return; }
@@ -2405,6 +2451,7 @@ function meetingTranscriptHtml(m){
     +'<button class="cbtn" data-mshare="'+m.id+'">'+mIcon('share',11)+' 공유</button></div>';
   // 클라이언트 의견·방향 제시 → 회의 이어가기
   h+='<div class="mcontbox"><div class="mcontbox-t">'+mIcon('repeat',11)+' 이 회의를 이어가기 — 의견·진행 방향을 제시하면 그 방향으로 회의가 계속돼요</div>'
+    +'<button class="cbtn" data-mkresolve="'+m.id+'" style="margin-bottom:7px">🧩 미결 항목 추천안 채우기</button>'
     +'<div class="mcont-row"><input data-mcontnote="'+m.id+'" placeholder="예: B안으로 좁혀서 구체적 실행계획까지 정해줘"><button class="cbtn conn" data-mcontgo="'+m.id+'">'+mIcon('repeat',11)+' 의견 반영해 이어가기</button></div></div>';
   // 만족도
   var rv=m.rating||0;
@@ -2695,11 +2742,35 @@ function bindMeeting(){
       else { var t=(mt.transcript||[])[+key]; src=t?t.text:""; label=(t&&AGENTS[t.dept]?AGENTS[t.dept].kr:"")+" 발언"; }
       if(!src){ alert("내용을 찾지 못했어요."); return; }
       if(!useBackend()){ alert("콘텐츠 제작에는 AI 백엔드 연결이 필요해요 (설정 › AI 백엔드)."); return; }
-      var instruction="다음 회의 내용("+label+" · 주제: "+(mt.topic||"")+")을 바탕으로 제작부(02)가 바로 게시 가능한 SNS 콘텐츠를 완성해줘. "
-        +"플랫폼에 맞는 게시물 카피(또는 영상 스크립트·구성안)와 해시태그까지 완성형으로:\n\n「"+src+"」";
-      try{ submit(instruction, "console"); }catch(err){ alert("전송 실패: "+(err.message||err)); return; }
-      STATE.view="console"; render();
-      var ob=b.innerHTML; b.innerHTML="✓ 제작부로 보냄"; setTimeout(function(){ try{ b.innerHTML=ob; }catch(_){} },1500);
+      var ob=b.innerHTML; b.disabled=true; b.innerHTML="콘텐츠 만드는 중… (10~40초)";
+      (async function(){
+        try{
+          await wakeServer(50000);
+          var r=await fetch(backendOrigin()+"/api/content/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ source:src, label:label, topic:(mt.topic||"") })});
+          var d=await r.json(); if(d.error) throw new Error(d.error);
+          // 콘텐츠 탭에 바로 뜨도록 제작부 콘텐츠 메시지를 직접 추가
+          STATE.messages.push({ role:"agent", deptId:(d.dept||"creation"), text:(d.content||""), time:nowTime(), _jid:("mk"+Date.now()), _inst:"회의 → 콘텐츠: "+label+" ("+(mt.topic||"")+")", _forceContent:true });
+          STATE.busy=false; saveState();
+          STATE.view="content"; render();
+        }catch(err){ alert("콘텐츠 생성 실패: "+(err.message||err)); b.disabled=false; b.innerHTML=ob; }
+      })();
+    };
+  });
+  // 미결 항목 추천안 채우기 → 결과를 이어가기 입력칸에 채움(검토 후 이어가기)
+  viewEl.querySelectorAll('[data-mkresolve]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var id=+b.getAttribute("data-mkresolve");
+      if(!useBackend()){ alert("추천안 생성에는 AI 백엔드 연결이 필요해요."); return; }
+      var inp=viewEl.querySelector('[data-mcontnote="'+id+'"]');
+      var ob=b.innerHTML; b.disabled=true; b.innerHTML="추천안 생성 중… (10~30초)";
+      (async function(){
+        try{ await wakeServer(50000);
+          var r=await fetch(backendOrigin()+"/api/meeting/suggest-unresolved",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ id:id })});
+          var d=await r.json(); if(d.error) throw new Error(d.error);
+          if(inp){ inp.value=(d.text||"").trim()||"미결 항목을 찾지 못했어요."; }
+          b.innerHTML="✓ 채웠어요 — 검토 후 이어가기";
+        }catch(err){ alert("추천안 생성 실패: "+(err.message||err)); b.innerHTML=ob; }
+        b.disabled=false; setTimeout(function(){ try{ b.innerHTML=ob; }catch(_){} },2500);
+      })();
     };
   });
   viewEl.querySelectorAll('[data-mfinish]').forEach(function(b){
