@@ -138,7 +138,29 @@
   /* ===== 밝은 사무실 테마 마감 ===== */
   .vtab.on{color:#0e8aa0}
   /* ===== 미연시 대사창 (하이브리드) ===== */
-  .vnmsg{display:flex;align-items:flex-end;gap:0;margin-bottom:20px}
+  #__progplaceholder__{}
+
+/* 팀에이전트 수행 중 패널 + 접기/펼치기 */
+.progmsg{background:#f4f9ff;border:1px solid #d7e6fb;border-radius:13px;padding:11px 13px;margin:8px 0}
+.progmsg-hd{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#1c3a5e}
+.progmsg-hd b{font-weight:800}
+.prog-hint{font-size:10px;color:#8a9bb3;font-weight:400;margin-left:2px}
+.prog-chev{margin-left:auto;color:#7c97bd;transition:transform .15s;display:inline-block}
+.prog-chev.open{transform:rotate(90deg)}
+.prog-spin{width:13px;height:13px;border:2px solid #bcd4f5;border-top-color:#3a78d6;border-radius:50%;display:inline-block;animation:progspin .8s linear infinite;flex-shrink:0}
+@keyframes progspin{to{transform:rotate(360deg)}}
+.progmsg-body{margin-top:9px;display:flex;flex-direction:column;gap:5px}
+.prog-line{font-size:12px;color:#33506f;line-height:1.5;padding:6px 9px;background:#fff;border:1px solid #e4eefb;border-radius:8px;white-space:pre-wrap}
+.msg-fold{margin-top:6px;background:transparent;border:1px solid #d7dee8;color:#5a6677;font-size:11px;font-family:inherit;border-radius:7px;padding:3px 10px;cursor:pointer}
+.msg-fold:hover{background:#f3f5f9}
+.progmsg.slow{background:#fff7f0;border-color:#f4d9bf}
+.prog-warn{font-size:11px;color:#a8632a;background:#fff1e3;border:1px solid #f3d6b6;border-radius:8px;padding:7px 9px;margin-top:7px;line-height:1.5}
+.prog-acts{display:flex;gap:7px;margin-top:8px}
+.prog-btn{flex:1;background:#fff;border:1px solid #cfd6e2;color:#4a5562;font-size:11.5px;font-family:inherit;border-radius:8px;padding:7px 0;cursor:pointer;font-weight:700}
+.prog-btn:hover{background:#f3f5f9}
+.prog-btn.cancel{color:#c0392b;border-color:#ecc4bd}
+.prog-btn.cancel:hover{background:#fdf0ee}
+.vnmsg{display:flex;align-items:flex-end;gap:0;margin-bottom:20px}
   .vn-stand{flex-shrink:0;width:96px;align-self:flex-end;margin-right:-14px;z-index:2;filter:drop-shadow(0 6px 12px rgba(40,30,70,.18));position:relative}
   .vn-stand video{position:absolute;inset:0;width:100%;height:128px;object-fit:cover;object-position:top center;border-radius:14px;border:2px solid #fff;display:none;z-index:1}
   .vn-stand.talking video{display:block}
@@ -327,6 +349,10 @@
 .mchip{display:inline-flex;align-items:center;gap:5px;border:1px solid #d4dae6;border-radius:999px;padding:5px 11px 5px 6px;font-size:11px;cursor:pointer;background:#fff;color:#5a6677;user-select:none;transition:all .15s}
 .mchip.on{background:#0e1726;border-color:#0e1726;color:#fff}
 .mtr{display:flex;gap:9px;margin:10px 0;align-items:flex-start}
+.mtr-client{flex-direction:row-reverse}
+.cl-ava{width:28px;height:28px;border-radius:50%;background:#0e1726;color:#7ef0c6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.mt-b-client{background:#eafaf3 !important;border:1px solid #b8ecd6 !important;border-radius:14px 4px 14px 14px !important}
+.mt-b-client .mt-w{color:#0e7a52}
 .mtr .mt-b{background:#f7f9fc;border:1px solid #e9edf4;border-radius:4px 14px 14px 14px;padding:10px 13px;font-size:12px;line-height:1.7;flex:1;white-space:pre-wrap;word-break:break-word;color:#2a3344}
 .mt-w{font-size:9.5px;letter-spacing:.5px;color:#9aa3b3;margin-bottom:5px;text-transform:uppercase}
 .mt-sum{background:linear-gradient(135deg,#fffdf6,#fcf6e6);border:1px solid #ecd9a8;border-left:3px solid #c9a44c;border-radius:12px;padding:13px 15px;font-size:12px;line-height:1.75;white-space:pre-wrap;margin-top:12px;color:#4a3f24;box-shadow:0 6px 18px -14px rgba(176,141,47,.45)}
@@ -433,7 +459,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v42</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v45</span>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
   <div id="view"></div>
@@ -1034,6 +1060,13 @@ function pollInstruct(jobId){
 }
 function resumePendingJobs(){
   (STATE.pendingJobs||[]).forEach(function(id){ pollInstruct(id); });
+  // 고아 placeholder 정리: pendingJobs에 없지만 메시지에 남은 '수행 중'도 폴링해 완료/에러 시 자동 제거
+  (STATE.messages||[]).forEach(function(m){
+    if(m && m._waitJob && (STATE.pendingJobs||[]).indexOf(m._waitJob)<0){
+      if(useBackend()) pollInstruct(m._waitJob);
+      else { m.title="⚠️ 수행 중단"; m.text="백엔드 연결이 끊겨 진행 상태를 확인할 수 없어요. 취소 후 다시 시도해 주세요."; }
+    }
+  });
 }
 function pushJobMessages(j){
   if(j.deliberate){
@@ -1241,7 +1274,7 @@ async function submit(text, via){
       // 백엔드가 작업을 받아 백그라운드에서 수행 → 앱을 닫아도 진행, 폴링으로 결과 수신
       var start = await instructBackend(text, via, atts);
       if(start && start.status==="running" && start.id){
-        STATE.messages.push({ role:"plan", title:"⏳ 수행 중…", text:"부서들이 답하고 있어요. 곧 결과가 도착해요. (다른 앱을 보거나 화면을 꺼도 서버에서 계속 진행됩니다)", depts:[], _waitJob:start.id });
+        STATE.messages.push({ role:"plan", title:"⏳ 수행 중…", text:"부서들이 답하고 있어요. 곧 결과가 도착해요. (다른 앱을 보거나 화면을 꺼도 서버에서 계속 진행됩니다)", depts:[], _waitJob:start.id, _inst:text, _startedAt:Date.now() });
         STATE.pendingJobs=STATE.pendingJobs||[]; if(STATE.pendingJobs.indexOf(start.id)<0) STATE.pendingJobs.push(start.id);
         saveState(); render();
         pollInstruct(start.id);
@@ -1792,8 +1825,24 @@ function consoleMessages(){
     if(m.role==="route"){ var head=m.phase==="opinion"?'💭 의견 수렴 → ':(m.direct?'🎯 직접 지목 → ':'👑 총괄 → '); var tail=m.phase==="opinion"?' 의견 요청':(m.direct?(m.depts.length>1?' 협업':' 담당 응답'):(m.depts.length>1?' 동시 분배·협업':' 배정')); return '<div class="msg"><div class="route">'+head+m.depts.map(function(d){ var mn=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[d])?' '+DEPT_MEMBERS[d]:''; return '<span style="color:'+AGENTS[d].c+';font-weight:700">'+AGENTS[d].no+' '+AGENTS[d].kr+mn+'</span>'; }).join(' + ')+tail+'</div></div>'; }
     if(m.role==="opinion"){ var ao=AGENTS[m.deptId]; var mno=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[m.deptId])?' '+DEPT_MEMBERS[m.deptId]:''; return '<div class="msg"><div class="opinionmsg">'+avatar(m.deptId,26)+'<div><div style="font-size:11px;font-weight:700;color:'+ao.c+'">'+ao.no+' '+ao.kr+mno+' 의견</div><div style="font-size:12px;color:#4a5562;line-height:1.6;white-space:pre-wrap">'+escapeHtml(m.text)+'</div></div></div></div>'; }
     if(m.role==="debate"){ return '<div class="msg"><div class="debatemsg">💬 <b>부서 토론</b><br>'+escapeHtml(m.text)+'</div></div>'; }
+    if(m.role==="plan" && m._waitJob){
+      var popen = m._collapsed!==true; // 기본 펼침
+      var ptxt = (m.text||"").replace(/\n\(앱을 닫거나[^\n]*\)/,"").replace(/\n\(다른 앱을[^\n]*\)/,"").trim();
+      var plines = ptxt.split("\n").filter(function(x){return x.trim();});
+      var pbody = plines.map(function(ln){ return '<div class="prog-line">'+escapeHtml(ln)+'</div>'; }).join("");
+      var mins = m._startedAt ? Math.floor((Date.now()-m._startedAt)/60000) : 0;
+      var slow = mins>=3;
+      return '<div class="msg"><div class="progmsg'+(slow?' slow':'')+'">'
+        +'<div class="progmsg-hd" data-progtoggle="'+m._i+'"><span class="prog-spin"></span><b>수행 중</b>'
+          +'<span class="prog-hint">'+(mins>0?(mins+'분째 · '):'')+'화면 꺼도 계속 진행</span>'
+          +'<span class="prog-chev'+(popen?' open':'')+'">▸</span></div>'
+        +'<div class="progmsg-body" style="display:'+(popen?'block':'none')+'">'+(pbody||'<div class="prog-line">부서들이 작업 중…</div>')
+          +(slow?'<div class="prog-warn">⚠ 무료 서버가 잠들었거나 작업이 무거우면 지연될 수 있어요. 안 끝나면 아래로 취소·재시도하세요.</div>':'')
+          +'<div class="prog-acts"><button class="prog-btn" data-jobretry="'+m._i+'">↻ 다시 시도</button><button class="prog-btn cancel" data-jobcancel="'+m._i+'">■ 취소</button></div>'
+        +'</div></div></div>';
+    }
     if(m.role==="plan"){ return '<div class="msg"><div class="planmsg">👑 <b>'+escapeHtml(m.title?m.title.replace(/^👑\s*/,''):'총괄 협의 결과')+'</b><br>'+escapeHtml(m.text)+'<div style="margin-top:6px;font-size:11px;color:#7c8696">→ 실행: '+(m.depts||[]).map(function(d){ return AGENTS[d].no+' '+AGENTS[d].kr+((typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[d])?'('+DEPT_MEMBERS[d]+')':''); }).join(', ')+'</div></div></div>'; }
-    if(m.role==="agent"){ var a2=AGENTS[m.deptId]; var mn=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[m.deptId])?DEPT_MEMBERS[m.deptId]:""; var exp=(STATE.deptExp&&STATE.deptExp[m.deptId])||0; var lv=Math.floor(exp/5)+1; var prog=Math.round((exp%5)/5*100); var stand=(typeof DEPT_STANDING!=="undefined"&&DEPT_STANDING[m.deptId])?DEPT_STANDING[m.deptId]:""; return '<div class="msg vnmsg"><div class="vn-stand" data-dept="'+m.deptId+'" title="'+escapeHtml((mn||a2.kr))+' · 하는 일·성격 보기">'+(((STATE.deptClips&&STATE.deptClips[m.deptId])?'<video src="'+escapeHtml(STATE.deptClips[m.deptId])+'" muted loop playsinline preload="auto"></video>':'')+(stand?'<img src="'+stand+'">':avatar(m.deptId,72)))+'</div><div class="vn-box" style="--dc:'+a2.c+'"><div class="vn-name"><span class="vn-nm">'+(mn||a2.kr)+'</span><span class="vn-role">'+a2.no+' '+a2.kr+'</span><button class="vn-say" data-say="'+m._i+'" title="대사 듣기">🔊</button><span class="vn-intim"><span class="vn-lv">친밀도 Lv.'+lv+'</span><span class="vn-gauge"><i style="width:'+prog+'%;background:'+a2.c+'"></i></span></span></div><div class="vn-text"'+(m._new?(STATE.typeFx?' data-typing="'+m._i+'"':' data-fresh="'+m._i+'"'):'')+'>'+((m._new&&STATE.typeFx)?'':escapeHtml(m.text))+'</div>'+pubControls(m)+'</div></div>'; }
+    if(m.role==="agent"){ var a2=AGENTS[m.deptId]; var mn=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[m.deptId])?DEPT_MEMBERS[m.deptId]:""; var exp=(STATE.deptExp&&STATE.deptExp[m.deptId])||0; var lv=Math.floor(exp/5)+1; var prog=Math.round((exp%5)/5*100); var stand=(typeof DEPT_STANDING!=="undefined"&&DEPT_STANDING[m.deptId])?DEPT_STANDING[m.deptId]:""; var _typing=(m._new&&STATE.typeFx); var _long=(m.text||"").length>280; var _col=(m._collapsed===true)&&!_typing; var _shown=_col?((m.text||"").slice(0,200)+"…"):(m.text||""); var _txtInner=_typing?'':escapeHtml(_shown); var _toggle=(_long&&!_typing)?'<button class="msg-fold" data-msgfold="'+m._i+'">'+(_col?'⌄ 펼치기':'⌃ 접기')+'</button>':''; return '<div class="msg vnmsg"><div class="vn-stand" data-dept="'+m.deptId+'" title="'+escapeHtml((mn||a2.kr))+' · 하는 일·성격 보기">'+(((STATE.deptClips&&STATE.deptClips[m.deptId])?'<video src="'+escapeHtml(STATE.deptClips[m.deptId])+'" muted loop playsinline preload="auto"></video>':'')+(stand?'<img src="'+stand+'">':avatar(m.deptId,72)))+'</div><div class="vn-box" style="--dc:'+a2.c+'"><div class="vn-name"><span class="vn-nm">'+(mn||a2.kr)+'</span><span class="vn-role">'+a2.no+' '+a2.kr+'</span><button class="vn-say" data-say="'+m._i+'" title="대사 듣기">🔊</button><span class="vn-intim"><span class="vn-lv">친밀도 Lv.'+lv+'</span><span class="vn-gauge"><i style="width:'+prog+'%;background:'+a2.c+'"></i></span></span></div><div class="vn-text"'+(_typing?(' data-typing="'+m._i+'"'):(m._new?' data-fresh="'+m._i+'"':''))+'>'+_txtInner+'</div>'+_toggle+pubControls(m)+'</div></div>'; }
     if(m.role==="publish") return '<div class="msg"><div class="pubmsg'+(m.warn?' warn':'')+'">'+(m.warn?'⚠️ ':'✅ ')+escapeHtml(m.text)+'</div></div>';
     if(m.role==="video") return '<div class="msg"><div class="amsg"><div class="abody" style="width:100%"><div class="aname" style="color:#f5a623">🎬 생성된 영상</div><video src="'+escapeHtml(m.url)+'" controls playsinline style="width:100%;max-width:320px;border-radius:10px;margin-top:6px;background:#000"></video><div style="display:flex;gap:6px;margin-top:8px"><button class="pubbtn" data-vsave="'+escapeHtml(m.url)+'">⬇️ 갤러리에 저장</button></div></div></div></div>';
     return '<div class="msg"><div class="route" style="color:#ff5d8f">⚠️ 처리 실패 · API 연결 확인 ('+escapeHtml(m.text)+')</div></div>';
@@ -2124,7 +2173,7 @@ function meetingToText(m){
   L.push("  일시: "+new Date(m.at).toLocaleString("ko-KR"));
   L.push("  참여: "+(m.depts||[]).map(function(d){return AGENTS[d]?(AGENTS[d].kr+(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[d]?"("+DEPT_MEMBERS[d]+")":"")):d;}).join(", "));
   L.push("════════════════════════════════\n");
-  (m.transcript||[]).forEach(function(t){ if(AGENTS[t.dept]) L.push("["+t.round+"R] "+AGENTS[t.dept].kr+(t.member?"("+t.member+")":"")+"\n"+(t.text||"")+"\n"); });
+  (m.transcript||[]).forEach(function(t){ if(t.dept==="client") L.push("[클라이언트 발언]\n"+(t.text||"")+"\n"); else if(AGENTS[t.dept]) L.push("["+t.round+"R] "+AGENTS[t.dept].kr+(t.member?"("+t.member+")":"")+"\n"+(t.text||"")+"\n"); });
   if(m.summary){ L.push("──────── 의장 결론 ────────"); L.push(m.summary); }
   return L.join("\n");
 }
@@ -2198,7 +2247,7 @@ function renderMeeting(){
         +'<div class="mroom-name">'+escapeHtml(r.topic)+'</div>'+st+'</div>'
       +'<div class="mr-body" style="display:'+(expanded?'block':'none')+'">'
       +'<div class="mr-avs">'+r.depts.map(function(d){return avatar(d,26);}).join("")+'<span class="nm2">'+r.depts.map(function(d){return AGENTS[d].kr;}).join(", ")+' · '+meta.join(" · ")+'</span></div>'
-      +'<div class="mfb-row" style="margin-top:6px"><input data-mnote="'+i+'" placeholder="개입 지침(선택): 이번 회의 방향을 한마디로" value="'+escapeHtml(r.note||"")+'"></div>'
+      +'<div class="mfb-row" style="margin-top:6px"><input data-mnote="'+i+'" placeholder="💬 내 발언(클라이언트): 회의에서 직접 말하기 — 부서들이 이 발언에 응답해요" value="'+escapeHtml(r.note||"")+'"></div>'
       +'<div class="mr-btns">'
       +'<button class="cbtn conn" data-mrun="'+i+'" '+(r.status==="running"?"disabled":"")+'>'+mIcon('play',11)+' 지금 회의</button>'
       +(r.status==="running"?'<button class="cbtn disc" data-mstop="'+i+'">'+mIcon('stop',11)+' 중단·초기화</button>':'')
@@ -2264,6 +2313,10 @@ function meetingTranscriptHtml(m){
   if(m.clientNote) h+='<div class="note" style="border-left:3px solid #0e1726;padding-left:9px">'+mIcon('talk',11)+' 클라이언트 개입: '+escapeHtml(m.clientNote)+'</div>';
   var multi=(m.agenda&&m.agenda.length>1);
   (m.transcript||[]).forEach(function(t){
+    if(t.dept==="client"){
+      h+='<div class="mtr mtr-client"><div class="cl-ava">나</div><div class="mt-b mt-b-client"><div class="mt-w">💬 클라이언트(나)의 발언</div>'+escapeHtml(t.text||"")+'</div></div>';
+      return;
+    }
     if(!AGENTS[t.dept]) return;
     if(multi && (t.round===1) && t.dept===m.depts[0]) h+='<div class="magenda">'+mIcon('pin',11)+' 안건 '+(t.agenda+1)+'. '+escapeHtml(m.agenda[t.agenda]||"")+'</div>';
     h+='<div class="mtr">'+avatar(t.dept,28)+'<div class="mt-b"><div class="mt-w">'+escapeHtml(t.member||"")+' · '+AGENTS[t.dept].kr+' · '+t.round+'R</div>'+escapeHtml(t.text||"")+'</div></div>';
@@ -2773,6 +2826,35 @@ function bindComposer(){
   function go(){ var v=inp.value; if(v.trim() && !STATE.busy){ submit(v, STATE.view); } }
 }
 function bindPublish(){
+  // 수행 중 패널 접기/펼치기
+  document.querySelectorAll("[data-progtoggle]").forEach(function(b){
+    b.addEventListener("click", function(){ var i=+b.getAttribute("data-progtoggle"); var m=STATE.messages[i]; if(!m) return; m._collapsed=!m._collapsed; saveState(); render(); });
+  });
+  // 긴 결과 메시지 접기/펼치기
+  document.querySelectorAll("[data-msgfold]").forEach(function(b){
+    b.addEventListener("click", function(){ var i=+b.getAttribute("data-msgfold"); var m=STATE.messages[i]; if(!m) return; m._collapsed=!m._collapsed; saveState(); render(); });
+  });
+  // 멈춘 '수행 중' 취소 — placeholder 제거 + 폴링 중단 + 서버에 취소 알림
+  document.querySelectorAll("[data-jobcancel]").forEach(function(b){
+    b.addEventListener("click", function(e){ e.stopPropagation(); var i=+b.getAttribute("data-jobcancel"); var m=STATE.messages[i]; if(!m) return;
+      var jid=m._waitJob;
+      if(jid){ delete IPOLLS[jid]; STATE.pendingJobs=(STATE.pendingJobs||[]).filter(function(x){return x!==jid;});
+        if(useBackend()){ try{ fetch(backendOrigin()+"/api/instruct/"+jid+"/cancel",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}); }catch(err){} } }
+      STATE.messages=STATE.messages.filter(function(ms){ return ms!==m; });
+      saveState(); render();
+    });
+  });
+  // 멈춘 '수행 중' 다시 시도 — placeholder 제거 후 같은 지시 재전송
+  document.querySelectorAll("[data-jobretry]").forEach(function(b){
+    b.addEventListener("click", function(e){ e.stopPropagation(); var i=+b.getAttribute("data-jobretry"); var m=STATE.messages[i]; if(!m) return;
+      var inst=m._inst||"", jid=m._waitJob;
+      if(jid){ delete IPOLLS[jid]; STATE.pendingJobs=(STATE.pendingJobs||[]).filter(function(x){return x!==jid;});
+        if(useBackend()){ try{ fetch(backendOrigin()+"/api/instruct/"+jid+"/cancel",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}); }catch(err){} } }
+      STATE.messages=STATE.messages.filter(function(ms){ return ms!==m; });
+      saveState(); render();
+      if(inst){ try{ submit(inst, "console"); }catch(err){ var inp=document.getElementById("inp"); if(inp) inp.value=inst; } }
+    });
+  });
   document.querySelectorAll(".vn-stand[data-dept]").forEach(function(s){
     s.style.cursor="pointer";
     s.addEventListener("click", function(){ openDeptModal(s.getAttribute("data-dept")); });
