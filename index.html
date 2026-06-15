@@ -502,7 +502,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v58</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v59</span>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
   <div id="view"></div>
@@ -854,11 +854,18 @@ function typeWriter(elm, text, deptId){
     if(i>=text.length){ clearInterval(t); setTalking(stand,false); }
   }, 20);
 }
+function openExternal(url){
+  // PWA/안드로이드에서 새 탭·외부앱 열기가 막히는 경우를 대비해 여러 방식 시도
+  try{ var a=document.createElement("a"); a.href=url; a.target="_blank"; a.rel="noopener noreferrer"; document.body.appendChild(a); a.click(); document.body.removeChild(a); return true; }catch(e){}
+  try{ var w=window.open(url,"_blank","noopener"); if(w) return true; }catch(e){}
+  try{ location.href=url; return true; }catch(e){}
+  return false;
+}
 function copyToGemini(text){
   var payload = "아래 기획안·스크립트를 바탕으로 8초 분량의 세로(9:16) 쇼츠 영상을 만들어줘. "
     + "장면 전환과 자막, 어울리는 배경음/효과음까지 넣어주고, 밝고 시선을 끄는 분위기로.\n\n"
     + "[기획안·스크립트]\n" + (text||"");
-  var go = function(){ window.open("https://gemini.google.com/app","_blank"); };
+  var go = function(){ openExternal("https://gemini.google.com/app"); };
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(payload).then(function(){
       alert("영상 프롬프트를 복사했어요.\n\n① 제미나이가 열리면 도구에서 '동영상'을 선택\n② 입력창에 붙여넣기(길게 눌러 붙여넣기) 후 생성\n③ 만든 mp4를 내려받아 팀에이전트 채팅의 📎로 올리면 보관·재생돼요.\n\n(구글 AI 울트라로 제작 — 추가 토큰·비용 없음)");
@@ -1494,11 +1501,11 @@ function videoPlanHtml(m, mi){
       segs.forEach(function(sg, si){
         h+='<div class="vseg"><div class="vseg-h">구간 '+(si+1)+'<button class="vseg-copy" data-vpsegcopy="'+mi+':'+si+'">📋 복사</button></div><div class="vplan-prompt">'+escapeHtml(sg)+'</div></div>';
       });
-      h+='<div class="vplan-acts"><button class="cbtn" data-vpcopy="'+mi+'">📋 전체 복사</button><button class="cbtn" data-vpgemini="1">▶ Gemini 앱 열기</button></div>';
+      h+='<div class="vplan-acts"><button class="cbtn" data-vpcopy="'+mi+'">📋 전체 복사</button><button class="cbtn" data-vpgemini="'+mi+'">▶ Gemini 앱 열기</button></div>';
       h+='<div class="note" style="margin-top:6px">구간별로 복사해 <b>Gemini 앱(Ultra) → Veo</b>에서 하나씩 생성한 뒤 이어붙이면 돼요.</div>';
     } else {
       h+='<div class="vplan-prompt" data-vptext="'+mi+'">'+escapeHtml(vp.veoPrompt||"")+'</div>';
-      h+='<div class="vplan-acts"><button class="cbtn conn" data-vpcopy="'+mi+'">📋 Veo 프롬프트 복사</button><button class="cbtn" data-vpgemini="1">▶ Gemini 앱 열기</button></div>';
+      h+='<div class="vplan-acts"><button class="cbtn conn" data-vpcopy="'+mi+'">📋 Veo 프롬프트 복사</button><button class="cbtn" data-vpgemini="'+mi+'">▶ Gemini 앱 열기</button></div>';
       h+='<div class="note" style="margin-top:6px">복사한 프롬프트를 <b>Gemini 앱(Ultra) → Veo</b>에 붙여넣어 샘플 영상을 생성하세요.</div>';
     }
     h+='</div>';
@@ -1619,7 +1626,12 @@ function bindContent(){
       if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t||"").then(function(){ var o=b.textContent; b.textContent="✓ 복사됨"; setTimeout(function(){b.textContent=o;},1200); }); } else { alert(t); } });
   });
   document.querySelectorAll('[data-vpgemini]').forEach(function(b){
-    b.addEventListener("click", function(){ try{ window.open("https://gemini.google.com/app","_blank"); }catch(e){ alert("Gemini 앱(또는 gemini.google.com)을 열어 붙여넣으세요."); } });
+    b.addEventListener("click", function(){
+      var mi=+b.getAttribute("data-vpgemini"); var m=STATE.messages[mi]; var t=(m&&m._videoPlan)?m._videoPlan.veoPrompt:"";
+      var open=function(){ openExternal("https://gemini.google.com/app"); var o=b.textContent; b.textContent="↗ 여는 중…"; setTimeout(function(){ b.textContent=o; },1500); };
+      if(t && navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(open, open); }
+      else open();
+    });
   });
   // 기획 의견 반영(소통) → 제작부가 기획안 수정
   document.querySelectorAll('[data-vpfb]').forEach(function(b){
