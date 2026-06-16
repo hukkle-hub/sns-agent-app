@@ -357,6 +357,10 @@
 .mkcont{display:block;margin-top:8px;background:#fff4e6;border:1px solid #f3d2a0;color:#b5701a;font-size:10.5px;font-weight:700;font-family:inherit;border-radius:7px;padding:5px 10px;cursor:pointer}
 .mkcont:hover{background:#ffead0}
 .mkcont.light{background:rgba(255,255,255,.7);border-color:#e6d2b0;margin-top:9px}
+.mopine{display:block;margin-top:6px;background:#eef4ff;border:1px solid #cfe0fb;color:#3a5bbf;font-size:10.5px;font-weight:700;font-family:inherit;border-radius:7px;padding:5px 10px;cursor:pointer}
+.mopine.light{background:rgba(255,255,255,.7);border-color:#cfddf5;margin-top:7px}
+.mopine:hover{background:#e2ecfd}
+.mopine-box{margin-top:8px;display:flex;flex-direction:column;gap:6px;background:#f7f9fc;border:1px solid #e7ebf2;border-radius:10px;padding:9px}
 /* 이어 대화 */
 .vn-reply{margin-top:7px;background:#eef4ff;border:1px solid #cfe0fb;color:#3a5bbf;font-size:10.5px;font-weight:700;font-family:inherit;border-radius:7px;padding:4px 10px;cursor:pointer}
 .vn-reply:hover{background:#e2ecfd}
@@ -502,7 +506,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v59</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v61</span>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
   <div id="view"></div>
@@ -2532,6 +2536,19 @@ function renderMeeting(){
   viewEl.innerHTML=h;
 }
 
+function meetingOpineHtml(m, key){
+  var th=(m._opine&&m._opine[key])||[];
+  var open=(m._opineOpen&&m._opineOpen[key]===true) || th.length>0;
+  if(!open) return "";
+  var h='<div class="mopine-box">';
+  th.forEach(function(c){
+    if(c.role==="op") h+='<div class="ccom-op"><b>나</b> '+escapeHtml(c.text)+'</div>';
+    else h+='<div class="ccom-ag"><b>'+escapeHtml(c.name||"담당")+'</b> '+escapeHtml(c.text)+'</div>';
+  });
+  h+='<div class="ccom-row"><input data-mopineinp="'+m.id+':'+key+'" placeholder="이 내용에 의견을 적으면 담당 부서와 다듬어요"><button class="cbtn conn" data-mopinesend="'+m.id+':'+key+'">보내기</button></div>';
+  h+='</div>';
+  return h;
+}
 function meetingTranscriptHtml(m){
   var h='';
   var running=(m.status==="running");
@@ -2552,11 +2569,13 @@ function meetingTranscriptHtml(m){
     if(multi && (t.round===1) && t.dept===m.depts[0]) h+='<div class="magenda">'+mIcon('pin',11)+' 안건 '+(t.agenda+1)+'. '+escapeHtml(m.agenda[t.agenda]||"")+'</div>';
     h+='<div class="mtr">'+avatar(t.dept,28)+'<div class="mt-b"><div class="mt-w">'+escapeHtml(t.member||"")+' · '+AGENTS[t.dept].kr+' · '+t.round+'R</div>'+escapeHtml(t.text||"")
       +'<button class="mkcont" data-mkcont="'+m.id+':'+ti+'" title="이 발언을 콘텐츠로 만들기">📝 콘텐츠로</button>'
+      +'<button class="mopine" data-mopine="'+m.id+':'+ti+'" title="이 발언에 의견 제시·소통">💬 의견</button>'
+      +meetingOpineHtml(m, String(ti))
       +'</div></div>';
   });
   // 안건별 결론(여러 안건일 때)
-  if(multi && m.agendaSummaries) m.agendaSummaries.forEach(function(a,k){ h+='<div class="mt-sum" style="margin-top:8px">'+mIcon('pin',11)+' 안건 '+(k+1)+' 결론 — '+escapeHtml(a.title)+'\n'+escapeHtml(a.summary)+'<button class="mkcont light" data-mkcont="'+m.id+':a'+k+'" title="이 결론을 콘텐츠로 만들기">📝 콘텐츠로</button></div>'; });
-  if(m.summary) h+='<div class="mt-sum">'+mIcon('crown',12)+' '+(multi?'종합 결론':'의장 결론')+'\n'+escapeHtml(m.summary)+'<button class="mkcont light" data-mkcont="'+m.id+':concl" title="이 결론을 콘텐츠로 만들기">📝 콘텐츠로</button></div>';
+  if(multi && m.agendaSummaries) m.agendaSummaries.forEach(function(a,k){ h+='<div class="mt-sum" style="margin-top:8px">'+mIcon('pin',11)+' 안건 '+(k+1)+' 결론 — '+escapeHtml(a.title)+'\n'+escapeHtml(a.summary)+'<button class="mkcont light" data-mkcont="'+m.id+':a'+k+'" title="이 결론을 콘텐츠로 만들기">📝 콘텐츠로</button><button class="mopine light" data-mopine="'+m.id+':a'+k+'" title="이 결론에 의견 제시·소통">💬 의견</button>'+meetingOpineHtml(m,'a'+k)+'</div>'; });
+  if(m.summary) h+='<div class="mt-sum">'+mIcon('crown',12)+' '+(multi?'종합 결론':'의장 결론')+'\n'+escapeHtml(m.summary)+'<button class="mkcont light" data-mkcont="'+m.id+':concl" title="이 결론을 콘텐츠로 만들기">📝 콘텐츠로</button><button class="mopine light" data-mopine="'+m.id+':concl" title="이 결론에 의견 제시·소통">💬 의견</button>'+meetingOpineHtml(m,'concl')+'</div>';
   if(running){
     h+='<div class="note" style="border-left:3px solid #3b6fd8;padding-left:8px;background:#f6f9ff;border-radius:0 9px 9px 0;padding:8px 10px">'+mIcon('live',11)+' 회의 진행 중… 발언이 실시간으로 올라와요. ('+(m.transcript||[]).length+'개 발언)</div>';
     return h;
@@ -2882,6 +2901,37 @@ function bindMeeting(){
     };
   });
   // 미결 항목 추천안 채우기 → 결과를 이어가기 입력칸에 채움(검토 후 이어가기)
+  // 회의 발언·결론에 의견 제시·소통 → 담당 부서와 주고받으며 다듬기
+  viewEl.querySelectorAll('[data-mopine]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation(); var parts=b.getAttribute("data-mopine").split(":"); var mid=+parts[0], key=parts[1];
+      var mt=(STATE.meetings||[]).filter(function(x){return x.id===mid;})[0]; if(!mt) return;
+      mt._opineOpen=mt._opineOpen||{}; mt._opineOpen[key]=!(mt._opineOpen[key]===true); saveState(); render();
+    };
+  });
+  viewEl.querySelectorAll('[data-mopinesend]').forEach(function(b){
+    b.onclick=async function(e){ e.stopPropagation(); var parts=b.getAttribute("data-mopinesend").split(":"); var mid=+parts[0], key=parts[1];
+      var mt=(STATE.meetings||[]).filter(function(x){return x.id===mid;})[0]; if(!mt) return;
+      var inp=viewEl.querySelector('[data-mopineinp="'+mid+':'+key+'"]'); var txt=inp?String(inp.value||"").trim():""; if(!txt) return;
+      if(!useBackend()){ alert("의견 소통에는 AI 백엔드 연결이 필요해요."); return; }
+      // 대상 발언/결론 텍스트 + 담당 부서 결정
+      var src="", dept="ops";
+      if(key==="concl"){ src=mt.summary||""; dept=mt.chair||"ops"; }
+      else if(key.charAt(0)==="a"){ var ai=+key.slice(1); var a=(mt.agendaSummaries||[])[ai]; src=a?a.summary:""; dept="ops"; }
+      else { var t=(mt.transcript||[])[+key]; src=t?t.text:""; dept=(t&&AGENTS[t.dept])?t.dept:"ops"; }
+      mt._opine=mt._opine||{}; mt._opine[key]=mt._opine[key]||[]; mt._opineOpen=mt._opineOpen||{}; mt._opineOpen[key]=true;
+      mt._opine[key].push({ role:"op", text:txt });
+      mt._opine[key].push({ role:"agent", text:"…답변 작성 중", _pending:true, name:(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[dept])?DEPT_MEMBERS[dept]:(AGENTS[dept]?AGENTS[dept].kr:"담당") });
+      saveState(); render();
+      try{ await wakeServer(50000);
+        var r=await fetch(backendOrigin()+"/api/content/reply",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ content:"[회의 발언/결론]\n"+src, comment:txt, dept:dept })});
+        var d=await r.json(); if(d.error) throw new Error(d.error);
+        var pend=mt._opine[key].filter(function(c){return c._pending;})[0];
+        if(pend){ pend.text=d.reply||"(응답 없음)"; pend._pending=false; if(d.dept&&typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[d.dept]) pend.name=DEPT_MEMBERS[d.dept]; }
+        try{ logAct(dept,"회의 의견 소통", true, txt.slice(0,40)); }catch(_){}
+      }catch(err){ var p2=mt._opine[key].filter(function(c){return c._pending;})[0]; if(p2){ p2.text="응답 실패: "+(err.message||err); p2._pending=false; } }
+      saveState(); render();
+    };
+  });
   viewEl.querySelectorAll('[data-mkresolve]').forEach(function(b){
     b.onclick=function(e){ e.stopPropagation(); var id=+b.getAttribute("data-mkresolve");
       if(!useBackend()){ alert("추천안 생성에는 AI 백엔드 연결이 필요해요."); return; }
@@ -3350,7 +3400,15 @@ function bindSettings(){
     ru.textContent="조회 중…";
     try{
       var r=await fetch(backendOrigin()+"/api/usage"); var d=await r.json();
-      document.getElementById("usageBox").innerHTML='<div style="font-size:12px;color:#2c3744;line-height:1.8">토큰 입력 '+(d.tokensIn||0).toLocaleString()+' · 출력 '+(d.tokensOut||0).toLocaleString()+'<br>호출 '+(d.calls||0)+'회 · 예상 비용 $'+(d.estCostUsd||0)+'<br>오늘 발행 '+(d.publishesToday||0)+'건</div>';
+      document.getElementById("usageBox").innerHTML='<div style="font-size:12px;color:#2c3744;line-height:1.8">'
+        +'<div style="font-weight:700;color:#0e7a52;margin-bottom:2px">📅 오늘 누적</div>'
+        +'토큰 입력 '+(d.tokensInToday||0).toLocaleString()+' · 출력 '+(d.tokensOutToday||0).toLocaleString()+'<br>'
+        +'호출 '+(d.callsToday||0)+'회 · 예상 비용 $'+(d.estCostUsdToday||0)+'<br>'
+        +'오늘 발행 '+(d.publishesToday||0)+'건'
+        +'<div style="height:7px"></div><div style="font-weight:700;color:#6a7686;margin-bottom:2px">📊 전체 누적</div>'
+        +'토큰 입력 '+(d.tokensIn||0).toLocaleString()+' · 출력 '+(d.tokensOut||0).toLocaleString()+'<br>'
+        +'호출 '+(d.calls||0)+'회 · 예상 비용 $'+(d.estCostUsd||0)
+        +'</div>';
     }catch(e){ document.getElementById("usageBox").innerHTML='<div class="note" style="color:#ff5d8f">조회 실패</div>'; }
     ru.textContent="새로고침";
   });
