@@ -330,7 +330,11 @@
   .o2-accup .o2-accbody{margin-top:0;margin-bottom:9px}
   .o2-dirrow{display:flex;gap:7px;align-items:center}
   .o2-dirrow .o2-dirin{flex:1;width:auto;margin-top:0}
-  .o2-arrow{position:absolute;top:42%;transform:translateY(-50%);z-index:12;width:40px;height:60px;border:none;background:rgba(20,16,11,.45);color:#fff;font-size:30px;line-height:1;cursor:pointer;border-radius:10px}
+  .o2-stalebtn{}
+.o2-stalebtn{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:6;background:rgba(255,255,255,.92);border:1px solid #f3d7a8;color:#b5631a;font-weight:700;font-size:12px;padding:7px 14px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.15);backdrop-filter:blur(4px)}
+.o2-stalebtn b{color:#fff;background:#ff7043;border-radius:999px;padding:0 6px;margin-left:3px;font-size:11px}
+.o2-stalebtn:disabled{opacity:.7}
+.o2-arrow{position:absolute;top:42%;transform:translateY(-50%);z-index:12;width:40px;height:60px;border:none;background:rgba(20,16,11,.45);color:#fff;font-size:30px;line-height:1;cursor:pointer;border-radius:10px}
   .o2-arrow.l{left:6px}.o2-arrow.r{right:6px}
   .o2-count{position:absolute;top:12px;right:14px;z-index:12;font-size:12px;color:#e8dcc6;background:rgba(20,16,11,.5);border-radius:999px;padding:3px 11px}
 
@@ -551,7 +555,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v75</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v76</span>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
   <div id="view"></div>
@@ -1947,7 +1951,10 @@ function renderOffice(){
         +'</div>'):'')
       +'</div></div></div>';
   }).join("");
+  var staleN=0; var _nowO=Date.now();
+  keys.forEach(function(id){ if(id==="ops")return; var mm=(STATE.deptMemory&&STATE.deptMemory[id])||[]; if(mm.length){ var la=mm[mm.length-1].at||0; if(la&&_nowO-la>24*3600000) staleN++; } });
   viewEl.innerHTML='<div class="o2-wrap">'
+    +'<button class="o2-stalebtn" id="o2stale">🧭 팀장 정체 점검'+(staleN?' <b>'+staleN+'</b>':'')+'</button>'
     +'<div class="o2-vp" id="o2vp">'+slides+'</div>'
     +'<button class="o2-arrow l" id="o2prev">‹</button><button class="o2-arrow r" id="o2next">›</button>'
     +'<div class="o2-count" id="o2count">'+(idx+1)+' / '+keys.length+'</div>'
@@ -1957,6 +1964,21 @@ function renderOffice(){
 function esc(s){ s=String(s==null?"":s); return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function bindOffice(){
   var keys=Object.keys(AGENTS);
+  var sb=document.getElementById("o2stale");
+  if(sb) sb.addEventListener("click", async function(){
+    if(!useBackend()){ alert("정체 점검에는 AI 백엔드 연결이 필요해요."); return; }
+    var ob=sb.innerHTML; sb.disabled=true; sb.textContent="팀장 점검 중… (잠시)";
+    try{ await wakeServer(50000);
+      var r=await fetch(backendOrigin()+"/api/ops/check-stale",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      try{ await syncBackend(true); }catch(e){}
+      var n=(d.newDirectives||[]).length;
+      sb.disabled=false;
+      if(n){ alert("팀장이 정체된 "+n+"개 부서에 새 지시를 내렸어요. 각 부서 카드 위 '🧭 팀장 재지시'를 확인하세요."); }
+      else { alert("지금 24시간+ 정체된 부서는 없어요(또는 최근 이미 점검됨). 자동 실행이 멈춰 있으면 외부 핑(설정 안내)을 확인해 주세요."); }
+      render();
+    }catch(err){ sb.disabled=false; sb.innerHTML=ob; alert("정체 점검 실패: "+(err.message||err)); }
+  });
   var vp=document.getElementById("o2vp"); if(!vp) return;
   var activeVoiceBtn=null, voicePoll=null;
   function stopVoiceUI(){ if(activeVoiceBtn){ activeVoiceBtn.classList.remove("on"); activeVoiceBtn=null; } if(voicePoll){ clearInterval(voicePoll); voicePoll=null; } }
