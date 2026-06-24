@@ -574,7 +574,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v80</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v81</span>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
   <div id="view"></div>
@@ -703,7 +703,7 @@ function avatar(id, size){
 var STATE = {
   view:"console", messages:[], busy:false, busyDept:null,
   autoPublish:false,
-  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0,
+  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0},
   autoBackup:0, savedAt:null, lastSync:null,
   schedule:{ mode:"hours", start:"09:00", end:"18:00", workMin:40, restMin:20 },
   safety:{ audit:false, dailyLimit:0, requireApproval:false },
@@ -1017,7 +1017,7 @@ function applyLoadedState(d, isMerge){
     if(d.collect) STATE.collect=Object.assign({ everyMin:0, topic:"" }, d.collect);
     if(typeof d.deliberate==="boolean") STATE.deliberate=d.deliberate;
     if(typeof d.voiceAuto==="boolean") STATE.voiceAuto=d.voiceAuto;
-    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge; if(d.clientProfile&&typeof d.clientProfile==="object") STATE.clientProfile=d.clientProfile; if(Array.isArray(d.briefings)) STATE.briefings=d.briefings; if(Array.isArray(d.leadDirectives)) STATE.leadDirectives=d.leadDirectives; if(d.lastTrainAt&&typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt; if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt;
+    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge; if(d.clientProfile&&typeof d.clientProfile==="object") STATE.clientProfile=d.clientProfile; if(Array.isArray(d.briefings)) STATE.briefings=d.briefings; if(Array.isArray(d.leadDirectives)) STATE.leadDirectives=d.leadDirectives; if(d.lastTrainAt&&typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt; if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst;
     if(d.deptClips && typeof d.deptClips==="object") STATE.deptClips=Object.assign({},STATE.deptClips,d.deptClips);
     if(d.blog && typeof d.blog==="object") STATE.blog=Object.assign({naverId:"",tistory:"",wp:""},d.blog);
     if(Array.isArray(d.customTargets)) STATE.customTargets=d.customTargets;
@@ -3972,7 +3972,8 @@ function renderRecord(){
     var bnr='<div class="learnbnr">📚 <b>학습 현황</b> — 누적 활동 <b>'+totalAct+'회</b> · 평균 <b>Lv'+avgLv+'</b> · 전문성 압축 <b>'+kbCount+'개 부서</b>'
       +(topD?' · 최다 성장 <b>'+escapeHtml(AGENTS[topD].kr)+'</b>(Lv'+(Math.floor(topLv/5)+1)+')':'')
       +'<div class="learnbnr-sub">각 부서를 펼치면 무엇을 배웠는지(학습 노트)와 압축된 전문성이 보여요. 활동 3회마다 자동 압축되고, 피드백(회의 별점·팀장 평가)도 학습에 반영돼요. 10활동마다 전체 전문성을 심화 정리하고, 주기적으로 스스로 훈련(자기 단련)해 지식을 계속 강화해요.</div>'
-      +'<button class="cbtn conn" id="consolidateAll" style="margin-top:8px;width:100%">🧠 전 부서 전문성 지금 심화 정리</button>'
+      +'<button class="cbtn conn" id="growBurst" style="margin-top:8px;width:100%;background:linear-gradient(135deg,#ff8a3d,#ff5e7e);color:#fff;border:none">⚡ 전 부서 집중 성장 (Lv 빠르게)</button>'
+      +'<button class="cbtn conn" id="consolidateAll" style="margin-top:6px;width:100%">🧠 전 부서 전문성 지금 심화 정리</button>'
       +'<button class="cbtn" id="trainAll" style="margin-top:6px;width:100%">🏋️ 전 부서 지식 훈련 지금</button></div>';
     learnHtml = brfHtml + cpHtml + bnr + memDepts.map(function(d){
       var a=AGENTS[d], notes=deptNotes[d];
@@ -4066,8 +4067,37 @@ function renderRecord(){
     +'<div class="note">학습·회의 기록은 새로고침 시 사라지므로, 보관하려면 저장하세요. (백엔드 연결 시 서버 DB에 영구 저장 — 연동설계 7번 참고)</div>'
     +'</div>';
 }
+function renderIfRecord(){ if(STATE.view==="record"){ try{ render(); }catch(e){} } }
 function bindRecord(){
   bindResGo();
+  var gb=document.getElementById("growBurst");
+  if(gb) gb.addEventListener("click", async function(){
+    if(!useBackend()){ alert("집중 성장에는 AI 백엔드 연결이 필요해요."); return; }
+    if(gb._running) return; gb._running=true; gb.disabled=true;
+    var lvBefore={}; Object.keys(AGENTS).forEach(function(d){ lvBefore[d]=Math.floor(((STATE.deptExp&&STATE.deptExp[d])||0)/5)+1; });
+    gb.textContent="성장 시작 중…";
+    try{ await wakeServer(50000);
+      var r=await fetch(backendOrigin()+"/api/ops/grow",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ rounds:4 })});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      // 진행 폴링: growBurst.active가 끝날 때까지 주기적으로 동기화하며 진행 표시
+      var polls=0;
+      var timer=setInterval(async function(){
+        polls++;
+        try{ await syncBackend(true); }catch(e){}
+        var bs=STATE.growBurst||{};
+        if(bs.total){ gb.textContent="⚡ 성장 중… "+(bs.done||0)+"/"+bs.total; }
+        renderIfRecord();
+        if(!bs.active || polls>90){
+          clearInterval(timer); gb._running=false; gb.disabled=false;
+          gb.textContent="⚡ 전 부서 집중 성장 (Lv 빠르게)";
+          // 레벨 상승 요약
+          var ups=[]; Object.keys(AGENTS).forEach(function(dd){ if(dd==="ops")return; var lv=Math.floor(((STATE.deptExp&&STATE.deptExp[dd])||0)/5)+1; if(lv>(lvBefore[dd]||1)) ups.push(AGENTS[dd].kr+" Lv"+lv); });
+          render();
+          alert(ups.length ? ("집중 성장 완료! 레벨 상승:\n"+ups.join(", ")) : "집중 성장 완료! 각 부서 경험치가 올랐어요(레벨은 5경험치마다 +1). 더 올리려면 다시 눌러주세요.");
+        }
+      }, 4000);
+    }catch(err){ gb._running=false; gb.disabled=false; gb.textContent="⚡ 전 부서 집중 성장 (Lv 빠르게)"; alert("집중 성장 실패: "+(err.message||err)); }
+  });
   var trn=document.getElementById("trainAll");
   if(trn) trn.addEventListener("click", async function(){
     if(!useBackend()){ alert("지식 훈련에는 AI 백엔드 연결이 필요해요."); return; }
