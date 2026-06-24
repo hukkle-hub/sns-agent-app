@@ -492,6 +492,21 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
 .res-go:active{opacity:.6}
 .kbbox{background:#f3fbf7;border:1px solid #cdeede;border-radius:10px;padding:9px 11px;margin-bottom:9px;font-size:11px;color:#1c5b40}
 .kbbox b{color:#0e7a52}
+.capwrap{}
+.capwrap{background:#fff;border:1px solid #e7ebf2;border-radius:12px;padding:11px 12px;margin:10px 0}
+.capwrap-h{font-size:12.5px;font-weight:800;color:#1c2e4a;margin-bottom:8px}
+.capr{border-top:1px solid #eef1f6;padding:8px 0}
+.capr.lead{background:linear-gradient(90deg,#fff8ec,#fff);border-radius:9px;border:1px solid #ffe2ad;padding:8px 9px;margin-bottom:4px}
+.capr-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:#27405e;margin-bottom:5px}
+.capr-lv{color:#8a94a6;font-size:10.5px;font-weight:500}
+.capr-ov{margin-left:auto;font-size:11px;font-weight:800;color:#3a7;background:#eafaf2;padding:2px 8px;border-radius:999px}
+.capr-ov.capr-na{color:#9aa3b2;background:#f1f3f7}
+.capr-na2{font-size:10.5px;color:#9aa3b2;padding:2px 0}
+.capb{display:flex;align-items:center;gap:7px;margin:3px 0}
+.capb-l{font-size:10.5px;color:#56627a;width:40px;flex:none}
+.capb-track{flex:1;height:8px;background:#eef1f6;border-radius:999px;overflow:hidden}
+.capb-fill{display:block;height:100%;border-radius:999px;transition:width .4s}
+.capb-v{font-size:10.5px;color:#27405e;font-weight:700;width:26px;text-align:right;flex:none}
 .learnbnr{background:linear-gradient(180deg,#f3fbf7,#eef7ff);border:1px solid #cdeede;border-radius:11px;padding:11px 12px;margin-bottom:11px;font-size:12px;color:#1c5b40;line-height:1.6}
 .learnbnr b{color:#0e7a52}
 .learnbnr-sub{font-size:10.5px;color:#6a8a7c;margin-top:4px;font-weight:400}
@@ -574,7 +589,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v81</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v85</span>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
   <div id="view"></div>
@@ -703,7 +718,7 @@ function avatar(id, size){
 var STATE = {
   view:"console", messages:[], busy:false, busyDept:null,
   autoPublish:false,
-  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0},
+  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0}, dailyGrowthOn:true, capability:{},
   autoBackup:0, savedAt:null, lastSync:null,
   schedule:{ mode:"hours", start:"09:00", end:"18:00", workMin:40, restMin:20 },
   safety:{ audit:false, dailyLimit:0, requireApproval:false },
@@ -1017,7 +1032,7 @@ function applyLoadedState(d, isMerge){
     if(d.collect) STATE.collect=Object.assign({ everyMin:0, topic:"" }, d.collect);
     if(typeof d.deliberate==="boolean") STATE.deliberate=d.deliberate;
     if(typeof d.voiceAuto==="boolean") STATE.voiceAuto=d.voiceAuto;
-    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge; if(d.clientProfile&&typeof d.clientProfile==="object") STATE.clientProfile=d.clientProfile; if(Array.isArray(d.briefings)) STATE.briefings=d.briefings; if(Array.isArray(d.leadDirectives)) STATE.leadDirectives=d.leadDirectives; if(d.lastTrainAt&&typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt; if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst;
+    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge; if(d.clientProfile&&typeof d.clientProfile==="object") STATE.clientProfile=d.clientProfile; if(Array.isArray(d.briefings)) STATE.briefings=d.briefings; if(Array.isArray(d.leadDirectives)) STATE.leadDirectives=d.leadDirectives; if(d.lastTrainAt&&typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt; if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst; if(d.capability&&typeof d.capability==="object") STATE.capability=d.capability; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst;
     if(d.deptClips && typeof d.deptClips==="object") STATE.deptClips=Object.assign({},STATE.deptClips,d.deptClips);
     if(d.blog && typeof d.blog==="object") STATE.blog=Object.assign({naverId:"",tistory:"",wp:""},d.blog);
     if(Array.isArray(d.customTargets)) STATE.customTargets=d.customTargets;
@@ -1289,7 +1304,7 @@ async function syncBackend(full){
 }
 async function pushState(){
   if(!useBackend()) return;
-  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH }) }); }catch(e){}
+  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn }) }); }catch(e){}
 }
 // 총괄: 1개 이상 부서 배정 (다중 분배)
 async function route(instruction){
@@ -3219,6 +3234,32 @@ function srvLineHtml(){
   return '<div class="trn-srv">'+dot+' <b>'+txt+'</b>'
     +'<button class="cbtn" id="srvCheck" style="float:right;margin-top:-2px">서버 점검</button></div>';
 }
+function capBar(label, v, color){
+  v=Math.max(0,Math.min(100,v||0));
+  return '<div class="capb"><span class="capb-l">'+label+'</span><span class="capb-track"><span class="capb-fill" style="width:'+v+'%;background:'+color+'"></span></span><span class="capb-v">'+v+'</span></div>';
+}
+function capabilityHtml(){
+  var cap=STATE.capability||{};
+  var depts=Object.keys(AGENTS);
+  // 정렬: 팀장(ops) 맨 위, 그다음 종합점수(없으면 레벨) 높은 순
+  var rows=depts.map(function(d){
+    var a=AGENTS[d];
+    var exp=(STATE.deptExp&&STATE.deptExp[d])||0; var lv=Math.floor(exp/5)+1;
+    var kb=(STATE.deptKnowledge&&STATE.deptKnowledge[d]&&STATE.deptKnowledge[d].text)||"";
+    var c=cap[d]||null;
+    var overall=c?c.overall:0;
+    var sortKey=c?(c.overall+1000):(lv); // 평가 있으면 우선
+    return { d:d, a:a, lv:lv, exp:exp, kbLen:kb.length, c:c, overall:overall, isLeader:d==="ops", sortKey:sortKey };
+  });
+  rows.sort(function(x,y){ if(x.isLeader!==y.isLeader) return x.isLeader?-1:1; return (y.sortKey)-(x.sortKey); });
+  var cards=rows.map(function(r){
+    var head='<div class="capr-h"><b>'+(r.isLeader?'👑 ':'')+escapeHtml(r.a.kr)+'</b> <span class="capr-lv">Lv'+r.lv+' · 경험 '+r.exp+' · 지식 '+r.kbLen+'자</span>'
+      +(r.c?'<span class="capr-ov">종합 '+r.overall+'</span>':'<span class="capr-ov capr-na">미평가</span>')+'</div>';
+    var bars=r.c ? (capBar('지식',r.c.knowledge,'#5b6cff')+capBar('수행력',r.c.execution,'#ff8a3d')+capBar('품질',r.c.quality,'#22b07a')) : '<div class="capr-na2">아래 "역량 평가 새로고침"을 누르면 팀장이 0~100점으로 평가해요</div>';
+    return '<div class="capr'+(r.isLeader?' lead':'')+'">'+head+bars+'</div>';
+  }).join("");
+  return '<div class="capwrap"><div class="capwrap-h">📊 부서 역량(능력치) — 지식·수행력·품질</div>'+cards+'</div>';
+}
 function trainStatusHtml(){
   var on=STATE.trainOn!==false;
   var everyH=STATE.trainEveryH||12;
@@ -3302,6 +3343,7 @@ function renderSettings(){
     +  '<div class="brfset-row"><span class="brfset-sw'+(STATE.semanticSearch!==false?" on":"")+'" data-brftog="semanticSearch"></span><b>🔎 의미검색(임베딩)</b> <span class="brfset-d">키워드 한계 극복 — 뜻으로 과거 작업 재활용</span></div>'
     +  '<div class="brfset-row"><span class="brfset-sw'+(STATE.kShareOn!==false?" on":"")+'" data-brftog="kShareOn"></span><b>🤝 지식 공유 자동화</b> <span class="brfset-d">부서끼리 서로 가르치며 성장</span><span class="brfset-time">매 <select data-brfnum="kShareEveryH">'+kshOpts(STATE.kShareEveryH)+'</select></span></div>'
     +  '<div class="brfset-row"><span class="brfset-sw'+(STATE.trainOn!==false?" on":"")+'" data-brftog="trainOn"></span><b>🏋️ 지식 자기 훈련</b> <span class="brfset-d">학습한 지식을 스스로 계속 단련</span><span class="brfset-time">매 <select data-brfnum="trainEveryH">'+trnOpts(STATE.trainEveryH)+'</select></span></div>'
+    +  '<div class="brfset-row"><span class="brfset-sw'+(STATE.dailyGrowthOn!==false?" on":"")+'" data-brftog="dailyGrowthOn"></span><b>📅 매일 자동 성장</b> <span class="brfset-d">매일 전 부서 자기주도 학습+팀장 통합지능 (무료)</span></div>'
     +'</div>'
     +trainStatusHtml()
     +srvKeepGuideHtml()
@@ -3973,9 +4015,13 @@ function renderRecord(){
       +(topD?' · 최다 성장 <b>'+escapeHtml(AGENTS[topD].kr)+'</b>(Lv'+(Math.floor(topLv/5)+1)+')':'')
       +'<div class="learnbnr-sub">각 부서를 펼치면 무엇을 배웠는지(학습 노트)와 압축된 전문성이 보여요. 활동 3회마다 자동 압축되고, 피드백(회의 별점·팀장 평가)도 학습에 반영돼요. 10활동마다 전체 전문성을 심화 정리하고, 주기적으로 스스로 훈련(자기 단련)해 지식을 계속 강화해요.</div>'
       +'<button class="cbtn conn" id="growBurst" style="margin-top:8px;width:100%;background:linear-gradient(135deg,#ff8a3d,#ff5e7e);color:#fff;border:none">⚡ 전 부서 집중 성장 (Lv 빠르게)</button>'
+      +'<button class="cbtn conn" id="growBalance" style="margin-top:6px;width:100%;background:linear-gradient(135deg,#3d8bff,#7e5eff);color:#fff;border:none">⚖️ 균형 성장 (낮은 부서 따라잡기)</button>'
+      +'<button class="cbtn conn" id="growDaily" style="margin-top:6px;width:100%;background:linear-gradient(135deg,#22b07a,#2bb5a8);color:#fff;border:none">📅 오늘 자동 성장 (전 부서+팀장 통합지능)</button>'
+      +'<button class="cbtn conn" id="leaderAudit" style="margin-top:6px;width:100%;background:linear-gradient(135deg,#8a5cff,#c44eff);color:#fff;border:none">🔎 팀장이 전 부서 점검·보완</button>'
       +'<button class="cbtn conn" id="consolidateAll" style="margin-top:6px;width:100%">🧠 전 부서 전문성 지금 심화 정리</button>'
-      +'<button class="cbtn" id="trainAll" style="margin-top:6px;width:100%">🏋️ 전 부서 지식 훈련 지금</button></div>';
-    learnHtml = brfHtml + cpHtml + bnr + memDepts.map(function(d){
+      +'<button class="cbtn" id="trainAll" style="margin-top:6px;width:100%">🏋️ 전 부서 지식 훈련 지금</button>'
+      +'<button class="cbtn conn" id="capAssess" style="margin-top:6px;width:100%;background:linear-gradient(135deg,#5b6cff,#28c2d6);color:#fff;border:none">📊 부서 역량(능력치) 평가 새로고침</button></div>';
+    learnHtml = brfHtml + cpHtml + capabilityHtml() + bnr + memDepts.map(function(d){
       var a=AGENTS[d], notes=deptNotes[d];
       var open=openD[d]===true;
       var last=notes[notes.length-1]; var lastSubj=last?(classify(last).subj||last.note||""):"";
@@ -4070,34 +4116,52 @@ function renderRecord(){
 function renderIfRecord(){ if(STATE.view==="record"){ try{ render(); }catch(e){} } }
 function bindRecord(){
   bindResGo();
-  var gb=document.getElementById("growBurst");
-  if(gb) gb.addEventListener("click", async function(){
-    if(!useBackend()){ alert("집중 성장에는 AI 백엔드 연결이 필요해요."); return; }
-    if(gb._running) return; gb._running=true; gb.disabled=true;
+  function runGrow(btn, body, label, path){
+    if(!useBackend()){ alert("성장에는 AI 백엔드 연결이 필요해요."); return; }
+    if(btn._running) return; btn._running=true; btn.disabled=true;
+    var orig=btn.textContent;
     var lvBefore={}; Object.keys(AGENTS).forEach(function(d){ lvBefore[d]=Math.floor(((STATE.deptExp&&STATE.deptExp[d])||0)/5)+1; });
-    gb.textContent="성장 시작 중…";
+    btn.textContent=label+" 시작 중…";
+    (async function(){
+      try{ await wakeServer(50000);
+        var r=await fetch(backendOrigin()+(path||"/api/ops/grow"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+        var d=await r.json(); if(d.error) throw new Error(d.error);
+        var polls=0;
+        var timer=setInterval(async function(){
+          polls++;
+          try{ await syncBackend(true); }catch(e){}
+          var bs=STATE.growBurst||{};
+          if(bs.total){ btn.textContent=label+" 중… "+(bs.done||0)+"/"+bs.total; }
+          renderIfRecord();
+          if(!bs.active || polls>120){
+            clearInterval(timer); btn._running=false; btn.disabled=false; btn.textContent=orig;
+            var ups=[]; Object.keys(AGENTS).forEach(function(dd){ if(dd==="ops")return; var lv=Math.floor(((STATE.deptExp&&STATE.deptExp[dd])||0)/5)+1; if(lv>(lvBefore[dd]||1)) ups.push(AGENTS[dd].kr+" Lv"+lv); });
+            render();
+            alert(ups.length ? (label+" 완료! 레벨 상승:\n"+ups.join(", ")) : (label+" 완료! 경험치가 올랐어요. 격차가 더 좁혀지게 한 번 더 눌러도 돼요."));
+          }
+        }, 4000);
+      }catch(err){ btn._running=false; btn.disabled=false; btn.textContent=orig; alert(label+" 실패: "+(err.message||err)); }
+    })();
+  }
+  var gb=document.getElementById("growBurst");
+  if(gb) gb.addEventListener("click", function(){ runGrow(gb, { rounds:4 }, "⚡ 집중 성장"); });
+  var gbal=document.getElementById("growBalance");
+  if(gbal) gbal.addEventListener("click", function(){ runGrow(gbal, { balance:true }, "⚖️ 균형 성장"); });
+  var gday=document.getElementById("growDaily");
+  if(gday) gday.addEventListener("click", function(){ runGrow(gday, { daily:true }, "📅 자동 성장"); });
+  var capb=document.getElementById("capAssess");
+  if(capb) capb.addEventListener("click", async function(){
+    if(!useBackend()){ alert("역량 평가에는 AI 백엔드 연결이 필요해요."); return; }
+    var ob=capb.textContent; capb.disabled=true; capb.textContent="팀장이 평가 중…";
     try{ await wakeServer(50000);
-      var r=await fetch(backendOrigin()+"/api/ops/grow",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ rounds:4 })});
+      var r=await fetch(backendOrigin()+"/api/ops/capability",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ assess:true })});
       var d=await r.json(); if(d.error) throw new Error(d.error);
-      // 진행 폴링: growBurst.active가 끝날 때까지 주기적으로 동기화하며 진행 표시
-      var polls=0;
-      var timer=setInterval(async function(){
-        polls++;
-        try{ await syncBackend(true); }catch(e){}
-        var bs=STATE.growBurst||{};
-        if(bs.total){ gb.textContent="⚡ 성장 중… "+(bs.done||0)+"/"+bs.total; }
-        renderIfRecord();
-        if(!bs.active || polls>90){
-          clearInterval(timer); gb._running=false; gb.disabled=false;
-          gb.textContent="⚡ 전 부서 집중 성장 (Lv 빠르게)";
-          // 레벨 상승 요약
-          var ups=[]; Object.keys(AGENTS).forEach(function(dd){ if(dd==="ops")return; var lv=Math.floor(((STATE.deptExp&&STATE.deptExp[dd])||0)/5)+1; if(lv>(lvBefore[dd]||1)) ups.push(AGENTS[dd].kr+" Lv"+lv); });
-          render();
-          alert(ups.length ? ("집중 성장 완료! 레벨 상승:\n"+ups.join(", ")) : "집중 성장 완료! 각 부서 경험치가 올랐어요(레벨은 5경험치마다 +1). 더 올리려면 다시 눌러주세요.");
-        }
-      }, 4000);
-    }catch(err){ gb._running=false; gb.disabled=false; gb.textContent="⚡ 전 부서 집중 성장 (Lv 빠르게)"; alert("집중 성장 실패: "+(err.message||err)); }
+      if(d.capability) STATE.capability=d.capability;
+      capb.disabled=false; capb.textContent=ob; render();
+    }catch(err){ capb.disabled=false; capb.textContent=ob; alert("역량 평가 실패: "+(err.message||err)); }
   });
+  var laud=document.getElementById("leaderAudit");
+  if(laud) laud.addEventListener("click", function(){ runGrow(laud, {}, "🔎 팀장 점검·보완", "/api/ops/audit"); });
   var trn=document.getElementById("trainAll");
   if(trn) trn.addEventListener("click", async function(){
     if(!useBackend()){ alert("지식 훈련에는 AI 백엔드 연결이 필요해요."); return; }
