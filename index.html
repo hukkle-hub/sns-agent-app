@@ -279,6 +279,7 @@
   .ob-row2{display:flex;gap:6px;margin-top:6px}
   .ob-mini{flex:1;border:1px solid #d6deea;background:#f7f9fc;color:#34465e;border-radius:7px;font-size:10.5px;font-weight:600;padding:6px 4px;cursor:pointer;font-family:inherit}
   .ob-mini:hover{background:#eef3fa;border-color:#bcd0e8}
+  .ob-st.auto{color:#1f5fa8}
   .ob-last{font-size:10.5px;color:#56627a;margin-top:6px;background:#f7f9fc;border-radius:7px;padding:5px 7px;line-height:1.45}
   .ps-item{display:flex;align-items:center;gap:9px;padding:8px 9px;border:1px solid #e6eaf2;border-radius:9px;margin-bottom:6px;background:#fff}
   .ps-item.off{opacity:.5}
@@ -610,6 +611,17 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
 .capr-ov{margin-left:auto;font-size:11px;font-weight:800;color:#3a7;background:#eafaf2;padding:2px 8px;border-radius:999px}
 .capr-ov.capr-na{color:#9aa3b2;background:#f1f3f7}
 .capr-na2{font-size:10.5px;color:#9aa3b2;padding:2px 0}
+.capr-bars{margin-top:2px}
+.capr-today{margin-top:6px;font-size:10.5px;color:#1f5fa8;background:#eef5ff;border-radius:7px;padding:5px 8px;line-height:1.4}
+.capr-review{margin-top:6px;font-size:10.5px;color:#5a6677;background:#f6f4fb;border-radius:7px;padding:5px 8px;line-height:1.4;display:flex;align-items:center;gap:6px}
+.capr-grade{color:#fff;font-weight:800;font-size:9.5px;padding:1px 7px;border-radius:999px;flex:none}
+.capr-research{margin-top:6px;font-size:10.5px;color:#3a3560;background:#f0ecfb;border-radius:7px;padding:5px 8px;line-height:1.4}
+.capsum{display:flex;align-items:center;gap:11px;background:#f7f9fc;border:1px solid #eef1f6;border-radius:10px;padding:10px 12px;margin-bottom:9px}
+.capsum-ring{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;position:relative}
+.capsum-ring::after{content:"";position:absolute;inset:5px;background:#fff;border-radius:50%}
+.capsum-ring span{position:relative;z-index:1;font-size:13px;font-weight:800;color:#1c2e4a}
+.capsum-txt{font-size:11px;color:#5a6677;line-height:1.5}
+.capsum-txt b{color:#1c2e4a;font-size:12.5px}
 .capb{display:flex;align-items:center;gap:7px;margin:3px 0}
 .capb-l{font-size:10.5px;color:#56627a;width:40px;flex:none}
 .capb-track{flex:1;height:8px;background:#eef1f6;border-radius:999px;overflow:hidden}
@@ -697,7 +709,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v99</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v102</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -830,7 +842,7 @@ function avatar(id, size){
 var STATE = {
   view:"console", messages:[], busy:false, busyDept:null,
   autoPublish:false,
-  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0}, dailyGrowthOn:true, capability:{}, pubSchedules:[], usdKrw:0, monthLimitKrw:0, geminiMonthLimitKrw:100000, paidGeminiOn:false,
+  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], leaderDailyDirective:{}, dailyReview:{}, nightResearch:{}, briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0}, dailyGrowthOn:true, capability:{}, pubSchedules:[], usdKrw:0, monthLimitKrw:0, geminiMonthLimitKrw:100000, paidGeminiOn:false,
   autoBackup:0, savedAt:null, lastSync:null,
   schedule:{ mode:"hours", start:"09:00", end:"18:00", workMin:40, restMin:20 },
   safety:{ audit:false, dailyLimit:0, requireApproval:false },
@@ -1144,7 +1156,7 @@ function applyLoadedState(d, isMerge){
     if(d.collect) STATE.collect=Object.assign({ everyMin:0, topic:"" }, d.collect);
     if(typeof d.deliberate==="boolean") STATE.deliberate=d.deliberate;
     if(typeof d.voiceAuto==="boolean") STATE.voiceAuto=d.voiceAuto;
-    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge; if(d.clientProfile&&typeof d.clientProfile==="object") STATE.clientProfile=d.clientProfile; if(Array.isArray(d.briefings)) STATE.briefings=d.briefings; if(Array.isArray(d.leadDirectives)) STATE.leadDirectives=d.leadDirectives; if(d.lastTrainAt&&typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt; if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst; if(d.capability&&typeof d.capability==="object") STATE.capability=d.capability; if(Array.isArray(d.pubSchedules)) STATE.pubSchedules=d.pubSchedules; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst;
+    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge; if(d.clientProfile&&typeof d.clientProfile==="object") STATE.clientProfile=d.clientProfile; if(Array.isArray(d.briefings)) STATE.briefings=d.briefings; if(Array.isArray(d.leadDirectives)) STATE.leadDirectives=d.leadDirectives; if(d.leaderDailyDirective&&typeof d.leaderDailyDirective==="object") STATE.leaderDailyDirective=d.leaderDailyDirective; if(d.dailyReview&&typeof d.dailyReview==="object") STATE.dailyReview=d.dailyReview; if(d.nightResearch&&typeof d.nightResearch==="object") STATE.nightResearch=d.nightResearch; if(d.lastTrainAt&&typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt; if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst; if(d.capability&&typeof d.capability==="object") STATE.capability=d.capability; if(Array.isArray(d.pubSchedules)) STATE.pubSchedules=d.pubSchedules; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst;
     if(d.deptClips && typeof d.deptClips==="object") STATE.deptClips=Object.assign({},STATE.deptClips,d.deptClips);
     if(d.blog && typeof d.blog==="object") STATE.blog=Object.assign({naverId:"",tistory:"",wp:""},d.blog);
     if(Array.isArray(d.customTargets)) STATE.customTargets=d.customTargets;
@@ -2273,19 +2285,25 @@ function renderOfficeBoard(keys){
     var a=AGENTS[id], mem=(DEPT_MEMBERS&&DEPT_MEMBERS[id])||"";
     var exp=(STATE.deptExp&&STATE.deptExp[id])||0, lv=Math.floor(exp/5)+1;
     var dir=(STATE.deptDirective&&STATE.deptDirective[id])?String(STATE.deptDirective[id]).trim():"";
+    var ldd=(STATE.leaderDailyDirective&&STATE.leaderDailyDirective[id])?STATE.leaderDailyDirective[id]:null;
+    var lddTxt=ldd?String(ldd.text||"").trim():"";
     var mm=(STATE.deptMemory&&STATE.deptMemory[id])||[]; var last=mm.length?mm[mm.length-1]:null;
     var lastTxt=last?String(last.note||"").slice(0,80):""; var lastAt=last?(last.at||0):0;
     var stale=lastAt && (_now-lastAt>24*3600000); var staleH=lastAt?Math.floor((_now-lastAt)/3600000):0;
     var busy=!!dir;
+    var noteHtml;
+    if(dir) noteHtml='적용됨(직접 지시) · 비우고 적용하면 해제';
+    else if(lddTxt) noteHtml='<span style="color:#1f5fa8">🧭 오늘 팀장 지시: '+esc(lddTxt)+'</span>';
+    else noteHtml='비우면 기본(트렌드 학습) · 팀장 지시 대기 중';
     return '<div class="ob-card'+(id==="ops"?" lead":"")+'">'
       +'<div class="ob-hd"><span class="o2-id" data-dept="'+id+'"><span class="ob-no" style="background:'+a.c+'">'+a.no+'</span><b>'+(id==="ops"?"👑 ":"")+esc(a.kr)+'</b></span>'
         +'<span class="ob-meta">⭐'+exp+' · Lv'+lv+'</span>'
-        +'<span class="ob-st '+(busy?"on":"off")+'">'+(busy?"🟢":"⚪")+'</span></div>'
+        +'<span class="ob-st '+(busy?"on":(lddTxt?"auto":"off"))+'">'+(busy?"🟢":(lddTxt?"🧭":"⚪"))+'</span></div>'
       +'<div class="ob-mem">'+esc(mem)+(stale?' · <span style="color:#e07b2a">⏰'+staleH+'h 정체</span>':'')+'</div>'
-      +'<input class="o2-dirin ob-in" id="o2dir_'+id+'" value="'+esc(dir).replace(/"/g,"&quot;")+'" placeholder="이 부서에 지시 입력 (예: 고흥 맛집 리뷰 초안)">'
+      +'<input class="o2-dirin ob-in" id="o2dir_'+id+'" value="'+esc(dir).replace(/"/g,"&quot;")+'" placeholder="'+(lddTxt?esc(lddTxt):"이 부서에 지시 입력 (예: 고흥 맛집 리뷰 초안)")+'">'
       +'<div class="ob-row"><button class="o2-apply ob-apply" data-dept="'+id+'" style="background:'+a.c+'">💾 적용·즉시수행</button></div>'
       +'<div class="ob-row2"><button class="ob-mini" data-obmeet="'+id+'">💬 회의 소집</button><button class="ob-mini" data-obcontent="'+id+'">📦 콘텐츠</button></div>'
-      +'<div class="o2-dirnote ob-note" id="o2note_'+id+'">'+(dir?'적용됨 · 비우고 적용하면 해제':'비우면 기본(트렌드 학습)')+'</div>'
+      +'<div class="o2-dirnote ob-note" id="o2note_'+id+'">'+noteHtml+'</div>'
       +(lastTxt?'<div class="ob-last">⏳ '+esc(lastTxt)+'…</div>':'')
       +'<span id="o2st_'+id+'" style="display:none">'+(dir?'✅':'⚪')+'</span>'
       +'</div>';
@@ -3726,27 +3744,51 @@ function capBar(label, v, color){
   v=Math.max(0,Math.min(100,v||0));
   return '<div class="capb"><span class="capb-l">'+label+'</span><span class="capb-track"><span class="capb-fill" style="width:'+v+'%;background:'+color+'"></span></span><span class="capb-v">'+v+'</span></div>';
 }
+function capScoreColor(v){ return v>=75?'#22b07a':(v>=45?'#ff8a3d':'#e0566b'); }
 function capabilityHtml(){
   var cap=STATE.capability||{};
+  var ldd=STATE.leaderDailyDirective||{};
+  var rev=STATE.dailyReview||{};
+  var nr=STATE.nightResearch||{};
   var depts=Object.keys(AGENTS);
-  // 정렬: 팀장(ops) 맨 위, 그다음 종합점수(없으면 레벨) 높은 순
   var rows=depts.map(function(d){
     var a=AGENTS[d];
     var exp=(STATE.deptExp&&STATE.deptExp[d])||0; var lv=Math.floor(exp/5)+1;
     var kb=(STATE.deptKnowledge&&STATE.deptKnowledge[d]&&STATE.deptKnowledge[d].text)||"";
     var c=cap[d]||null;
     var overall=c?c.overall:0;
-    var sortKey=c?(c.overall+1000):(lv); // 평가 있으면 우선
-    return { d:d, a:a, lv:lv, exp:exp, kbLen:kb.length, c:c, overall:overall, isLeader:d==="ops", sortKey:sortKey };
+    var sortKey=c?(c.overall+1000):(lv);
+    var dToday=(ldd[d]&&ldd[d].text)?String(ldd[d].text).trim():"";
+    var rv=rev[d]||null;
+    var nrv=nr[d]||null;
+    return { d:d, a:a, lv:lv, exp:exp, kbLen:kb.length, c:c, overall:overall, isLeader:d==="ops", sortKey:sortKey, today:dToday, rv:rv, nr:nrv };
   });
   rows.sort(function(x,y){ if(x.isLeader!==y.isLeader) return x.isLeader?-1:1; return (y.sortKey)-(x.sortKey); });
+  // 요약 헤더 — 팀 평균/최고/평가 진행률을 한눈에
+  var assessed=rows.filter(function(r){ return !r.isLeader && r.c; });
+  var allNonLead=rows.filter(function(r){ return !r.isLeader; });
+  var avgOverall=assessed.length ? Math.round(assessed.reduce(function(s,r){ return s+r.overall; },0)/assessed.length) : 0;
+  var top=assessed.slice().sort(function(x,y){ return y.overall-x.overall; })[0];
+  var lastAt=assessed.length ? Math.max.apply(null,assessed.map(function(r){ return r.c.at||0; })) : 0;
+  var summary='<div class="capsum">'
+    +'<div class="capsum-ring" style="background:conic-gradient('+capScoreColor(avgOverall)+' '+(avgOverall*3.6)+'deg,#eef1f6 0)"><span>'+(assessed.length?avgOverall:'-')+'</span></div>'
+    +'<div class="capsum-txt"><b>팀 평균 종합점수</b><br>평가완료 '+assessed.length+'/'+allNonLead.length+'개 부서'
+      +(top?(' · 최고 '+esc(top.a.kr)+'('+top.overall+')'):'')
+      +(lastAt?(' · '+agoText(lastAt)+' 평가'):'')
+    +'</div></div>';
+  var unassessedN=allNonLead.length-assessed.length;
+  var hint = unassessedN>0 ? ('<div class="note" style="margin:4px 0 8px">📋 '+unassessedN+'개 부서 미평가 — 아래 "역량 평가 새로고침"을 누르면 팀장이 0~100점으로 평가해요</div>') : '';
   var cards=rows.map(function(r){
-    var head='<div class="capr-h"><b>'+(r.isLeader?'👑 ':'')+escapeHtml(r.a.kr)+'</b> <span class="capr-lv">Lv'+r.lv+' · 경험 '+r.exp+' · 지식 '+r.kbLen+'자</span>'
-      +(r.c?'<span class="capr-ov">종합 '+r.overall+'</span>':'<span class="capr-ov capr-na">미평가</span>')+'</div>';
-    var bars=r.c ? (capBar('지식',r.c.knowledge,'#5b6cff')+capBar('수행력',r.c.execution,'#ff8a3d')+capBar('품질',r.c.quality,'#22b07a')) : '<div class="capr-na2">아래 "역량 평가 새로고침"을 누르면 팀장이 0~100점으로 평가해요</div>';
-    return '<div class="capr'+(r.isLeader?' lead':'')+'">'+head+bars+'</div>';
+    var badge=r.c ? ('<span class="capr-ov" style="background:'+capScoreColor(r.overall)+'22;color:'+capScoreColor(r.overall)+'">'+r.overall+'</span>') : '<span class="capr-ov capr-na">미평가</span>';
+    var head='<div class="capr-h"><b>'+(r.isLeader?'👑 ':'')+escapeHtml(r.a.kr)+'</b> <span class="capr-lv">Lv'+r.lv+' · 경험 '+r.exp+'</span>'+badge+'</div>';
+    var bars=r.c ? ('<div class="capr-bars">'+capBar('지식',r.c.knowledge,'#5b6cff')+capBar('수행력',r.c.execution,'#ff8a3d')+capBar('품질',r.c.quality,'#22b07a')+'</div>') : '';
+    var todayLine = (!r.isLeader && r.today) ? ('<div class="capr-today">🧭 오늘 지시: '+esc(r.today.length>44?r.today.slice(0,44)+'…':r.today)+'</div>') : '';
+    var gcolor={ '상':'#22b07a','중':'#ff8a3d','하':'#e0566b' };
+    var reviewLine = (!r.isLeader && r.rv && r.rv.grade) ? ('<div class="capr-review"><span class="capr-grade" style="background:'+((gcolor[r.rv.grade])||'#8a94a6')+'">회고 '+esc(r.rv.grade)+'</span> '+(r.rv.tomorrow?('내일: '+esc(String(r.rv.tomorrow).length>40?String(r.rv.tomorrow).slice(0,40)+'…':r.rv.tomorrow)):esc(String(r.rv.improve||'').slice(0,40)))+'</div>') : '';
+    var researchLine = (!r.isLeader && r.nr && r.nr.text) ? ('<div class="capr-research">🌌 밤새 연구: '+esc(String(r.nr.text).length>70?String(r.nr.text).slice(0,70)+'…':r.nr.text)+'</div>') : '';
+    return '<div class="capr'+(r.isLeader?' lead':'')+'">'+head+bars+reviewLine+researchLine+todayLine+'</div>';
   }).join("");
-  return '<div class="capwrap"><div class="capwrap-h">📊 부서 역량(능력치) — 지식·수행력·품질</div>'+cards+'</div>';
+  return '<div class="capwrap"><div class="capwrap-h">📊 부서 역량(능력치) — 지식·수행력·품질</div>'+summary+hint+cards+'</div>';
 }
 function trainStatusHtml(){
   var on=STATE.trainOn!==false;
@@ -4642,7 +4684,10 @@ function renderRecord(){
       +'<button class="cbtn conn" id="leaderAudit" style="margin-top:6px;width:100%;background:linear-gradient(135deg,#8a5cff,#c44eff);color:#fff;border:none">🔎 팀장이 전 부서 점검·보완</button>'
       +'<button class="cbtn conn" id="consolidateAll" style="margin-top:6px;width:100%">🧠 전 부서 전문성 지금 심화 정리</button>'
       +'<button class="cbtn" id="trainAll" style="margin-top:6px;width:100%">🏋️ 전 부서 지식 훈련 지금</button>'
-      +'<button class="cbtn conn" id="capAssess" style="margin-top:6px;width:100%;background:linear-gradient(135deg,#5b6cff,#28c2d6);color:#fff;border:none">📊 부서 역량(능력치) 평가 새로고침</button></div>';
+      +'<button class="cbtn conn" id="capAssess" style="margin-top:6px;width:100%;background:linear-gradient(135deg,#5b6cff,#28c2d6);color:#fff;border:none">📊 부서 역량(능력치) 평가 새로고침</button>'
+      +'<button class="cbtn conn" id="dailyDirRefresh" style="margin-top:6px;width:100%;background:linear-gradient(135deg,#1f5fa8,#2b8aef);color:#fff;border:none">🧭 오늘의 팀장 지시 새로고침</button>'
+      +'<button class="cbtn conn" id="dailyReviewNow" style="margin-top:6px;width:100%;background:linear-gradient(135deg,#6a5acd,#9b59b6);color:#fff;border:none">🌙 퇴근 회고 지금 (오늘 평가·학습)</button>'
+      +'<button class="cbtn conn" id="nightResearchNow" style="margin-top:6px;width:100%;background:linear-gradient(135deg,#2c3e70,#4a5db0);color:#fff;border:none">🌌 야간 연구 지금 (내일 자료 조사·수집)</button></div>';
     learnHtml = brfHtml + cpHtml + capabilityHtml() + bnr + memDepts.map(function(d){
       var a=AGENTS[d], notes=deptNotes[d];
       var open=openD[d]===true;
@@ -4781,6 +4826,39 @@ function bindRecord(){
       if(d.capability) STATE.capability=d.capability;
       capb.disabled=false; capb.textContent=ob; render();
     }catch(err){ capb.disabled=false; capb.textContent=ob; alert("역량 평가 실패: "+(err.message||err)); }
+  });
+  var ddr=document.getElementById("dailyDirRefresh");
+  if(ddr) ddr.addEventListener("click", async function(){
+    if(!useBackend()){ alert("팀장 지시 배정에는 AI 백엔드 연결이 필요해요."); return; }
+    var ob=ddr.textContent; ddr.disabled=true; ddr.textContent="팀장이 오늘의 지시를 정리하는 중…";
+    try{ await wakeServer(50000);
+      var r=await fetch(backendOrigin()+"/api/ops/daily-directives",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      if(d.leaderDailyDirective) STATE.leaderDailyDirective=d.leaderDailyDirective;
+      ddr.disabled=false; ddr.textContent=ob; render();
+    }catch(err){ ddr.disabled=false; ddr.textContent=ob; alert("지시 배정 실패: "+(err.message||err)); }
+  });
+  var drv=document.getElementById("dailyReviewNow");
+  if(drv) drv.addEventListener("click", async function(){
+    if(!useBackend()){ alert("퇴근 회고에는 AI 백엔드 연결이 필요해요."); return; }
+    var ob=drv.textContent; drv.disabled=true; drv.textContent="오세라가 오늘을 회고하는 중…";
+    try{ await wakeServer(50000);
+      var r=await fetch(backendOrigin()+"/api/ops/daily-review",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      if(d.dailyReview) STATE.dailyReview=d.dailyReview;
+      drv.disabled=false; drv.textContent=ob; render();
+    }catch(err){ drv.disabled=false; drv.textContent=ob; alert("회고 실패: "+(err.message||err)); }
+  });
+  var nrb=document.getElementById("nightResearchNow");
+  if(nrb) nrb.addEventListener("click", async function(){
+    if(!useBackend()){ alert("야간 연구에는 AI 백엔드 연결이 필요해요."); return; }
+    var ob=nrb.textContent; nrb.disabled=true; nrb.textContent="오세라가 내일 자료를 조사하는 중…";
+    try{ await wakeServer(50000);
+      var r=await fetch(backendOrigin()+"/api/ops/night-research",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      if(d.nightResearch) STATE.nightResearch=d.nightResearch;
+      nrb.disabled=false; nrb.textContent=ob; render();
+    }catch(err){ nrb.disabled=false; nrb.textContent=ob; alert("야간 연구 실패: "+(err.message||err)); }
   });
   var laud=document.getElementById("leaderAudit");
   if(laud) laud.addEventListener("click", function(){ runGrow(laud, {}, "🔎 팀장 점검·보완", "/api/ops/audit"); });
