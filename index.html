@@ -618,6 +618,11 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
 .capr-grade{color:#fff;font-weight:800;font-size:9.5px;padding:1px 7px;border-radius:999px;flex:none}
 .capr-research{margin-top:6px;font-size:10.5px;color:#3a3560;background:#f0ecfb;border-radius:7px;padding:5px 8px;line-height:1.4}
 .capr-src{color:#7a72a8;font-weight:700}
+.capprv{background:#fff8ef;border:1px solid #ffe1bf;border-radius:11px;padding:11px 12px;margin-bottom:10px}
+.capprv-h{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#2c3744;margin-bottom:7px}
+.capprv-t{width:100%;box-sizing:border-box;min-height:120px;padding:9px 11px;border:1px solid #e6d3ba;border-radius:8px;font-family:inherit;font-size:12px;line-height:1.5;background:#fff;resize:vertical}
+.capprv-row{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
+.capprv-row .cbtn{flex:1;min-width:88px;justify-content:center}
 .capsum{display:flex;align-items:center;gap:11px;background:#f7f9fc;border:1px solid #eef1f6;border-radius:10px;padding:10px 12px;margin-bottom:9px}
 .capsum-ring{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;position:relative}
 .capsum-ring::after{content:"";position:absolute;inset:5px;background:#fff;border-radius:50%}
@@ -751,11 +756,11 @@ const AGENTS = {
   publishing:  { no:"03", kr:"채널 발행",      c:"#4d9bff", role:"채널 발행 담당. 연결된 플랫폼에 콘텐츠를 발행하고 업로드 일정·해시태그·발행 최적화를 관리한다." },
   engagement:  { no:"04", kr:"커뮤니티·CS",    c:"#b07cff", role:"커뮤니티·고객응대 담당. 댓글·DM 응답 문안, 팔로워 소통 방안을 작성한다." },
   analytics:   { no:"05", kr:"데이터 분석",    c:"#34e0a1", role:"데이터 분석 담당. 성과 지표 해석, 개선 포인트, 다음 액션을 데이터 관점에서 제시한다." },
-  monetization:{ no:"06", kr:"수익화",        c:"#ffd84d", role:"수익화 담당. 제휴·광고·디지털 상품·멤버십 등 수익 모델과 정산 방안을 제안한다." },
-  growth:      { no:"07", kr:"성장·광고",      c:"#ff5d8f", role:"성장·광고 담당. 유료 광고 전략, A/B 테스트, 바이럴 확산 방안을 설계한다." },
+  monetization:{ no:"06", kr:"수익화",        c:"#ffd84d", role:"판매 전환 담당. 스마트스토어·상세페이지 구성, 구매 전환 카피(혜택·후기·CTA), 특산물 상품 소개, 제휴·공동구매 아이디어를 만든다. 대규모 수익화보다 '실제 판매 전환'에 집중한다." },
+  growth:      { no:"07", kr:"성장·광고",      c:"#ff5d8f", role:"유기적 성장(무료 바이럴) 담당. 해시태그 전략, 릴스·숏폼 확산, 게시 시간대 최적화, 참여 유도(저장·공유·댓글) 훅, 챌린지·품앗이 등 돈 안 드는 성장에 집중한다. 유료 광고는 필요할 때만 보조." },
   ops:         { no:"08", kr:"감사·법무·리스크", c:"#7c8696", role:"플랫폼 운영·관리 총괄 감사관. 저작권·광고법·플랫폼 정책·정보보안을 점검하고 위험을 경고할 뿐 아니라, 모든 부서의 산출물·기획·발행물을 검토하고 직접 수정·보완·재작성한다. 클로드(텍스트·추론)와 제미나이(영상·이미지)를 함께 다뤄 콘텐츠·정책·발행 전반을 조율한다." },
-  advisory:    { no:"09", kr:"자문·서기",      c:"#7b8cf0", role:"자문·서기 담당. 논의를 정리·요약하고 결정 사항을 구조화해 기록한다." },
-  scout:       { no:"10", kr:"탐색·발상",      c:"#9ee84d", role:"탐색·발상 담당(R&D). 새로운 기회·아이디어·트렌드 조합을 능동적으로 발굴해 제안한다." }
+  advisory:    { no:"09", kr:"자문·서기",      c:"#7b8cf0", role:"품질 검수·서기 담당. 콘텐츠 발행 전 최종 게이트키퍼 — 과대·허위광고 표현, 브랜드 톤 이탈, 오탈자, 정책 위반을 점검해 PASS/FAIL로 판정하고 개선 지시를 남긴다. 회의 논의도 정리·기록한다." },
+  scout:       { no:"10", kr:"탐색·발상",      c:"#9ee84d", role:"트렌드 소재화 담당. 팀장이 조사해온 트렌드·밈·키워드를 우리 특산물 콘텐츠 실전 소재로 가공한다(콘텐츠 아이디어·후킹 문구·릴스 포맷·시즌 앵글)." }
 };
 const CHARS = {
   strategy:{skin:"#f0c9a4",hair:"short",hairC:"#2e2a28",glasses:1,mouth:"calm"},
@@ -867,7 +872,7 @@ function avatar(id, size){
 var STATE = {
   view:"console", messages:[], busy:false, busyDept:null,
   autoPublish:false,
-  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], leaderDailyDirective:{}, dailyReview:{}, nightResearch:{}, leaderReport:{}, leaderAutoOn:true, capHistory:[], nightSearchOn:true, briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0}, dailyGrowthOn:true, capability:{}, pubSchedules:[], usdKrw:0, monthLimitKrw:0, geminiMonthLimitKrw:100000, paidGeminiOn:false,
+  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], leaderDailyDirective:{}, dailyReview:{}, nightResearch:{}, leaderReport:{}, leaderAutoOn:true, capHistory:[], contentApprovals:[], nightSearchOn:true, briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0}, dailyGrowthOn:true, capability:{}, pubSchedules:[], usdKrw:0, monthLimitKrw:0, geminiMonthLimitKrw:100000, paidGeminiOn:false,
   autoBackup:0, savedAt:null, lastSync:null,
   schedule:{ mode:"hours", start:"09:00", end:"18:00", workMin:40, restMin:20 },
   safety:{ audit:false, dailyLimit:0, requireApproval:false },
@@ -1181,7 +1186,7 @@ function applyLoadedState(d, isMerge){
     if(d.collect) STATE.collect=Object.assign({ everyMin:0, topic:"" }, d.collect);
     if(typeof d.deliberate==="boolean") STATE.deliberate=d.deliberate;
     if(typeof d.voiceAuto==="boolean") STATE.voiceAuto=d.voiceAuto;
-    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge; if(d.clientProfile&&typeof d.clientProfile==="object") STATE.clientProfile=d.clientProfile; if(Array.isArray(d.briefings)) STATE.briefings=d.briefings; if(Array.isArray(d.leadDirectives)) STATE.leadDirectives=d.leadDirectives; if(d.leaderDailyDirective&&typeof d.leaderDailyDirective==="object") STATE.leaderDailyDirective=d.leaderDailyDirective; if(d.dailyReview&&typeof d.dailyReview==="object") STATE.dailyReview=d.dailyReview; if(d.nightResearch&&typeof d.nightResearch==="object") STATE.nightResearch=d.nightResearch; if(d.leaderReport&&typeof d.leaderReport==="object"){ STATE.leaderReport=d.leaderReport; if(typeof d.leaderReport.leaderAutoOn==="boolean") STATE.leaderAutoOn=d.leaderReport.leaderAutoOn; } if(Array.isArray(d.capHistory)) STATE.capHistory=d.capHistory; if(d.lastTrainAt&&typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt; if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst; if(d.capability&&typeof d.capability==="object") STATE.capability=d.capability; if(Array.isArray(d.pubSchedules)) STATE.pubSchedules=d.pubSchedules; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst;
+    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge; if(d.clientProfile&&typeof d.clientProfile==="object") STATE.clientProfile=d.clientProfile; if(Array.isArray(d.briefings)) STATE.briefings=d.briefings; if(Array.isArray(d.leadDirectives)) STATE.leadDirectives=d.leadDirectives; if(d.leaderDailyDirective&&typeof d.leaderDailyDirective==="object") STATE.leaderDailyDirective=d.leaderDailyDirective; if(d.dailyReview&&typeof d.dailyReview==="object") STATE.dailyReview=d.dailyReview; if(d.nightResearch&&typeof d.nightResearch==="object") STATE.nightResearch=d.nightResearch; if(d.leaderReport&&typeof d.leaderReport==="object"){ STATE.leaderReport=d.leaderReport; if(typeof d.leaderReport.leaderAutoOn==="boolean") STATE.leaderAutoOn=d.leaderReport.leaderAutoOn; } if(Array.isArray(d.capHistory)) STATE.capHistory=d.capHistory; if(Array.isArray(d.contentApprovals)) STATE.contentApprovals=d.contentApprovals; if(d.lastTrainAt&&typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt; if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst; if(d.capability&&typeof d.capability==="object") STATE.capability=d.capability; if(Array.isArray(d.pubSchedules)) STATE.pubSchedules=d.pubSchedules; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst;
     if(d.deptClips && typeof d.deptClips==="object") STATE.deptClips=Object.assign({},STATE.deptClips,d.deptClips);
     if(d.blog && typeof d.blog==="object") STATE.blog=Object.assign({naverId:"",tistory:"",wp:""},d.blog);
     if(Array.isArray(d.customTargets)) STATE.customTargets=d.customTargets;
@@ -1822,6 +1827,26 @@ function videoPlanHtml(m, mi){
   h+='</div>';
   return h;
 }
+function contentApprovalHtml(){
+  var list=(STATE.contentApprovals||[]);
+  if(!list.length) return "";
+  return '<div class="s-sec" style="margin-top:4px">🙋 승인 대기 <span style="font-size:11px;color:#8a93a6">'+list.length+'건 · 클라이언트 확인 필요</span></div>'
+    + list.map(function(a){
+      var revBadge = (a.reviews&&a.reviews.length&&a.reviews[a.reviews.length-1].verdict==="PASS") ? '<span class="capr-grade" style="background:#22b07a">검수통과</span>' : '';
+      return '<div class="capprv" data-cid="'+a.id+'">'
+        +'<div class="capprv-h"><b>'+esc((a.label||a.topic||"콘텐츠").slice(0,40))+'</b> '+revBadge+'<span style="margin-left:auto;font-size:10px;color:#9aa3b2">'+(dateTimeText(a.at)||"")+'</span></div>'
+        +'<textarea class="capprv-t" data-cedit="'+a.id+'">'+escapeHtml(a.content||"")+'</textarea>'
+        +'<div class="capprv-row">'
+          +'<button class="cbtn conn capprv-ok" data-capprove="'+a.id+'" style="background:#22b07a;color:#fff;border:none">✅ 승인</button>'
+          +'<button class="cbtn capprv-edit" data-csave="'+a.id+'">✏️ 수정 확정</button>'
+          +'<button class="cbtn disc" data-creject="'+a.id+'">↩️ 반려·재작성</button>'
+        +'</div>'
+        +'<div class="capprv-row" style="margin-top:6px"><button class="cbtn" data-cvisual="'+a.id+'" style="flex:1;justify-content:center">🎨 이미지·영상 프롬프트 만들기</button></div>'
+        +'<div class="capprv-vis" id="capprvvis_'+a.id+'"></div>'
+        +'<div class="note capprv-stat" id="capprvstat_'+a.id+'"></div>'
+      +'</div>';
+    }).join("");
+}
 function renderContent(){
   var CONTENT_DEPTS={ creation:1, publishing:1 };
   // 완성 콘텐츠가 아니라 "방향을 되묻는 질문/선택 요청"은 제외
@@ -1844,6 +1869,7 @@ function renderContent(){
   groups.reverse(); // 최신 묶음이 위로
   var total=0; groups.forEach(function(g){ total+=g.items.length; });
   var h='<div class="s-wrap"><div class="s-sec">📦 완성된 콘텐츠 <span style="font-size:11px;color:#8a93a6">'+total+'건 · '+groups.length+'개 작업</span></div>';
+  h+=contentApprovalHtml();
   h+='<div class="note" style="margin-bottom:10px">지시별로 총괄이 완료 보고를 올리고, 그 아래에 콘텐츠가 정리돼요. 맨 위가 가장 최근 작업입니다.</div>';
   if(groups.length) h+='<button class="savebig" id="dlAllContent" style="margin-bottom:10px">💾 전체 콘텐츠 노트앱에 저장 ('+total+'건)</button>';
   if(!groups.length) h+='<div class="empty">아직 완성된 콘텐츠가 없어요. 팀에이전트 탭에서 콘텐츠 제작을 지시해 보세요.</div>';
@@ -1913,6 +1939,40 @@ function saveToNote(title, text, prefix){
 }
 function bindContent(){
   bindBlogButtons();
+  document.querySelectorAll('[data-capprove]').forEach(function(b){ b.addEventListener("click", async function(){
+    var id=b.getAttribute("data-capprove"); var st=document.getElementById("capprvstat_"+id);
+    b.disabled=true; if(st) st.textContent="승인 중…";
+    try{ await wakeServer(40000);
+      var r=await fetch(backendOrigin()+"/api/content-approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id})});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      STATE.contentApprovals=(STATE.contentApprovals||[]).filter(function(a){return String(a.id)!==String(id);});
+      render();
+    }catch(e){ b.disabled=false; if(st) st.innerHTML='<span style="color:#c0392b">실패: '+escapeHtml(e.message||String(e))+'</span>'; }
+  }); });
+  document.querySelectorAll('[data-csave]').forEach(function(b){ b.addEventListener("click", async function(){
+    var id=b.getAttribute("data-csave"); var st=document.getElementById("capprvstat_"+id);
+    var ta=document.querySelector('[data-cedit="'+id+'"]'); var val=ta?ta.value:"";
+    b.disabled=true; if(st) st.textContent="저장 중…";
+    try{ await wakeServer(40000);
+      var r=await fetch(backendOrigin()+"/api/content-edit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id, content:val})});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      STATE.contentApprovals=(STATE.contentApprovals||[]).filter(function(a){return String(a.id)!==String(id);});
+      render();
+    }catch(e){ b.disabled=false; if(st) st.innerHTML='<span style="color:#c0392b">실패: '+escapeHtml(e.message||String(e))+'</span>'; }
+  }); });
+  document.querySelectorAll('[data-creject]').forEach(function(b){ b.addEventListener("click", async function(){
+    var id=b.getAttribute("data-creject"); var st=document.getElementById("capprvstat_"+id);
+    var reason=prompt("반려 사유를 입력하세요 (이 내용을 반영해 다시 작성해요):","");
+    if(reason===null) return;
+    b.disabled=true; if(st) st.textContent="반려 사유 반영해 재작성 중…";
+    try{ await wakeServer(50000);
+      var r=await fetch(backendOrigin()+"/api/content-reject",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id, reason:reason})});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      var ta=document.querySelector('[data-cedit="'+id+'"]'); if(ta&&d.content) ta.value=d.content;
+      (STATE.contentApprovals||[]).forEach(function(a){ if(String(a.id)===String(id)&&d.content) a.content=d.content; });
+      b.disabled=false; if(st) st.innerHTML='<span style="color:#0e7a52">재작성 완료 — 확인 후 승인하세요.</span>';
+    }catch(e){ b.disabled=false; if(st) st.innerHTML='<span style="color:#c0392b">실패: '+escapeHtml(e.message||String(e))+'</span>'; }
+  }); });
   // 영상 기획(Veo, Gemini 협력)
   document.querySelectorAll('[data-vplan]').forEach(function(b){
     b.addEventListener("click", async function(){ var mi=+b.getAttribute("data-vplan"); var m=STATE.messages[mi]; if(!m) return;
@@ -2000,6 +2060,18 @@ function bindContent(){
       saveState(); if(STATE.view==="content") render();
     });
   });
+  document.querySelectorAll('[data-cvisual]').forEach(function(b){ b.addEventListener("click", async function(){
+    var id=b.getAttribute("data-cvisual"); var vis=document.getElementById("capprvvis_"+id);
+    var ta=document.querySelector('[data-cedit="'+id+'"]'); var copy=ta?ta.value:"";
+    if(!useBackend()){ alert("이미지 프롬프트에는 AI 백엔드 연결이 필요해요."); return; }
+    var ob=b.innerHTML; b.disabled=true; b.innerHTML="이미지 프롬프트 만드는 중…";
+    try{ await wakeServer(40000);
+      var r=await fetch(backendOrigin()+"/api/content/visual",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({content:copy})});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      if(vis) vis.innerHTML='<div class="capprv-visbox"><div style="font-size:10.5px;color:#8a6d3b;margin-bottom:4px">🎨 이미지·영상 생성 프롬프트 (Gemini·나노바나나·Veo에 붙여 무료 생성)</div><textarea class="capprv-t" style="min-height:150px">'+escapeHtml(d.visualPrompt||"")+'</textarea></div>';
+      b.disabled=false; b.innerHTML=ob;
+    }catch(e){ b.disabled=false; b.innerHTML=ob; if(vis) vis.innerHTML='<span style="color:#c0392b;font-size:11px">실패: '+escapeHtml(e.message||String(e))+'</span>'; }
+  }); });
   var all=document.getElementById("dlAllContent");
   if(all) all.onclick=function(){
     if(!CONTENT_GROUPS.length){ alert("저장할 콘텐츠가 없어요."); return; }
@@ -3177,7 +3249,10 @@ function renderMeeting(){
   // 룸 카드들
   rooms.forEach(function(r,i){
     var liveM=r.status==="running"?(STATE.meetings||[]).filter(function(x){return x.id===r.lastMeetingId;})[0]:null;
-    var st = r.status==="running" ? '<span class="mr-stat run">'+mIcon('live',11)+' 진행 중 · 발언 '+((liveM&&liveM.transcript)?liveM.transcript.length:0)+'</span>' : (r.status==="done" ? '<span class="mr-stat done">'+mIcon('check',10)+' 완료</span>' : '<span class="mr-stat">대기</span>');
+    var _phase=(liveM&&liveM.phase)?liveM.phase:"";
+    var _revs=(liveM&&liveM.reviews)||[];
+    var _revPass=_revs.length?(_revs[_revs.length-1].verdict==="PASS"):null;
+    var st = r.status==="running" ? '<span class="mr-stat run">'+mIcon('live',11)+' '+(_phase?esc(_phase)+' · ':'')+'발언 '+((liveM&&liveM.transcript)?liveM.transcript.length:0)+'</span>' : (r.status==="done" ? '<span class="mr-stat done">'+mIcon('check',10)+' 완료'+(_revPass===true?' · ✅검수통과':(_revPass===false?' · ⚠️검수':''))+'</span>' : '<span class="mr-stat">대기</span>');
     var meta=[(MODE_LABELS[r.mode]||"협의")];
     if(r.chair&&AGENTS[r.chair]) meta.push("의장 "+AGENTS[r.chair].kr);
     if(r.agenda&&r.agenda.length) meta.push("안건 "+r.agenda.length);
@@ -3286,7 +3361,7 @@ function meetingTranscriptHtml(m){
   });
   // 안건별 결론(여러 안건일 때)
   if(multi && m.agendaSummaries) m.agendaSummaries.forEach(function(a,k){ h+='<div class="mt-sum" style="margin-top:8px">'+mIcon('pin',11)+' 안건 '+(k+1)+' 결론 — '+escapeHtml(a.title)+'\n'+escapeHtml(a.summary)+'<button class="mkcont light" data-mkcont="'+m.id+':a'+k+'" title="이 결론을 콘텐츠로 만들기">📝 콘텐츠로</button><button class="mopine light" data-mopine="'+m.id+':a'+k+'" title="이 결론에 의견 제시·소통">💬 의견</button>'+meetingOpineHtml(m,'a'+k)+'</div>'; });
-  if(m.summary) h+='<div class="mt-sum">'+mIcon('crown',12)+' '+(multi?'종합 결론':'의장 결론')+'\n'+escapeHtml(m.summary)+'<button class="mkcont light" data-mkcont="'+m.id+':concl" title="이 결론을 콘텐츠로 만들기">📝 콘텐츠로</button><button class="mopine light" data-mopine="'+m.id+':concl" title="이 결론에 의견 제시·소통">💬 의견</button>'+meetingOpineHtml(m,'concl')+'</div>';
+  if(m.summary) h+='<div class="mt-sum">'+mIcon('crown',12)+' '+(multi?'종합 결론':'의장 결론')+'\n'+escapeHtml(m.summary)+'<button class="mkcont light" data-mkcont="'+m.id+':concl" title="이 결론을 콘텐츠로 만들기">📝 콘텐츠로</button><button class="mkcont light" data-mkmulti="'+m.id+':concl" title="인스타·블로그·카톡 채널별로 각각 만들기">📱 채널별로</button><button class="mopine light" data-mopine="'+m.id+':concl" title="이 결론에 의견 제시·소통">💬 의견</button>'+meetingOpineHtml(m,'concl')+'</div>';
   if(running){
     h+='<div class="note" style="border-left:3px solid #3b6fd8;padding-left:8px;background:#f6f9ff;border-radius:0 9px 9px 0;padding:8px 10px">'+mIcon('live',11)+' 회의 진행 중… 발언이 실시간으로 올라와요. ('+(m.transcript||[]).length+'개 발언)</div>';
     return h;
@@ -3605,6 +3680,30 @@ function bindMeeting(){
       var mtg=(STATE.meetings||[]).filter(function(x){return x.id===r.lastMeetingId;})[0];
       if(mtg) execMeetingToConsole(mtg, false); };
   });
+  // 채널별로(인스타·블로그·카톡) 각각 최적화 콘텐츠 생성 → 각각 승인 대기로
+  viewEl.querySelectorAll('[data-mkmulti]').forEach(function(b){
+    b.onclick=function(e){ e.stopPropagation();
+      var parts=b.getAttribute("data-mkmulti").split(":"); var mid=+parts[0], key=parts[1];
+      var mt=(STATE.meetings||[]).filter(function(x){return x.id===mid;})[0]; if(!mt){ alert("회의를 찾지 못했어요."); return; }
+      var src=(key==="concl")?(mt.summary||""):""; var label="회의 결론";
+      if(!src){ alert("내용을 찾지 못했어요."); return; }
+      if(!useBackend()){ alert("콘텐츠 제작에는 AI 백엔드 연결이 필요해요."); return; }
+      var ob=b.innerHTML; b.disabled=true; b.innerHTML="채널별 생성 중… (30~90초)";
+      (async function(){
+        try{
+          await wakeServer(90000);
+          var r=await fetch(backendOrigin()+"/api/content/multichannel",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ source:src, label:label, topic:(mt.topic||""), needApproval:true, engine:(STATE.workEngine==="gemini"?"gemini":"claude") })});
+          var d=await r.json(); if(d.error) throw new Error(d.error);
+          (d.results||[]).forEach(function(rc){
+            var _cid="c"+Date.now()+Math.floor(Math.random()*999);
+            STATE.messages.push({ role:"agent", deptId:"creation", text:(rc.content||""), time:nowTime(), _jid:("mc"+Date.now()), _cid:_cid, _inst:"채널별["+rc.name+"]: "+label+" ("+(mt.topic||"")+")", _forceContent:true });
+          });
+          if(useBackend()) syncBackend();
+          STATE.busy=false; saveState(); STATE.view="content"; render();
+        }catch(err){ alert("채널별 생성 실패: "+(err.message||err)); b.disabled=false; b.innerHTML=ob; }
+      })();
+    };
+  });
   // 회의 발언·결론을 콘텐츠로 만들기 → 제작부에 지시(결과는 콘텐츠 탭에도 모임)
   viewEl.querySelectorAll('[data-mkcont]').forEach(function(b){
     b.onclick=function(e){ e.stopPropagation();
@@ -3620,7 +3719,7 @@ function bindMeeting(){
       (async function(){
         try{
           await wakeServer(50000);
-          var r=await fetch(backendOrigin()+"/api/content/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ source:src, label:label, topic:(mt.topic||""), engine:(STATE.workEngine==="gemini"?"gemini":"claude") })});
+          var r=await fetch(backendOrigin()+"/api/content/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ source:src, label:label, topic:(mt.topic||""), needApproval:true, engine:(STATE.workEngine==="gemini"?"gemini":"claude") })});
           var d=await r.json(); if(d.error) throw new Error(d.error);
           // 콘텐츠 탭에 바로 뜨도록 제작부 콘텐츠 메시지를 직접 추가
           var _cid="c"+Date.now();
