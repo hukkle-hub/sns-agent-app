@@ -631,6 +631,15 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
 .lr-pill.ok{background:#e2f6ec;color:#1aa251}
 .lr-pill.no{background:#eef0f4;color:#98a1b0}
 .lr-sub{margin-top:7px;font-size:10.5px;color:#6a7590}
+.lrauto{display:flex;align-items:center;gap:10px;background:#f4f6fb;border:1px solid #e3e7f0;border-radius:11px;padding:11px 13px;margin-top:8px}
+.lrauto.on{background:linear-gradient(135deg,#eaf6ef,#e9f0ff);border-color:#cfe6d8}
+.lrauto-t{flex:1}
+.lrauto-t b{font-size:13px;color:#233}
+.lrauto-s{font-size:10.5px;color:#6a7590;margin-top:3px;line-height:1.4}
+.lrauto-sw{width:46px;height:26px;border-radius:999px;background:#c3cad6;flex:none;position:relative;cursor:pointer;transition:background .18s}
+.lrauto.on .lrauto-sw{background:#22b07a}
+.lrauto-knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.lrauto.on .lrauto-knob{left:23px}
 .advtog{margin-top:8px;text-align:center;font-size:11.5px;color:#7a8090;cursor:pointer;padding:6px;user-select:none}
 .advtog:hover{color:#4a5568}
 .capb{display:flex;align-items:center;gap:7px;margin:3px 0}
@@ -720,7 +729,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v104</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v107</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -853,7 +862,7 @@ function avatar(id, size){
 var STATE = {
   view:"console", messages:[], busy:false, busyDept:null,
   autoPublish:false,
-  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], leaderDailyDirective:{}, dailyReview:{}, nightResearch:{}, leaderReport:{}, nightSearchOn:true, briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0}, dailyGrowthOn:true, capability:{}, pubSchedules:[], usdKrw:0, monthLimitKrw:0, geminiMonthLimitKrw:100000, paidGeminiOn:false,
+  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], leaderDailyDirective:{}, dailyReview:{}, nightResearch:{}, leaderReport:{}, leaderAutoOn:true, nightSearchOn:true, briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0}, dailyGrowthOn:true, capability:{}, pubSchedules:[], usdKrw:0, monthLimitKrw:0, geminiMonthLimitKrw:100000, paidGeminiOn:false,
   autoBackup:0, savedAt:null, lastSync:null,
   schedule:{ mode:"hours", start:"09:00", end:"18:00", workMin:40, restMin:20 },
   safety:{ audit:false, dailyLimit:0, requireApproval:false },
@@ -1167,7 +1176,7 @@ function applyLoadedState(d, isMerge){
     if(d.collect) STATE.collect=Object.assign({ everyMin:0, topic:"" }, d.collect);
     if(typeof d.deliberate==="boolean") STATE.deliberate=d.deliberate;
     if(typeof d.voiceAuto==="boolean") STATE.voiceAuto=d.voiceAuto;
-    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge; if(d.clientProfile&&typeof d.clientProfile==="object") STATE.clientProfile=d.clientProfile; if(Array.isArray(d.briefings)) STATE.briefings=d.briefings; if(Array.isArray(d.leadDirectives)) STATE.leadDirectives=d.leadDirectives; if(d.leaderDailyDirective&&typeof d.leaderDailyDirective==="object") STATE.leaderDailyDirective=d.leaderDailyDirective; if(d.dailyReview&&typeof d.dailyReview==="object") STATE.dailyReview=d.dailyReview; if(d.nightResearch&&typeof d.nightResearch==="object") STATE.nightResearch=d.nightResearch; if(d.leaderReport&&typeof d.leaderReport==="object") STATE.leaderReport=d.leaderReport; if(d.lastTrainAt&&typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt; if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst; if(d.capability&&typeof d.capability==="object") STATE.capability=d.capability; if(Array.isArray(d.pubSchedules)) STATE.pubSchedules=d.pubSchedules; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst;
+    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge; if(d.clientProfile&&typeof d.clientProfile==="object") STATE.clientProfile=d.clientProfile; if(Array.isArray(d.briefings)) STATE.briefings=d.briefings; if(Array.isArray(d.leadDirectives)) STATE.leadDirectives=d.leadDirectives; if(d.leaderDailyDirective&&typeof d.leaderDailyDirective==="object") STATE.leaderDailyDirective=d.leaderDailyDirective; if(d.dailyReview&&typeof d.dailyReview==="object") STATE.dailyReview=d.dailyReview; if(d.nightResearch&&typeof d.nightResearch==="object") STATE.nightResearch=d.nightResearch; if(d.leaderReport&&typeof d.leaderReport==="object"){ STATE.leaderReport=d.leaderReport; if(typeof d.leaderReport.leaderAutoOn==="boolean") STATE.leaderAutoOn=d.leaderReport.leaderAutoOn; } if(d.lastTrainAt&&typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt; if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst; if(d.capability&&typeof d.capability==="object") STATE.capability=d.capability; if(Array.isArray(d.pubSchedules)) STATE.pubSchedules=d.pubSchedules; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst;
     if(d.deptClips && typeof d.deptClips==="object") STATE.deptClips=Object.assign({},STATE.deptClips,d.deptClips);
     if(d.blog && typeof d.blog==="object") STATE.blog=Object.assign({naverId:"",tistory:"",wp:""},d.blog);
     if(Array.isArray(d.customTargets)) STATE.customTargets=d.customTargets;
@@ -1494,7 +1503,7 @@ async function syncBackend(full){
 }
 async function pushState(){
   if(!useBackend()) return;
-  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn, usdKrw:STATE.usdKrw, monthLimitKrw:STATE.monthLimitKrw, geminiMonthLimitKrw:STATE.geminiMonthLimitKrw, paidGeminiOn:STATE.paidGeminiOn, nightSearchOn:STATE.nightSearchOn }) }); }catch(e){}
+  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn, usdKrw:STATE.usdKrw, monthLimitKrw:STATE.monthLimitKrw, geminiMonthLimitKrw:STATE.geminiMonthLimitKrw, paidGeminiOn:STATE.paidGeminiOn, nightSearchOn:STATE.nightSearchOn, leaderAutoOn:STATE.leaderAutoOn }) }); }catch(e){}
 }
 // 총괄: 1개 이상 부서 배정 (다중 분배)
 async function route(instruction){
@@ -4712,7 +4721,11 @@ function renderRecord(){
       +(topD?' · 최다 성장 <b>'+escapeHtml(AGENTS[topD].kr)+'</b>(Lv'+(Math.floor(topLv/5)+1)+')':'')
       +'<div class="learnbnr-sub">각 부서를 펼치면 무엇을 배웠는지(학습 노트)와 압축된 전문성이 보여요. 활동 3회마다 자동 압축되고, 피드백(회의 별점·팀장 평가)도 학습에 반영돼요.</div>'
       + leaderReportHtml()
-      +'<button class="cbtn conn" id="leaderRunAll" style="margin-top:8px;width:100%;justify-content:center;background:linear-gradient(135deg,#1f5fa8,#6a5acd);color:#fff;border:none;font-weight:800;padding:13px">🧑‍💼 팀장에게 맡기기 — 회고·연구·오늘 지시·평가 한 번에</button>'
+      +'<div class="lrauto'+(STATE.leaderAutoOn!==false?' on':'')+'" id="leaderAutoRow">'
+        +'<div class="lrauto-t"><b>🧑‍💼 팀장에게 맡기기</b><div class="lrauto-s">'+(STATE.leaderAutoOn!==false?'ON — 매일 자동으로 회고·연구·지시가 돌아가요 (앱 안 열어도)':'OFF — 자동 실행 꺼짐 (직접 실행만)')+'</div></div>'
+        +'<div class="lrauto-sw" id="leaderAutoSw"><span class="lrauto-knob"></span></div>'
+      +'</div>'
+      +'<button class="cbtn conn" id="leaderRunAll" style="margin-top:8px;width:100%;justify-content:center;background:linear-gradient(135deg,#1f5fa8,#6a5acd);color:#fff;border:none;font-weight:700;padding:11px">▶ 지금 즉시 1회 실행 (회고·연구·지시·평가)</button>'
       +'<div class="advtog" id="advTog">⚙️ 고급 수동 실행 ▾</div>'
       +'<div id="advBox" style="display:none">'
         +'<button class="cbtn conn" id="growBurst" style="margin-top:6px;width:100%;background:linear-gradient(135deg,#ff8a3d,#ff5e7e);color:#fff;border:none">⚡ 전 부서 집중 성장 (Lv 빠르게)</button>'
@@ -4850,6 +4863,14 @@ function bindRecord(){
   }
   var advTog=document.getElementById("advTog"), advBox=document.getElementById("advBox");
   if(advTog&&advBox) advTog.addEventListener("click", function(){ var on=advBox.style.display==="none"; advBox.style.display=on?"block":"none"; advTog.textContent=on?"⚙️ 고급 수동 실행 ▴":"⚙️ 고급 수동 실행 ▾"; });
+  var leaderAutoSw=document.getElementById("leaderAutoSw"), leaderAutoRow=document.getElementById("leaderAutoRow");
+  function toggleLeaderAuto(){
+    STATE.leaderAutoOn = (STATE.leaderAutoOn===false) ? true : false;
+    saveState(); if(useBackend()) pushState();
+    render();
+  }
+  if(leaderAutoSw) leaderAutoSw.addEventListener("click", function(e){ e.stopPropagation(); toggleLeaderAuto(); });
+  if(leaderAutoRow) leaderAutoRow.addEventListener("click", toggleLeaderAuto);
   var runAll=document.getElementById("leaderRunAll");
   if(runAll) runAll.addEventListener("click", async function(){
     if(!useBackend()){ alert("팀장 실행에는 AI 백엔드 연결이 필요해요."); return; }
