@@ -117,6 +117,15 @@
   .pj-log-w{font-size:11.5px;color:#3a4453;line-height:1.55}
   .pj-log-r{font-size:11px;color:#7c6a3a;margin-top:4px;line-height:1.5}
   .pj-note{margin-top:9px;border-top:1px dashed #e2e7f0;padding-top:9px}
+  .pj-note-btns{display:flex;gap:6px;margin-top:5px}
+  .pj-note-btns .cbtn{flex:1;justify-content:center;font-size:11.5px}
+  .pj-disc{margin-top:6px;background:#f6f8fc;border:1px solid #e4e9f2;border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto}
+  .pj-msg{max-width:88%;padding:7px 10px;border-radius:11px;font-size:12px;line-height:1.5}
+  .pj-msg.me{align-self:flex-end;background:#1f6feb;color:#fff;border-bottom-right-radius:3px}
+  .pj-msg.lead{align-self:flex-start;background:#fff;border:1px solid #dbe2ee;color:#243040;border-bottom-left-radius:3px}
+  .pj-msg-who{font-size:9.5px;font-weight:700;opacity:.7;margin-bottom:2px}
+  .pj-msg.me .pj-msg-who{color:#dbe8ff}
+  .pj-disc-in{margin-top:8px}
   .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
   .attbar{display:flex;gap:7px;flex-wrap:wrap;padding:8px 4px 2px}
   .mnm{font-size:9px;color:#7c8696;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:56px;text-align:center}
@@ -307,6 +316,10 @@
   .ob-mini:hover{background:#eef3fa;border-color:#bcd0e8}
   .ob-st.auto{color:#1f5fa8}
   .ob-last{font-size:10.5px;color:#56627a;margin-top:6px;background:#f7f9fc;border-radius:7px;padding:5px 7px;line-height:1.45}
+  .ob-leaddir{font-size:11px;color:#28456e;margin-top:6px;background:rgba(31,95,168,.1);border:1px solid rgba(31,95,168,.24);border-radius:7px;padding:6px 8px;line-height:1.5}
+  .ob-leaddir b{color:#1f5fa8;font-size:10.5px}
+  .ob-leaddir .ob-leadwhen{font-size:9.5px;color:#7d93b5}
+  .ob-leaddir .ob-leadempty{opacity:.6;font-weight:500}
   .ps-item{display:flex;align-items:center;gap:9px;padding:8px 9px;border:1px solid #e6eaf2;border-radius:9px;margin-bottom:6px;background:#fff}
   .ps-item.off{opacity:.5}
   .ps-when{min-width:62px;font-size:12px;color:#15324f}
@@ -768,7 +781,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v117</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v122</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -1531,6 +1544,8 @@ async function syncBackend(full){
       STATE.leadDirectives.sort(function(a,b){ return (a.at||0)-(b.at||0); });
       if(STATE.leadDirectives.length>60) STATE.leadDirectives=STATE.leadDirectives.slice(-60);
     }
+    if(Array.isArray(d.projects)) STATE.projects=d.projects;
+    if(d.leaderDailyDirective && typeof d.leaderDailyDirective==="object") STATE.leaderDailyDirective=d.leaderDailyDirective;
     if(d.lastTrainAt && typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt;
     if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt;
     if(d.deptKnowledge && typeof d.deptKnowledge==="object"){
@@ -2310,7 +2325,7 @@ function renderOffice(){
       +'<div class="o2-scrim"></div>'
       +'<div class="o2-inner">'
       +'<div class="o2-top"><div class="o2-id" data-dept="'+id+'"><div class="o2-line1"><span class="o2-no" style="background:'+a.c+'">'+a.no+'</span><span class="o2-kr">'+a.kr+' ▸</span></div>'
-      +'<div class="o2-sub">'+mem+' · ⭐ '+exp+(stale?' · <span style="color:#ffb066">⏰ '+staleH+'h 정체</span>':'')+'</div></div>'
+      +'<div class="o2-sub">'+mem+' · ⭐ '+exp+'</div></div>'
       +'<div class="o2-actions"><span class="o2-st '+(busy?"on":"off")+'">'+(busy?"🟢 근무 중":"⚪ 대기")+'</span>'
       +'<button class="o2-voice" data-dept="'+id+'" aria-label="음성으로 듣기">🔊</button></div></div>'
       +'<div class="o2-spacer"></div>'
@@ -2323,11 +2338,14 @@ function renderOffice(){
       +'<button class="o2-apply" data-dept="'+id+'" style="background:'+a.c+'">적용</button></div>'
       +'<span class="o2-dirnote" id="o2note_'+id+'">'+(dir?'적용됨 · 비우고 적용하면 해제':'비워두면 기본(트렌드 학습)')+'</span>'
       +'</div></div>'
+      +(id!=="ops"?('<div class="o2-todaydir">🧭 <b>팀장 지시</b>'
+        +'<div class="o2-todaydir-t">'+(lddTxt?esc(lddTxt):'<span style="opacity:.6;font-weight:500">아직 팀장이 내린 지시가 없어요. 오피스 상단의 팀장(오세라)에게 요청하거나, 매일 새벽 자동 배정됩니다.</span>')+'</div>'
+        +(lddTxt&&ldd&&ldd.at?('<div style="font-size:10px;color:#9fb8de;margin-top:4px">'+agoText(ldd.at)+'</div>'):'')
+        +'</div>'):'')
       +(lastTxt?('<div class="o2-row o2-acc o2-accup" data-acc="last_'+id+'">'
         +'<div class="o2-acchd">⏳ <b>최근</b><span class="o2-caret">▴</span></div>'
         +'<div class="o2-accbody" style="display:none">'+esc(lastTxt)+'…</div>'
         +'</div>'):'')
-      +((lddTxt&&!dir)?('<div class="o2-todaydir">🧭 <b>오늘 팀장 지시</b><div class="o2-todaydir-t">'+esc(lddTxt)+'</div></div>'):'')
       +'</div></div></div>';
   }).join("");
   var staleN=0; var _nowO=Date.now();
@@ -2461,11 +2479,12 @@ function renderOfficeBoard(keys){
       +'<div class="ob-hd"><span class="o2-id" data-dept="'+id+'"><span class="ob-no" style="background:'+a.c+'">'+a.no+'</span><b>'+(id==="ops"?"👑 ":"")+esc(a.kr)+'</b></span>'
         +'<span class="ob-meta">⭐'+exp+' · Lv'+lv+'</span>'
         +'<span class="ob-st '+(busy?"on":(lddTxt?"auto":"off"))+'">'+(busy?"🟢":(lddTxt?"🧭":"⚪"))+'</span></div>'
-      +'<div class="ob-mem">'+esc(mem)+(stale?' · <span style="color:#e07b2a">⏰'+staleH+'h 정체</span>':'')+'</div>'
+      +'<div class="ob-mem">'+esc(mem)+'</div>'
       +'<input class="o2-dirin ob-in" id="o2dir_'+id+'" value="'+esc(dir).replace(/"/g,"&quot;")+'" placeholder="'+(lddTxt?esc(lddTxt):"이 부서에 지시 입력 (예: 고흥 맛집 리뷰 초안)")+'">'
       +'<div class="ob-row"><button class="o2-apply ob-apply" data-dept="'+id+'" style="background:'+a.c+'">💾 적용·즉시수행</button></div>'
       +'<div class="ob-row2"><button class="ob-mini" data-obmeet="'+id+'">💬 회의 소집</button><button class="ob-mini" data-obcontent="'+id+'">📦 콘텐츠</button></div>'
       +'<div class="o2-dirnote ob-note" id="o2note_'+id+'">'+noteHtml+'</div>'
+      +(id!=="ops"?('<div class="ob-leaddir">🧭 <b>팀장 지시</b> '+(lddTxt?('<span>'+esc(lddTxt)+'</span>'+(ldd&&ldd.at?' <span class="ob-leadwhen">'+agoText(ldd.at)+'</span>':'')):'<span class="ob-leadempty">아직 없음 · 매일 새벽 자동 배정</span>')+'</div>'):'')
       +(lastTxt?'<div class="ob-last">⏳ '+esc(lastTxt)+'…</div>':'')
       +'<span id="o2st_'+id+'" style="display:none">'+(dir?'✅':'⚪')+'</span>'
       +'</div>';
@@ -3293,7 +3312,7 @@ function renderProject(){
     h+='<div class="pj-new">'
       +'<input class="pj-in" id="pjTitle" placeholder="프로젝트 이름 (예: 고흥 복숭아 여름 스마트스토어 런칭)">'
       +'<textarea class="pj-ta" id="pjGoal" placeholder="목표·설명 (무엇을 이루고 싶은지 자세히)"></textarea>'
-      +'<div class="pj-row"><select class="pj-sel" id="pjInterval"><option value="30">30분마다</option><option value="60" selected>1시간마다</option><option value="120">2시간마다</option></select>'
+      +'<div class="pj-row"><select class="pj-sel" id="pjInterval"><option value="60" selected>1시간마다</option><option value="120">2시간마다</option><option value="180">3시간마다</option><option value="360">6시간마다</option><option value="720">12시간마다</option><option value="1440">24시간마다</option></select>'
       +'<button class="cbtn conn" id="pjCreate" style="flex:1;justify-content:center">＋ 프로젝트 시작</button></div>'
       +'</div>';
   } else {
@@ -3307,10 +3326,11 @@ function renderProject(){
       : p.status==="paused" ? '<span class="pj-badge">⏸ 일시정지</span>'
       : '<span class="pj-badge">📦 보관</span>';
     var intv=(p.intervalMin||60);
+    var intvTxt=(intv%60===0)?((intv/60)+"시간"):(intv+"분");
     h+='<div class="pj-card" data-pj="'+p.id+'">'
       +'<div class="pj-h"><b>'+esc(p.title)+'</b>'+statusBadge+'</div>'
       +'<div class="pj-goal">'+esc(p.goal||"")+'</div>'
-      +'<div class="pj-meta">사이클 '+(p.cycle||0)+'회 · '+intv+'분 간격 · 산출물 '+((p.outputs||[]).length)+'</div>';
+      +'<div class="pj-meta">사이클 '+(p.cycle||0)+'회 · '+intvTxt+' 간격 · 산출물 '+((p.outputs||[]).length)+'</div>';
     // 확인 필요 알림
     if(p.status==="awaiting" && p.holdReason){
       h+='<div class="pj-hold">🙋 <b>팀장이 확인을 요청했어요</b><div>'+esc(p.holdReason)+'</div><div class="pj-hold-sub">아래 의견창에 방향을 남기면 다시 진행해요.</div></div>';
@@ -3318,7 +3338,7 @@ function renderProject(){
     // 진행 컨트롤
     h+='<div class="pj-ctrl">'
       +'<button class="cbtn conn pj-run" data-pjrun="'+p.id+'">▶ 지금 진행</button>'
-      +'<select class="pj-sel2" data-pjint="'+p.id+'"><option value="30"'+(intv===30?' selected':'')+'>30분</option><option value="60"'+(intv===60?' selected':'')+'>1시간</option><option value="120"'+(intv===120?' selected':'')+'>2시간</option></select>';
+      +'<select class="pj-sel2" data-pjint="'+p.id+'"><option value="60"'+(intv===60?' selected':'')+'>1시간</option><option value="120"'+(intv===120?' selected':'')+'>2시간</option><option value="180"'+(intv===180?' selected':'')+'>3시간</option><option value="360"'+(intv===360?' selected':'')+'>6시간</option><option value="720"'+(intv===720?' selected':'')+'>12시간</option><option value="1440"'+(intv===1440?' selected':'')+'>24시간</option></select>';
     if(p.status==="active"||p.status==="awaiting") h+='<button class="cbtn pj-arch" data-pjstatus="'+p.id+':archived">📦 보관</button>';
     else if(p.status==="archived"||p.status==="paused") h+='<button class="cbtn pj-act" data-pjstatus="'+p.id+':active">▶ 재개</button>';
     h+='<button class="cbtn disc pj-del" data-pjstatus="'+p.id+':deleted">🗑</button>';
@@ -3342,9 +3362,23 @@ function renderProject(){
           +'</div>';
       });
     }
-    // 의견 입력창 (상시)
-    h+='<div class="pj-note"><textarea class="pj-ta" data-pjnote="'+p.id+'" placeholder="여기에 의견을 남기면 다음 사이클에서 팀장이 최우선 반영해요"></textarea>'
-      +'<button class="cbtn conn" data-pjnotesend="'+p.id+'" style="width:100%;justify-content:center;margin-top:5px">💬 의견 전달</button></div>';
+    // 팀장과의 토론 (대화 로그)
+    var disc=(p.discuss||[]).slice(-8);
+    if(disc.length){
+      h+='<div class="pj-sub">💬 팀장과의 토론</div><div class="pj-disc">';
+      disc.forEach(function(m){
+        var mine=(m.role==="client");
+        h+='<div class="pj-msg '+(mine?"me":"lead")+'"><div class="pj-msg-who">'+(mine?"나":"👑 팀장")+'</div><div class="pj-msg-t">'+esc(String(m.text||""))+'</div></div>';
+      });
+      h+='</div>';
+    }
+    // 토론 입력창
+    h+='<div class="pj-disc-in"><textarea class="pj-ta" data-pjdisc="'+p.id+'" placeholder="팀장에게 방향을 묻거나 토론해요 (예: 이 방향 말고 선물세트 중심으로 가면 어때?)"></textarea>'
+      +'<button class="cbtn conn" data-pjdiscsend="'+p.id+'" style="width:100%;justify-content:center;margin-top:5px">💬 팀장과 토론</button></div>';
+    // 의견 입력창 + 즉시 지시 (상시)
+    h+='<div class="pj-note"><textarea class="pj-ta" data-pjnote="'+p.id+'" placeholder="지시/방향을 남겨요. \'다음 사이클 반영\'은 다음 차례에, \'지금 바로 지시\'는 즉시 1회 실행해요."></textarea>'
+      +'<div class="pj-note-btns"><button class="cbtn" data-pjnotesend="'+p.id+'">📌 다음 사이클 반영</button>'
+      +'<button class="cbtn conn" data-pjnoterun="'+p.id+'">⚡ 지금 바로 지시</button></div></div>';
     h+='</div>';
   });
   h+='</div>';
@@ -3386,7 +3420,34 @@ function bindProject(){
       var d=await r.json(); if(d.error) throw new Error(d.error);
       try{ await syncBackend(true); }catch(e){}
       render();
-    }catch(e){ b.disabled=false; b.textContent="💬 의견 전달"; alert("실패: "+(e.message||e)); }
+    }catch(e){ b.disabled=false; b.textContent="📌 다음 사이클 반영"; alert("실패: "+(e.message||e)); }
+  }); });
+  // 즉시 지시: 지금 바로 1회 사이클 실행
+  document.querySelectorAll('[data-pjnoterun]').forEach(function(b){ b.addEventListener("click", async function(){
+    var id=b.getAttribute("data-pjnoterun");
+    var ta=document.querySelector('[data-pjnote="'+id+'"]'); var val=ta?ta.value:"";
+    if(!useBackend()){ alert("백엔드 연결이 필요해요."); return; }
+    var ob=b.innerHTML; b.disabled=true; b.innerHTML="지시 수행 중… (20~60초)";
+    try{ await wakeServer(70000);
+      var r=await fetch(backendOrigin()+"/api/projects/note-run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id,text:val})});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      try{ await syncBackend(true); }catch(e){}
+      render();
+    }catch(e){ b.disabled=false; b.innerHTML=ob; alert("지시 실패: "+(e.message||e)); }
+  }); });
+  // 토론: 팀장에게 보내고 즉답 받기
+  document.querySelectorAll('[data-pjdiscsend]').forEach(function(b){ b.addEventListener("click", async function(){
+    var id=b.getAttribute("data-pjdiscsend");
+    var ta=document.querySelector('[data-pjdisc="'+id+'"]'); var val=ta?ta.value:"";
+    if(!val.trim()){ alert("내용을 입력하세요."); return; }
+    if(!useBackend()){ alert("백엔드 연결이 필요해요."); return; }
+    b.disabled=true; b.textContent="팀장 생각 중… (10~30초)";
+    try{ await wakeServer(50000);
+      var r=await fetch(backendOrigin()+"/api/projects/discuss",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id,text:val})});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      try{ await syncBackend(true); }catch(e){}
+      render();
+    }catch(e){ b.disabled=false; b.textContent="💬 팀장과 토론"; alert("토론 실패: "+(e.message||e)); }
   }); });
   document.querySelectorAll('[data-pjint]').forEach(function(s){ s.addEventListener("change", async function(){
     var id=s.getAttribute("data-pjint");
@@ -4272,8 +4333,6 @@ function renderSettings(){
         ? '<div class="keyrow" style="margin-bottom:6px"><input type="text" id="kakaoHook" readonly value="'+escapeHtml(kakaoWebhookUrl())+'"><button class="cbtn conn" id="copyHook">복사</button></div>'
         : '<div class="note" style="color:#ffd84d">먼저 위 "AI 백엔드 연결"에 백엔드 주소를 입력하세요. 그러면 카카오톡 웹훅 주소가 자동 생성됩니다.</div>')
     +'<div class="note">앱과 카카오톡은 <b>각각 같은 백엔드에 접속</b>합니다. 카톡으로 보낸 지시도 백엔드가 처리해 카톡으로 회신하고, 앱과 데이터가 공유됩니다.<br><br>연결 순서:<br>1) 카카오 비즈니스 채널 + 카카오 i 오픈빌더 챗봇 생성<br>2) 오픈빌더 스킬 서버에 위 웹훅 주소 입력<br>3) 알림 받기: 백엔드 환경변수에 KAKAO_ACCESS_TOKEN 설정<br>4) 보안: ALLOWED_KAKAO_IDS에 본인 카톡 id만 허용</div>'
-    +'<div class="s-sec">🔔 웹푸시 알림 (폰 잠금 중에도)</div>'
-    +'<div class="toggle"><div style="flex:1"><div style="font-size:12.5px;font-weight:700">이 기기에 푸시 받기</div><div class="note">승인 요청·발행 완료·수집 알림을 폰 알림으로 받습니다(백엔드 VAPID 설정 필요).</div></div><button class="cbtn conn" id="pushBtn">구독</button></div>'
     +'<div class="s-sec">⚡ 자동 발행</div>'
     +'<div class="toggle"><div><div style="font-size:12.5px;font-weight:700">발행까지 자동 실행</div><div class="note">ON이면 발행부 작업 완료 시 연결된 플랫폼에 자동으로 발행 요청을 보냅니다.</div></div><div class="switch'+(STATE.autoPublish?' on':'')+'" id="autosw"></div></div>'
     +'<div class="s-sec">🛡 안전장치 (발행 게이트)</div>'
@@ -4633,20 +4692,6 @@ function bindSettings(){
       var sb=document.getElementById("selfcheckBtn"); if(sb&&sb.onclick) sb.onclick();
     }catch(err){ ceb.disabled=false; ceb.textContent=ob; alert("오류 기록 지우기 실패: "+(err.message||err)); }
   };
-  var pb=document.getElementById("pushBtn");
-  if(pb) pb.addEventListener("click", async function(){
-    if(!useBackend()){ alert("백엔드를 먼저 연결하세요."); return; }
-    if(!("serviceWorker" in navigator) || !("PushManager" in window)){ alert("이 브라우저는 웹푸시를 지원하지 않습니다."); return; }
-    pb.textContent="구독 중…";
-    try{
-      var keyRes = await (await fetch(backendOrigin()+"/api/push/key")).json();
-      if(!keyRes.key){ alert("백엔드에 VAPID 키가 설정되지 않았습니다."); pb.textContent="구독"; return; }
-      var reg = await navigator.serviceWorker.ready;
-      var sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: urlB64ToUint8(keyRes.key) });
-      await fetch(backendOrigin()+"/api/push/subscribe", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(sub) });
-      pb.textContent="✓ 구독됨";
-    }catch(e){ pb.textContent="실패"; alert("구독 실패: "+(e.message||e)); }
-  });
   document.querySelectorAll('[data-engmode]').forEach(function(c){
     c.addEventListener("click", function(){ var mode=c.getAttribute("data-engmode");
       if(mode==="save"){ STATE.meetingEngine="gemini"; STATE.workEngine="gemini"; }
