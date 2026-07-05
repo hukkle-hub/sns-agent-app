@@ -91,6 +91,32 @@
   .k-meta{font-size:8.5px;color:#5a7286;align-self:flex-end;margin:0 2px}
   /* settings */
   .s-wrap{flex:1;overflow-y:auto;background:#f4f6fb;padding:18px 16px 30px}
+  .pj-new{background:#fff;border:1px solid #e2e7f0;border-radius:12px;padding:12px;margin-bottom:12px}
+  .pj-in{width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #d4dae6;border-radius:8px;font-family:inherit;font-size:13px;margin-bottom:7px}
+  .pj-ta{width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #d4dae6;border-radius:8px;font-family:inherit;font-size:12.5px;min-height:56px;resize:vertical}
+  .pj-row{display:flex;gap:7px;margin-top:7px;align-items:center}
+  .pj-sel,.pj-sel2{padding:8px 10px;border:1px solid #d4dae6;border-radius:8px;font-family:inherit;font-size:12px;background:#fff}
+  .pj-card{background:#fff;border:1px solid #e2e7f0;border-radius:12px;padding:13px;margin-bottom:12px}
+  .pj-h{display:flex;align-items:center;gap:7px;font-size:14px;color:#1c2433;margin-bottom:5px}
+  .pj-badge{margin-left:auto;font-size:10.5px;padding:2px 8px;border-radius:20px;background:#eef1f6;color:#5a6677;white-space:nowrap}
+  .pj-badge.on{background:#e2f6ec;color:#12a150}
+  .pj-badge.await{background:#fff2dd;color:#c67c1a}
+  .pj-goal{font-size:12px;color:#5a6677;line-height:1.5;margin-bottom:5px}
+  .pj-meta{font-size:10.5px;color:#9aa3b2;margin-bottom:8px}
+  .pj-hold{background:#fff8ec;border:1px solid #ffdca8;border-radius:9px;padding:9px 11px;margin-bottom:9px;font-size:12px;color:#8a5a12;line-height:1.5}
+  .pj-hold-sub{font-size:10.5px;color:#b08535;margin-top:3px}
+  .pj-ctrl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+  .pj-ctrl .cbtn{flex:0 0 auto}
+  .pj-ctrl .pj-run{flex:1;justify-content:center}
+  .pj-sub{font-size:11px;color:#7c8696;font-weight:700;margin:9px 0 5px}
+  .pj-res{background:#f0f6ff;border-radius:7px;padding:7px 9px;font-size:11.5px;color:#3a5175;line-height:1.5;margin-bottom:5px}
+  .pj-log{background:#f7f9fc;border:1px solid #eef1f6;border-radius:8px;padding:8px 10px;margin-bottom:6px}
+  .pj-log.hold{background:#fff8ec;border-color:#ffdca8;color:#8a5a12;font-size:12px}
+  .pj-log-h{font-size:11px;color:#4a5568;font-weight:700;margin-bottom:3px}
+  .pj-pass{color:#12a150;font-size:9.5px;background:#e2f6ec;padding:1px 6px;border-radius:10px}
+  .pj-log-w{font-size:11.5px;color:#3a4453;line-height:1.55}
+  .pj-log-r{font-size:11px;color:#7c6a3a;margin-top:4px;line-height:1.5}
+  .pj-note{margin-top:9px;border-top:1px dashed #e2e7f0;padding-top:9px}
   .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
   .attbar{display:flex;gap:7px;flex-wrap:wrap;padding:8px 4px 2px}
   .mnm{font-size:9px;color:#7c8696;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:56px;text-align:center}
@@ -419,6 +445,9 @@
 .o2-lead-h{font-size:12px;font-weight:800;color:#b5631a}
 .o2-lead-when{font-weight:400;font-size:10px;color:#a08a6a;margin-left:6px}
 .o2-lead-d{font-size:12px;color:#3a2c1a;margin-top:3px;line-height:1.5;font-weight:600}
+.o2-todaydir{margin-top:8px;background:rgba(31,95,168,.14);border:1px solid rgba(31,95,168,.3);border-radius:9px;padding:8px 10px}
+.o2-todaydir b{font-size:11px;color:#bcd6ff}
+.o2-todaydir-t{font-size:12px;color:#eaf2ff;margin-top:3px;line-height:1.5;font-weight:600}
 .o2-lead-r{font-size:10px;color:#9a8a72;margin-top:3px}
 .o2-card{background:rgba(255,250,240,.96);color:#3a2f24;border-radius:16px;padding:13px 15px;box-shadow:0 14px 34px rgba(0,0,0,.5)}
   .o2-row{font-size:13px;line-height:1.6;padding:8px 0;border-bottom:1px solid #eee3cd}
@@ -731,7 +760,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="vtabs" id="vtabs">
     <button class="vtab on" data-v="console">팀에이전트</button>
     <button class="vtab" data-v="office">오피스</button>
-    <button class="vtab" data-v="meeting">회의</button>
+    <button class="vtab" data-v="project">프로젝트</button>
     <button class="vtab" data-v="content">콘텐츠</button>
     <button class="vtab" data-v="record">기록·분석</button>
     <button class="vtab" data-v="settings">설정</button>
@@ -739,7 +768,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v111</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v117</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -1205,6 +1234,8 @@ function applyLoadedState(d, isMerge){
     if(d.deptMemory){ if(isMerge){ STATE.deptMemory=STATE.deptMemory||{}; Object.keys(d.deptMemory).forEach(function(k){ var s=d.deptMemory[k]||[],l=STATE.deptMemory[k]||[]; if(s.length>=l.length) STATE.deptMemory[k]=s; }); } else STATE.deptMemory=d.deptMemory; }
     if(d.exp||d.deptExp){ var ex=d.deptExp||d.exp; if(isMerge){ STATE.deptExp=STATE.deptExp||{}; Object.keys(ex).forEach(function(k){ STATE.deptExp[k]=Math.max(STATE.deptExp[k]||0, ex[k]||0); }); } else STATE.deptExp=ex; }
     if(d.meetings && (!isMerge || d.meetings.length>=STATE.meetings.length)) STATE.meetings=d.meetings;
+    if(Array.isArray(d.projects)) STATE.projects=d.projects;
+    if(STATE.view==="meeting") STATE.view="project"; // 회의 탭 숨김 → 프로젝트로
     if(Array.isArray(d.meetingRooms)) STATE.meetingRooms=d.meetingRooms.slice(0,5);
     if(d.platforms) STATE.platforms=d.platforms;
     STATE.autoPublish=!!d.autoPublish; STATE.autoBackup=d.autoBackup||0; STATE.lastSync=d.lastSync||STATE.lastSync; if(Array.isArray(d.meetingAlways)) STATE.meetingAlways=d.meetingAlways; if(d.meetingEngine) STATE.meetingEngine=d.meetingEngine; if(d.workEngine) STATE.workEngine=d.workEngine;
@@ -2271,6 +2302,8 @@ function renderOffice(){
     var stale = lastAt && (_now-lastAt > 24*3600000);
     var leadDir=null; (STATE.leadDirectives||[]).forEach(function(x){ if(x.dept===id && (!leadDir||x.at>leadDir.at)) leadDir=x; });
     var leadFresh = leadDir && (_now-leadDir.at < 3*24*3600000);
+    var ldd=(STATE.leaderDailyDirective&&STATE.leaderDailyDirective[id])?STATE.leaderDailyDirective[id]:null;
+    var lddTxt=ldd?String(ldd.text||"").trim():"";
     var bgimg=(typeof DEPT_BG!=="undefined"&&DEPT_BG[id])?DEPT_BG[id]:((typeof DEPT_STANDING!=="undefined"&&DEPT_STANDING[id])?DEPT_STANDING[id]:(ava||OFFICE_BG));
     return '<div class="o2-slide" data-i="'+i+'">'
       +'<div class="o2-bg" style="background-image:linear-gradient(180deg, '+a.c+'22, rgba(20,16,11,.18) 40%, rgba(16,12,8,.92)), url('+bgimg+')"></div>'
@@ -2294,12 +2327,12 @@ function renderOffice(){
         +'<div class="o2-acchd">⏳ <b>최근</b><span class="o2-caret">▴</span></div>'
         +'<div class="o2-accbody" style="display:none">'+esc(lastTxt)+'…</div>'
         +'</div>'):'')
+      +((lddTxt&&!dir)?('<div class="o2-todaydir">🧭 <b>오늘 팀장 지시</b><div class="o2-todaydir-t">'+esc(lddTxt)+'</div></div>'):'')
       +'</div></div></div>';
   }).join("");
   var staleN=0; var _nowO=Date.now();
   keys.forEach(function(id){ if(id==="ops")return; var mm=(STATE.deptMemory&&STATE.deptMemory[id])||[]; if(mm.length){ var la=mm[mm.length-1].at||0; if(la&&_nowO-la>24*3600000) staleN++; } });
   viewEl.innerHTML='<div class="o2-wrap">'
-    +'<button class="o2-stalebtn" id="o2stale">🧭 팀장 정체 점검'+(staleN?' <b>'+staleN+'</b>':'')+'</button>'
     +'<div class="o2-vp" id="o2vp">'+slides+'</div>'
     +'<button class="o2-arrow l" id="o2prev">‹</button><button class="o2-arrow r" id="o2next">›</button>'
     +'<div class="o2-count" id="o2count">'+(idx+1)+' / '+keys.length+'</div>'
@@ -2440,7 +2473,6 @@ function renderOfficeBoard(keys){
   var staleN=0; keys.forEach(function(id){ if(id==="ops")return; var mm=(STATE.deptMemory&&STATE.deptMemory[id])||[]; if(mm.length){ var la=mm[mm.length-1].at||0; if(la&&_now-la>24*3600000) staleN++; } });
   viewEl.innerHTML='<div class="ob-wrap">'
     +'<div class="ob-toolbar"><div class="ob-title">🏢 부서 보드 — 각 부서에 따로 지시</div>'
-      +'<button class="o2-stalebtn" id="o2stale" style="position:static;margin:0">🧭 팀장 정체 점검'+(staleN?' <b>'+staleN+'</b>':'')+'</button>'
       +'<button class="cbtn conn" id="obSched">⏰ 예약 발행</button></div>'
     +'<div class="ob-grid">'+cards+'</div>'
     +'<div class="o2-vp" id="o2vp" style="display:none"></div>'
@@ -2729,6 +2761,7 @@ function render(){
     else if(STATE.view==="record") renderRecord();
     else if(STATE.view==="office") renderOffice();
     else if(STATE.view==="meeting") renderMeeting();
+    else if(STATE.view==="project") renderProject();
     else renderSettings();
     if(STATE.view==="settings") bindSettings();
     else if(STATE.view==="content") bindContent();
@@ -2736,6 +2769,7 @@ function render(){
     else if(STATE.view==="record") bindRecord();
     else if(STATE.view==="office") bindOffice();
     else if(STATE.view==="meeting") bindMeeting();
+    else if(STATE.view==="project") bindProject();
     else bindComposer();
     // 콘솔 입력창 복원: 작성 중이던 내용·커서·포커스 그대로 (키보드도 안 닫힘)
     if(STATE.view==="console" && _draft && _draft.v){
@@ -3248,6 +3282,130 @@ function execMeetingToConsole(m, auto){
   STATE.view="console"; saveState(); render();
   try{ submit(instr, "meeting"); }catch(e){ var inp=document.getElementById("inp"); if(inp){ inp.value=instr; inp.focus(); } }
   try{ logAct("meeting",(auto?"회의 자동 실행 이관: ":"회의 실행 보내기: ")+(m.topic||""), true, "팀에이전트 탭에서 수행"); }catch(e){}
+}
+function renderProject(){
+  var el=document.getElementById("view"); if(!el) return;
+  var projs=(STATE.projects||[]).filter(function(p){return p.status!=="deleted";});
+  var active=projs.filter(function(p){return p.status==="active"||p.status==="awaiting";});
+  var h='<div class="s-wrap"><div class="s-sec">🚀 프로젝트 <span style="font-size:11px;color:#8a93a6">지속 진행 · 팀장이 이끌고 계속 발전 · 동시 2개</span></div>';
+  // 새 프로젝트 등록
+  if(active.length<2){
+    h+='<div class="pj-new">'
+      +'<input class="pj-in" id="pjTitle" placeholder="프로젝트 이름 (예: 고흥 복숭아 여름 스마트스토어 런칭)">'
+      +'<textarea class="pj-ta" id="pjGoal" placeholder="목표·설명 (무엇을 이루고 싶은지 자세히)"></textarea>'
+      +'<div class="pj-row"><select class="pj-sel" id="pjInterval"><option value="30">30분마다</option><option value="60" selected>1시간마다</option><option value="120">2시간마다</option></select>'
+      +'<button class="cbtn conn" id="pjCreate" style="flex:1;justify-content:center">＋ 프로젝트 시작</button></div>'
+      +'</div>';
+  } else {
+    h+='<div class="note">동시 진행은 2개까지예요. 진행 중 프로젝트를 보관하면 새로 시작할 수 있어요.</div>';
+  }
+  if(!projs.length){ h+='<div class="note" style="margin-top:10px">아직 프로젝트가 없어요. 위에서 하나 시작해 보세요. 팀장이 정해진 간격마다 부서를 이끌어 계속 발전시켜요.</div>'; }
+  // 프로젝트 카드들
+  projs.slice().reverse().forEach(function(p){
+    var statusBadge = p.status==="awaiting" ? '<span class="pj-badge await">🙋 확인 필요</span>'
+      : p.status==="active" ? '<span class="pj-badge on">🟢 진행 중</span>'
+      : p.status==="paused" ? '<span class="pj-badge">⏸ 일시정지</span>'
+      : '<span class="pj-badge">📦 보관</span>';
+    var intv=(p.intervalMin||60);
+    h+='<div class="pj-card" data-pj="'+p.id+'">'
+      +'<div class="pj-h"><b>'+esc(p.title)+'</b>'+statusBadge+'</div>'
+      +'<div class="pj-goal">'+esc(p.goal||"")+'</div>'
+      +'<div class="pj-meta">사이클 '+(p.cycle||0)+'회 · '+intv+'분 간격 · 산출물 '+((p.outputs||[]).length)+'</div>';
+    // 확인 필요 알림
+    if(p.status==="awaiting" && p.holdReason){
+      h+='<div class="pj-hold">🙋 <b>팀장이 확인을 요청했어요</b><div>'+esc(p.holdReason)+'</div><div class="pj-hold-sub">아래 의견창에 방향을 남기면 다시 진행해요.</div></div>';
+    }
+    // 진행 컨트롤
+    h+='<div class="pj-ctrl">'
+      +'<button class="cbtn conn pj-run" data-pjrun="'+p.id+'">▶ 지금 진행</button>'
+      +'<select class="pj-sel2" data-pjint="'+p.id+'"><option value="30"'+(intv===30?' selected':'')+'>30분</option><option value="60"'+(intv===60?' selected':'')+'>1시간</option><option value="120"'+(intv===120?' selected':'')+'>2시간</option></select>';
+    if(p.status==="active"||p.status==="awaiting") h+='<button class="cbtn pj-arch" data-pjstatus="'+p.id+':archived">📦 보관</button>';
+    else if(p.status==="archived"||p.status==="paused") h+='<button class="cbtn pj-act" data-pjstatus="'+p.id+':active">▶ 재개</button>';
+    h+='<button class="cbtn disc pj-del" data-pjstatus="'+p.id+':deleted">🗑</button>';
+    h+='</div>';
+    // 수집 자료
+    var res=(p.research||[]).slice(-3).reverse();
+    if(res.length){
+      h+='<div class="pj-sub">🔎 수집한 자료</div>';
+      res.forEach(function(r){ h+='<div class="pj-res">'+esc(String(r.text||"").slice(0,200))+'</div>'; });
+    }
+    // 진행 로그
+    var logs=(p.log||[]).slice(-5).reverse();
+    if(logs.length){
+      h+='<div class="pj-sub">📜 진행 로그 (최근 '+logs.length+')</div>';
+      logs.forEach(function(x){
+        if(x.hold){ h+='<div class="pj-log hold">C'+x.cycle+' 🙋 '+esc(String(x.task||"").replace("[확인 필요] ",""))+'</div>'; return; }
+        var who=(typeof AGENTS!=="undefined"&&AGENTS[x.dept])?AGENTS[x.dept].kr:x.dept;
+        h+='<div class="pj-log"><div class="pj-log-h">C'+x.cycle+' · '+esc(who)+' · '+esc(String(x.task||"").slice(0,50))+(x.review&&x.review.indexOf("PASS")===0?' <span class="pj-pass">검수통과</span>':'')+'</div>'
+          +'<div class="pj-log-w">'+esc(String(x.work||"").slice(0,220))+(String(x.work||"").length>220?'…':'')+'</div>'
+          +(x.refine?'<div class="pj-log-r">🧭 보완: '+esc(String(x.refine).slice(0,120))+'</div>':'')
+          +'</div>';
+      });
+    }
+    // 의견 입력창 (상시)
+    h+='<div class="pj-note"><textarea class="pj-ta" data-pjnote="'+p.id+'" placeholder="여기에 의견을 남기면 다음 사이클에서 팀장이 최우선 반영해요"></textarea>'
+      +'<button class="cbtn conn" data-pjnotesend="'+p.id+'" style="width:100%;justify-content:center;margin-top:5px">💬 의견 전달</button></div>';
+    h+='</div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
+function bindProject(){
+  var c=document.getElementById("pjCreate");
+  if(c) c.addEventListener("click", async function(){
+    var t=(document.getElementById("pjTitle")||{}).value||"";
+    var g=(document.getElementById("pjGoal")||{}).value||"";
+    var iv=(document.getElementById("pjInterval")||{}).value||"60";
+    if(!t.trim()){ alert("프로젝트 이름을 입력하세요."); return; }
+    if(!useBackend()){ alert("프로젝트에는 AI 백엔드 연결이 필요해요."); return; }
+    c.disabled=true; c.textContent="시작하는 중…";
+    try{ await wakeServer(40000);
+      var r=await fetch(backendOrigin()+"/api/projects/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:t,goal:g,intervalMin:+iv})});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      try{ await syncBackend(true); }catch(e){}
+      render();
+    }catch(e){ c.disabled=false; c.textContent="＋ 프로젝트 시작"; alert("실패: "+(e.message||e)); }
+  });
+  document.querySelectorAll('[data-pjrun]').forEach(function(b){ b.addEventListener("click", async function(){
+    var id=b.getAttribute("data-pjrun"); if(!useBackend()){ alert("백엔드 연결이 필요해요."); return; }
+    var ob=b.innerHTML; b.disabled=true; b.innerHTML="진행 중… (20~60초)";
+    try{ await wakeServer(70000);
+      var r=await fetch(backendOrigin()+"/api/projects/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id})});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      try{ await syncBackend(true); }catch(e){}
+      render();
+    }catch(e){ b.disabled=false; b.innerHTML=ob; alert("진행 실패: "+(e.message||e)); }
+  }); });
+  document.querySelectorAll('[data-pjnotesend]').forEach(function(b){ b.addEventListener("click", async function(){
+    var id=b.getAttribute("data-pjnotesend");
+    var ta=document.querySelector('[data-pjnote="'+id+'"]'); var val=ta?ta.value:"";
+    if(!val.trim()){ alert("의견을 입력하세요."); return; }
+    b.disabled=true; b.textContent="전달 중…";
+    try{ await wakeServer(30000);
+      var r=await fetch(backendOrigin()+"/api/projects/note",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id,text:val})});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      try{ await syncBackend(true); }catch(e){}
+      render();
+    }catch(e){ b.disabled=false; b.textContent="💬 의견 전달"; alert("실패: "+(e.message||e)); }
+  }); });
+  document.querySelectorAll('[data-pjint]').forEach(function(s){ s.addEventListener("change", async function(){
+    var id=s.getAttribute("data-pjint");
+    try{ await wakeServer(30000);
+      await fetch(backendOrigin()+"/api/projects/interval",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id,intervalMin:+s.value})});
+      try{ await syncBackend(true); }catch(e){}
+    }catch(e){ alert("간격 변경 실패: "+(e.message||e)); }
+  }); });
+  document.querySelectorAll('[data-pjstatus]').forEach(function(b){ b.addEventListener("click", async function(){
+    var parts=b.getAttribute("data-pjstatus").split(":"); var id=parts[0], st=parts[1];
+    if(st==="deleted" && !confirm("이 프로젝트를 삭제할까요? 되돌릴 수 없어요.")) return;
+    b.disabled=true;
+    try{ await wakeServer(30000);
+      var r=await fetch(backendOrigin()+"/api/projects/status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id,status:st})});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      try{ await syncBackend(true); }catch(e){}
+      render();
+    }catch(e){ b.disabled=false; alert("실패: "+(e.message||e)); }
+  }); });
 }
 function renderMeeting(){
   var rooms = STATE.meetingRooms||[];
