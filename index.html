@@ -840,7 +840,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v137</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v139</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -1291,6 +1291,8 @@ async function saveState(){
   if(!ok){ try{ localStorage.setItem(STORE_KEY, json); ok=true; }catch(e){} }
   // 보조 백업(한 벌 더): 메인 키가 손상돼도 복구 가능
   try{ localStorage.setItem(STORE_KEY_BAK, json); }catch(e){}
+  // '마지막 정상' 스냅샷 갱신(하루 1회 정도로 throttle) — 서버 초기화 사고 대비 긴급복구용
+  try{ if(!window._lastSafetyAt || Date.now()-window._lastSafetyAt > 6*3600000){ keepSafetySnapshot(); window._lastSafetyAt=Date.now(); } }catch(e){}
   if(ok){ STATE.savedAt = Date.now(); updateSaveStatus(); }
 }
 async function loadState(){
@@ -1434,12 +1436,36 @@ function updateSaveStatus(){ var el=document.getElementById("savestat"); if(el) 
 var backupTimer=null;
 function startAutoBackup(){
   if(backupTimer){ clearInterval(backupTimer); backupTimer=null; }
-  if(STATE.autoBackup>0){ backupTimer=setInterval(function(){ saveAutoBackup(); }, STATE.autoBackup*60000); }
+  // 자동백업 기본 켜짐(하루 1회 = 1440분). 사용자가 STATE.autoBackup을 지정하면 그 값 사용.
+  var mins = (STATE.autoBackup>0) ? STATE.autoBackup : 1440;
+  backupTimer=setInterval(function(){ saveAutoBackup(); }, mins*60000);
+  // 앱 열 때마다 '마지막 정상' 스냅샷을 브라우저에 별도 보관(덮어쓰기 사고 대비)
+  try{ keepSafetySnapshot(); }catch(e){}
+}
+// 브라우저에 '마지막 정상 상태'를 별도 키로 보관 — 서버가 비어도 여기서 복구 가능
+function keepSafetySnapshot(){
+  try{
+    var snap = stateSnapshot();
+    // 의미 있는 데이터가 있을 때만 보관(빈 상태로 덮지 않음)
+    var hasContent = (STATE.messages&&STATE.messages.length>3) || (STATE.meetings&&STATE.meetings.length) ||
+                     (STATE.deptExp && Object.values(STATE.deptExp).reduce(function(a,v){return a+(+v||0);},0)>60) ||
+                     (STATE.deptKnowledge && Object.keys(STATE.deptKnowledge).length);
+    if(hasContent){ localStorage.setItem("sns_safety_snapshot", JSON.stringify({ at:Date.now(), data:snap })); }
+  }catch(e){}
 }
 function saveAutoBackup(){
   if(!STATE.messages.length && !STATE.meetings.length) return;
-  var body = buildFullMemo();
-  downloadTxt("자동백업", "SNS 에이전트 — 자동 백업\n저장: "+new Date().toLocaleString("ko-KR")+"\n\n", body);
+  keepSafetySnapshot();
+  // 복원 가능한 JSON 백업 파일 다운로드(진짜 백업)
+  try{
+    var json = backupJson();
+    var blob = new Blob([json], {type:"application/json"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = backupName();
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+  }catch(e){}
 }
 // ===== 웹(클라우드) 백업·복원 — 기기 간 수동 동기화 =====
 function applySnapshot(d){
@@ -2779,6 +2805,84 @@ function webtoonResultHtml(d){
   }
   return h;
 }
+// ===== 상품페이지 스튜디오 =====
+function openProductModal(){
+  var ov=document.createElement("div"); ov.className="modal"; ov.id="pdModal";
+  ov.innerHTML='<div class="modal-bx" style="max-width:600px">'
+    +'<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:16px;font-weight:800;flex:1">🛍️ 상품페이지 스튜디오 <span style="font-size:11px;font-weight:600;color:#8a94a6">— 실제 HTML 페이지</span></div><button id="pdClose" style="border:none;background:#eef1f6;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
+    +'<div class="note" style="margin-bottom:10px;background:#fff0f5;border:1px solid #ffd9e6;border-radius:9px;padding:8px 10px;font-size:11px;line-height:1.5">커머스·그로스(윤소희) 부서가 <b>축적한 품질 공식</b>을 적용해, 바로 열리는 <b>완성형 HTML 상품페이지</b>를 만들어요. 먼저 "📚 학습"을 눌러 명품 페이지를 공부시키면 품질이 올라갑니다.</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:10px"><button class="cbtn" id="pdLearn" style="flex:1;justify-content:center">📚 명품페이지 학습시키기</button><span class="note" id="pdLearnStat" style="flex:1;font-size:10.5px;align-self:center"></span></div>'
+    +'<input id="pdBrand" placeholder="브랜드명 (기본: 민앤팜)" style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12.5px;margin-bottom:6px">'
+    +'<input id="pdName" placeholder="상품명 (예: 고흥 유기농 유자청)" style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12.5px;margin-bottom:6px">'
+    +'<input id="pdPrice" placeholder="가격 (예: 18,000원 / 선택)" style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12.5px;margin-bottom:6px">'
+    +'<textarea id="pdInfo" placeholder="상품 정보·특징·스토리 (예: 고흥 청정해풍 맞고 자란 유자, 무농약, 3대째 전통방식...)" style="width:100%;box-sizing:border-box;min-height:70px;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:6px"></textarea>'
+    +'<textarea id="pdPhotos" placeholder="(선택) 사진 URL을 줄바꿈으로. 없으면 비워두면 AI이미지 자리로 표시됩니다." style="width:100%;box-sizing:border-box;min-height:44px;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:11.5px;margin-bottom:8px"></textarea>'
+    +'<button class="cbtn conn" id="pdRun" style="width:100%;justify-content:center">🛍️ 상품페이지 만들기</button>'
+    +'<div class="note" id="pdStat" style="margin-top:6px"></div>'
+    +'<div id="pdResult" style="margin-top:10px"></div>'
+    +'</div>';
+  document.body.appendChild(ov);
+  function close(){ try{ document.body.removeChild(ov); }catch(e){} }
+  ov.addEventListener("click", function(e){ if(e.target===ov) close(); });
+  ov.querySelector("#pdClose").addEventListener("click", close);
+  // 학습시키기(벤치마크 학습 수동 실행)
+  ov.querySelector("#pdLearn").addEventListener("click", async function(){
+    var st=ov.querySelector("#pdLearnStat"), btn=ov.querySelector("#pdLearn");
+    if(!useBackend()){ st.innerHTML='<span style="color:#c0392b">백엔드 연결 필요</span>'; return; }
+    btn.disabled=true; btn.textContent="명품페이지 조사·학습 중… (1분)";
+    st.textContent="";
+    try{ await wakeServer(60000);
+      var r=await fetch(backendOrigin()+"/api/learn/benchmark",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ dept:"monetization" })});
+      var d=await r.json();
+      if(d.ok){ st.innerHTML='<span style="color:#0e7a52">✔ 품질 공식 갱신! 이제 만들면 더 좋아져요</span>'; }
+      else { st.innerHTML='<span style="color:#c0392b">학습 보류: '+esc(d.note||"원인 미상")+'</span>'; }
+    }catch(e){ st.innerHTML='<span style="color:#c0392b">실패: '+esc(e.message||String(e))+'</span>'; }
+    btn.disabled=false; btn.textContent="📚 명품페이지 학습시키기";
+  });
+  // 상품페이지 생성
+  ov.querySelector("#pdRun").addEventListener("click", async function(){
+    var st=ov.querySelector("#pdStat"), btn=ov.querySelector("#pdRun");
+    var name=(ov.querySelector("#pdName").value||"").trim();
+    if(!useBackend()){ st.innerHTML='<span style="color:#c0392b">AI 백엔드 연결이 필요해요.</span>'; return; }
+    if(!name){ st.innerHTML='<span style="color:#c0392b">상품명을 입력하세요.</span>'; return; }
+    var photoLines=(ov.querySelector("#pdPhotos").value||"").split("\n").map(function(s){return s.trim();}).filter(Boolean);
+    var photos=photoLines.map(function(u){ return { url:u }; });
+    btn.disabled=true; btn.textContent="윤소희가 페이지 디자인 중… (1~2분)";
+    try{ await wakeServer(90000);
+      var r=await fetch(backendOrigin()+"/api/product-page",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+        product:name, brand:(ov.querySelector("#pdBrand").value||"").trim(), price:(ov.querySelector("#pdPrice").value||"").trim(),
+        info:(ov.querySelector("#pdInfo").value||"").trim(), photos:photos })});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      ov.querySelector("#pdResult").innerHTML=productResultHtml(d);
+      bindProductResult(ov, d.html||"", name);
+      st.innerHTML='<span style="color:#0e7a52">✔ 완성'+(d.appliedFormula?" (학습된 품질 공식 적용됨)":"")+' — 미리보기·다운로드하세요.</span>';
+    }catch(e){ st.innerHTML='<span style="color:#c0392b">실패: '+esc(e.message||String(e))+'</span>'; }
+    btn.disabled=false; btn.textContent="🛍️ 상품페이지 만들기";
+  });
+}
+function productResultHtml(d){
+  return '<div style="display:flex;gap:7px;margin-bottom:8px">'
+    +'<button class="ib-btn" data-pdpreview="1" style="flex:1;min-width:0;justify-content:center;background:#eef7ff;color:#1668c7">👁️ 미리보기</button>'
+    +'<button class="ib-btn" data-pddownload="1" style="flex:1;min-width:0;justify-content:center;background:#eafaf0;color:#0e7a52">📥 HTML 저장</button>'
+    +'<button class="ib-btn copy" data-pdcopy="1" style="flex:none;min-width:0;padding:6px 10px">📋</button></div>'
+    +'<iframe id="pdFrame" style="width:100%;height:420px;border:1px solid #e3e8ef;border-radius:10px;background:#fff" sandbox="allow-same-origin"></iframe>';
+}
+function bindProductResult(ov, html, name){
+  var frame=ov.querySelector("#pdFrame");
+  if(frame){ try{ frame.srcdoc=html; }catch(e){} }
+  ov.querySelector("#pdResult").addEventListener("click", function(e){
+    if(e.target.closest("[data-pdpreview]")){
+      try{ var w=window.open("","_blank"); w.document.open(); w.document.write(html); w.document.close(); }catch(_){ alert("팝업이 차단됐어요. 아래 미리보기를 이용하세요."); }
+    }
+    if(e.target.closest("[data-pddownload]")){
+      try{ var blob=new Blob([html],{type:"text/html"}); var url=URL.createObjectURL(blob); var a=document.createElement("a");
+        a.href=url; a.download=(name||"상품페이지").replace(/[^\w가-힣]+/g,"_")+".html"; document.body.appendChild(a); a.click();
+        setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },800);
+      }catch(_){ }
+    }
+    var c=e.target.closest("[data-pdcopy]"); if(c){ ibCopyText(html, c); }
+  });
+}
 function openWebtoonModal(){
   var ov=document.createElement("div"); ov.className="modal"; ov.id="wtModal";
   ov.innerHTML='<div class="modal-bx" style="max-width:560px">'
@@ -3009,6 +3113,7 @@ function renderOfficeBoard(keys){
       +'<button class="cbtn conn" id="obInbox" style="position:relative">📮 발행함'+(( (STATE.pubInbox||[]).length)?'<span style="position:absolute;top:-6px;right:-6px;background:#e8433a;color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;line-height:16px;border-radius:9px;padding:0 3px">'+(STATE.pubInbox||[]).length+'</span>':'')+'</button>'
       +'<button class="cbtn conn" id="obAnalytics">📈 성과</button>'
       +'<button class="cbtn conn" id="obWebtoon">🎨 웹툰</button>'
+      +'<button class="cbtn conn" id="obProduct">🛍️ 상품페이지</button>'
       +'<button class="cbtn conn" id="obSched">⏰ 예약 발행</button></div>'
     +'<div class="ob-grid">'+cards+'</div>'
     +'<div class="o2-vp" id="o2vp" style="display:none"></div>'
@@ -3020,6 +3125,7 @@ function bindOffice(){
   var obi=document.getElementById("obInbox"); if(obi) obi.addEventListener("click", openInboxModal);
   var oba=document.getElementById("obAnalytics"); if(oba) oba.addEventListener("click", openAnalyticsModal);
   var obw=document.getElementById("obWebtoon"); if(obw) obw.addEventListener("click", openWebtoonModal);
+  var obp=document.getElementById("obProduct"); if(obp) obp.addEventListener("click", openProductModal);
   document.querySelectorAll("[data-obmeet]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation();
     STATE.meetingPrefillDept=b.getAttribute("data-obmeet"); STATE.view="meeting";
     document.querySelectorAll(".vtab").forEach(function(t){ t.classList.toggle("on", t.dataset.v==="meeting"); }); render(); }); });
@@ -4957,6 +5063,7 @@ function renderSettings(){
     +'<div class="note" style="margin-bottom:7px">학습·경험치·설정·기록 전체를 파일 하나로 백업해요. <b>폰·윈도우 모두</b> 저장·복원되고, 폰에서 <b>공유</b>로 카톡·드라이브·메일에 보내 다른 기기에서 복원할 수 있어요. 복원은 <b>기존 데이터와 병합</b>(누적 보존)됩니다.</div>'
     +'<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:4px"><button class="savebig" id="exportBak" style="flex:1;min-width:120px;margin:0">📥 백업 저장</button><button class="savebig" id="shareBak" style="flex:1;min-width:120px;margin:0;background:#e8f7ee;color:#1aa251">📲 백업 공유</button><button class="savebig" id="importBak" style="flex:1;min-width:120px;margin:0;background:#eef2fb;color:#2b5b9e">📤 백업 복원</button></div>'
     +'<div class="note" style="margin-bottom:8px">📲 공유는 폰에서 가장 편해요(카톡 나에게 보내기·드라이브로 전송 → 윈도우에서 내려받아 복원). 윈도우에선 📥 저장으로 파일을 만든 뒤 옮기면 돼요.</div>'
+    +'<div style="background:#fff8ec;border:1px solid #ffe1bf;border-radius:9px;padding:9px 11px;margin-bottom:8px"><div style="font-size:12px;font-weight:800;color:#b9651a;margin-bottom:4px">🆘 긴급 복구 (이 폰에 저장된 마지막 정상 상태)</div><div class="note" style="margin-bottom:6px">서버 데이터가 초기화됐을 때, 이 폰 브라우저에 자동 보관된 마지막 정상 상태로 되돌립니다.</div><button class="savebig" id="recoverSnap" style="width:100%;margin:0;background:#fff3e0;color:#b9651a">🆘 마지막 정상 상태로 복구</button><div class="note" id="recoverStat" style="margin-top:5px"></div></div>'
     +'<div class="s-sec">💾 작업 기록</div>'
     +'<button class="savebig" id="savememo2">💾 지금 바로 메모장(.txt)으로 저장</button>'
     +'<div class="note">지금까지의 모든 지시·배정·에이전트 응답·발행 기록을 텍스트 파일로 내려받아 컴퓨터에 보관합니다.</div>'
@@ -5573,6 +5680,20 @@ function bindSettings(){
   var eb=document.getElementById("exportBak"); if(eb) eb.addEventListener("click", exportBackup);
   var shb=document.getElementById("shareBak"); if(shb) shb.addEventListener("click", shareBackup);
   var ib=document.getElementById("importBak"); if(ib) ib.addEventListener("click", importBackup);
+  var rs=document.getElementById("recoverSnap"); if(rs) rs.addEventListener("click", function(){
+    var stat=document.getElementById("recoverStat");
+    var raw=null; try{ raw=localStorage.getItem("sns_safety_snapshot"); }catch(e){}
+    if(!raw){ if(stat) stat.innerHTML='<span style="color:#c0392b">이 폰에 보관된 정상 상태가 없어요.</span>'; return; }
+    var snap; try{ snap=JSON.parse(raw); }catch(e){ if(stat) stat.innerHTML='<span style="color:#c0392b">복구 데이터를 읽을 수 없어요.</span>'; return; }
+    var when=snap.at?new Date(snap.at).toLocaleString("ko-KR"):"?";
+    if(!confirm("이 폰에 보관된 "+when+" 상태로 되돌릴까요?\n(현재 화면의 내용은 이 상태로 대체됩니다)")) return;
+    try{
+      applySnapshot(snap.data);
+      saveState();
+      if(stat) stat.innerHTML='<span style="color:#0e7a52">✔ 복구했어요. 서버에도 반영하려면 백엔드 연결 후 잠시 기다리세요.</span>';
+      setTimeout(function(){ render(); }, 300);
+    }catch(e){ if(stat) stat.innerHTML='<span style="color:#c0392b">복구 실패: '+esc(e.message||String(e))+'</span>'; }
+  });
 }
 
 function renderRecord(){
