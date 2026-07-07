@@ -840,7 +840,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v140</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v141</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -2619,6 +2619,13 @@ function renderOffice(){
   var staleN=0; var _nowO=Date.now();
   keys.forEach(function(id){ if(id==="ops")return; var mm=(STATE.deptMemory&&STATE.deptMemory[id])||[]; if(mm.length){ var la=mm[mm.length-1].at||0; if(la&&_nowO-la>24*3600000) staleN++; } });
   viewEl.innerHTML='<div class="o2-wrap">'
+    +'<div class="o2-tools" style="display:flex;gap:6px;overflow-x:auto;padding:8px 10px;background:#0d0b16;-webkit-overflow-scrolling:touch">'
+      +'<button class="cbtn conn" id="obInbox" style="flex:none;position:relative">📮 발행함'+(( (STATE.pubInbox||[]).length)?'<span style="position:absolute;top:-6px;right:-6px;background:#e8433a;color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;line-height:16px;border-radius:9px;padding:0 3px">'+(STATE.pubInbox||[]).length+'</span>':'')+'</button>'
+      +'<button class="cbtn conn" id="obAnalytics" style="flex:none">📈 성과</button>'
+      +'<button class="cbtn conn" id="obWebtoon" style="flex:none">🎨 웹툰</button>'
+      +'<button class="cbtn conn" id="obProduct" style="flex:none">🛍️ 상품페이지</button>'
+      +'<button class="cbtn conn" id="obSched" style="flex:none">⏰ 예약</button>'
+    +'</div>'
     +'<div class="o2-vp" id="o2vp">'+slides+'</div>'
     +'<button class="o2-arrow l" id="o2prev">‹</button><button class="o2-arrow r" id="o2next">›</button>'
     +'<div class="o2-count" id="o2count">'+(idx+1)+' / '+keys.length+'</div>'
