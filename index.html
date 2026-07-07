@@ -842,7 +842,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v142</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v143</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -2697,7 +2697,7 @@ async function ibCopyText(txt, btn){
   }catch(e){ alert("복사 실패 — 길게 눌러 직접 복사하세요."); }
 }
 function openInboxModal(){
-  var ov=document.createElement("div"); ov.className="modal"; ov.id="ibModal";
+  var ov=document.createElement("div"); ov.className="modal-ov"; ov.id="ibModal";
   ov.innerHTML='<div class="modal-bx" style="max-width:540px">'
     +'<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:16px;font-weight:800;flex:1">📮 발행함 <span style="font-size:11px;font-weight:600;color:#8a94a6">— 복사→붙여넣기</span></div><button id="ibClose" style="border:none;background:#eef1f6;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
     +'<div class="note" style="margin-bottom:10px;background:#eef4ff;border:1px solid #d5e2fb;border-radius:9px;padding:8px 10px;font-size:11.5px;line-height:1.5">티스토리·네이버·다음은 자동발행이 막혀 있어, 팀이 완성한 글을 여기 담아둡니다. <b>📋 복사 → 해당 앱 에디터에 붙여넣기 → ✅ 완료</b>만 누르면 끝이에요.</div>'
@@ -2818,7 +2818,7 @@ function webtoonResultHtml(d){
 }
 // ===== 상품페이지 스튜디오 =====
 function openProductModal(){
-  var ov=document.createElement("div"); ov.className="modal"; ov.id="pdModal";
+  var ov=document.createElement("div"); ov.className="modal-ov"; ov.id="pdModal";
   ov.innerHTML='<div class="modal-bx" style="max-width:600px">'
     +'<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:16px;font-weight:800;flex:1">🛍️ 상품페이지 스튜디오 <span style="font-size:11px;font-weight:600;color:#8a94a6">— 실제 HTML 페이지</span></div><button id="pdClose" style="border:none;background:#eef1f6;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
     +'<div class="note" style="margin-bottom:10px;background:#fff0f5;border:1px solid #ffd9e6;border-radius:9px;padding:8px 10px;font-size:11px;line-height:1.5">커머스·그로스(윤소희) 부서가 <b>축적한 품질 공식</b>을 적용해, 바로 열리는 <b>완성형 HTML 상품페이지</b>를 만들어요. 먼저 "📚 학습"을 눌러 명품 페이지를 공부시키면 품질이 올라갑니다.</div>'
@@ -2895,7 +2895,7 @@ function bindProductResult(ov, html, name){
   });
 }
 function openWebtoonModal(){
-  var ov=document.createElement("div"); ov.className="modal"; ov.id="wtModal";
+  var ov=document.createElement("div"); ov.className="modal-ov"; ov.id="wtModal";
   ov.innerHTML='<div class="modal-bx" style="max-width:560px">'
     +'<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:16px;font-weight:800;flex:1">🎨 웹툰 스튜디오 <span style="font-size:11px;font-weight:600;color:#8a94a6">— 콘티+작화 프롬프트</span></div><button id="wtClose" style="border:none;background:#eef1f6;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
     +'<div class="note" style="margin-bottom:10px;background:#f4f0ff;border:1px solid #ddd2f5;border-radius:9px;padding:8px 10px;font-size:11px;line-height:1.5">PD·작가·연출이 함께 <b>컷별 콘티 + 작화 프롬프트</b>를 만들어요. 프롬프트를 나노바나나/Gemini에 붙여넣어 그림을 만들고 순서대로 이어붙이면 웹툰 완성입니다.</div>'
@@ -2976,7 +2976,7 @@ function openWebtoonModal(){
   });
 }
 function openAnalyticsModal(){
-  var ov=document.createElement("div"); ov.className="modal"; ov.id="anModal";
+  var ov=document.createElement("div"); ov.className="modal-ov"; ov.id="anModal";
   ov.innerHTML='<div class="modal-bx" style="max-width:540px">'
     +'<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:16px;font-weight:800;flex:1">📈 채널 성과 <span style="font-size:11px;font-weight:600;color:#8a94a6">— 04 데이터분석</span></div><button id="anClose" style="border:none;background:#eef1f6;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
     +'<div id="anBody">'+analyticsPanelHtml()+'</div>'
@@ -3009,7 +3009,7 @@ function openAnalyticsModal(){
 function openPubSchedModal(){
   var reqAppr = !!(STATE.safety && STATE.safety.requireApproval);
   var plats=(STATE.platforms||[]).map(function(p){ return '<label class="ps-chk"><input type="checkbox" class="ps-plat-cb" value="'+escapeHtml(p.name)+'"> '+escapeHtml(p.name)+(p.connected?'':' <span style="color:#c0392b;font-size:9px">(미연결)</span>')+'</label>'; }).join("");
-  var ov=document.createElement("div"); ov.className="modal"; ov.id="psModal";
+  var ov=document.createElement("div"); ov.className="modal-ov"; ov.id="psModal";
   ov.innerHTML='<div class="modal-bx" style="max-width:520px">'
     +'<div style="display:flex;align-items:center;margin-bottom:10px"><div style="font-size:16px;font-weight:800;flex:1">⏰ 예약 외부발행</div><button id="psClose" style="border:none;background:#eef1f6;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
     +'<div class="note" style="margin-bottom:10px;background:'+(reqAppr?'#eefaf3':'#fff7ed')+';border:1px solid '+(reqAppr?'#cfeede':'#ffe1bf')+';border-radius:9px;padding:8px 10px">📲 예약 시각이 되면 <b>카카오톡으로 "진행 확인"</b>을 보내요. ✅승인을 눌러야 실제 발행됩니다.'+(reqAppr?'':' <br><span style="color:#b9651a">전역 "발행 전 승인"이 꺼져 있어도, 예약 발행은 항상 카카오 확인을 거쳐요.</span>')+'</div>'
