@@ -479,7 +479,9 @@
   @keyframes offbob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
   .off-legend{text-align:center;color:#bda884;font-size:11px;padding:0 0 16px}
   /* ===== 오피스 탭 (전체화면 슬라이드) ===== */
-  .o2-wrap{position:relative;height:100%;background:#100c08;overflow:hidden}
+  .o2-wrap{position:relative;height:100%;background:#100c08;overflow:hidden;display:flex;flex-direction:column}
+  .o2-tools{flex:0 0 auto;z-index:5}
+  .o2-stage{position:relative;flex:1 1 auto;min-height:0}
   .o2-vp{position:absolute;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .o2-vp::-webkit-scrollbar{display:none}
   .o2-slide{flex:0 0 100%;width:100%;height:100%;scroll-snap-align:center;position:relative;overflow:hidden}
@@ -840,7 +842,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v141</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v142</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -2626,9 +2628,11 @@ function renderOffice(){
       +'<button class="cbtn conn" id="obProduct" style="flex:none">🛍️ 상품페이지</button>'
       +'<button class="cbtn conn" id="obSched" style="flex:none">⏰ 예약</button>'
     +'</div>'
+    +'<div class="o2-stage">'
     +'<div class="o2-vp" id="o2vp">'+slides+'</div>'
     +'<button class="o2-arrow l" id="o2prev">‹</button><button class="o2-arrow r" id="o2next">›</button>'
     +'<div class="o2-count" id="o2count">'+(idx+1)+' / '+keys.length+'</div>'
+    +'</div>'
     +'</div>';
   var vp=document.getElementById("o2vp"); if(vp){ vp.scrollLeft=idx*vp.clientWidth; }
 }
