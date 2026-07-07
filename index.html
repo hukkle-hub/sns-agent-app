@@ -840,7 +840,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v139</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v140</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -6143,7 +6143,29 @@ async function loadAndApplyPatches(){
   setInterval(function(){ updateSaveStatus(); updateWorkStatus(); }, 30000);
   setInterval(function(){ if(useBackend() && !STATE.busy) syncBackend(); }, 15000);
 })();
-if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(function(){}); }
+if("serviceWorker" in navigator){
+  // 새 버전 활성화되면 자동 새로고침(캐시 갇힘 근본 차단) — 단, 무한 새로고침 방지 가드
+  var _swReloaded = false;
+  navigator.serviceWorker.addEventListener("message", function(ev){
+    if(ev.data && ev.data.type==="SW_UPDATED" && !_swReloaded){
+      _swReloaded = true;
+      // 사용자가 입력 중일 수 있으니, 데이터 저장 후 새로고침
+      try{ if(typeof saveState==="function") saveState(); }catch(_){}
+      setTimeout(function(){ location.reload(); }, 300);
+    }
+  });
+  // 새 SW로 제어가 바뀌면(첫 설치 제외) 새로고침
+  var _hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange", function(){
+    if(_hadController && !_swReloaded){ _swReloaded = true; location.reload(); }
+  });
+  navigator.serviceWorker.register("./sw.js").then(function(reg){
+    // 주기적으로 새 버전 확인(앱이 열려있는 동안 30분마다)
+    try{ setInterval(function(){ reg.update().catch(function(){}); }, 30*60000); }catch(_){}
+    // 페이지 열릴 때도 즉시 한 번 확인
+    try{ reg.update().catch(function(){}); }catch(_){}
+  }).catch(function(){});
+}
 </script>
 </body>
 </html>
