@@ -842,7 +842,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v145</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v146</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -2674,6 +2674,7 @@ function renderOffice(){
       +'<button class="cbtn conn" id="obAnalytics" style="flex:none">📈 성과</button>'
       +'<button class="cbtn conn" id="obWebtoon" style="flex:none">🎨 웹툰</button>'
       +'<button class="cbtn conn" id="obProduct" style="flex:none">🛍️ 상품페이지</button>'
+      +'<button class="cbtn conn" id="obLearn" style="flex:none">📚 학습</button>'
       +'<button class="cbtn conn" id="obSched" style="flex:none">⏰ 예약</button>'
     +'</div>'
     +'<div class="o2-stage">'
@@ -2863,6 +2864,96 @@ function webtoonResultHtml(d){
     h+='<div id="wtSb" style="font-size:12px;color:#1c2838;line-height:1.6;white-space:pre-wrap;background:#fff;border:1px solid #eef1f6;border-radius:9px;padding:10px 12px;max-height:340px;overflow:auto">'+esc(d.storyboard)+'</div>';
   }
   return h;
+}
+// ===== 학습 스튜디오: 유튜브 URL·웹 벤치마크로 부서 전문성 키우기 =====
+var LEARN_DEPTS = ["strategy","creation","publishing","analytics","monetization","advisory","scout"];
+function openLearnModal(){
+  var opts = LEARN_DEPTS.map(function(d){
+    var a=AGENTS[d]||{}; return '<option value="'+d+'">'+esc((a.no||"")+" "+(a.kr||d))+'</option>';
+  }).join("");
+  var ov=document.createElement("div"); ov.className="modal-ov"; ov.id="lnModal";
+  ov.innerHTML='<div class="modal-bx" style="max-width:560px">'
+    +'<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:16px;font-weight:800;flex:1">📚 학습 스튜디오 <span style="font-size:11px;font-weight:600;color:#8a94a6">— 보고 배워서 품질 향상</span></div><button id="lnClose" style="border:none;background:#eef1f6;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
+    +'<div class="note" style="margin-bottom:10px;background:#eef7ff;border:1px solid #cfe4fb;border-radius:9px;padding:8px 10px;font-size:11px;line-height:1.5">부서가 <b>실제 유튜브 영상을 화면까지 분석</b>하거나 <b>웹에서 고품질 사례를 조사</b>해 <b>품질 공식</b>을 쌓습니다. 쌓인 공식은 이후 모든 결과물에 자동 적용돼요.<br>✅ 접수 후 <b>앱을 닫아도 계속 진행</b>되고, 완료되면 <b>카카오톡</b>으로 알려드려요.</div>'
+    +'<div style="font-size:12px;font-weight:800;color:#15324f;margin-bottom:5px">학습시킬 부서</div>'
+    +'<select id="lnDept" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12.5px;margin-bottom:10px">'+opts+'</select>'
+    +'<div style="font-size:12px;font-weight:800;color:#15324f;margin-bottom:5px">🎬 유튜브 영상으로 학습 <span style="font-weight:500;color:#8a94a6;font-size:10.5px">(최대 3개, 줄바꿈으로 구분)</span></div>'
+    +'<textarea id="lnUrls" placeholder="https://youtu.be/영상ID&#10;https://www.youtube.com/watch?v=영상ID" style="width:100%;box-sizing:border-box;min-height:64px;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:11.5px;margin-bottom:6px"></textarea>'
+    +'<button class="cbtn conn" id="lnYt" style="width:100%;justify-content:center;margin-bottom:10px">🎬 이 영상으로 학습시키기</button>'
+    +'<div style="font-size:12px;font-weight:800;color:#15324f;margin-bottom:5px">🌐 웹 벤치마크로 학습 <span style="font-weight:500;color:#8a94a6;font-size:10.5px">(그 분야 고품질 사례 자동 조사)</span></div>'
+    +'<button class="cbtn" id="lnBm" style="width:100%;justify-content:center">🌐 웹에서 고품질 사례 학습</button>'
+    +'<div class="note" id="lnStat" style="margin-top:8px"></div>'
+    +'<div id="lnResult" style="margin-top:10px"></div>'
+    +'<details style="margin-top:12px"><summary style="font-size:12px;font-weight:800;color:#15324f;cursor:pointer">🧠 현재 부서가 배운 품질 공식 보기</summary><div id="lnKnow" style="margin-top:8px;font-size:11.5px;color:#2b3543;line-height:1.6;white-space:pre-wrap">불러오는 중…</div></details>'
+    +'</div>';
+  document.body.appendChild(ov);
+  function close(){ try{ document.body.removeChild(ov); }catch(e){} }
+  ov.addEventListener("click", function(e){ if(e.target===ov) close(); });
+  ov.querySelector("#lnClose").addEventListener("click", close);
+
+  function loadKnow(){
+    var d=ov.querySelector("#lnDept").value, box=ov.querySelector("#lnKnow");
+    if(!useBackend()){ box.textContent="백엔드 연결 필요"; return; }
+    box.textContent="불러오는 중…";
+    fetch(backendOrigin()+"/api/learn/knowledge?dept="+encodeURIComponent(d))
+      .then(function(r){return r.json();}).then(function(k){
+        box.textContent = (k&&k.knowledge) ? k.knowledge : "아직 배운 게 없어요. 위에서 학습시켜 보세요.";
+      }).catch(function(){ box.textContent="불러오기 실패"; });
+  }
+  ov.querySelector("#lnDept").addEventListener("change", loadKnow);
+  loadKnow();
+
+  function startLearn(kind){
+    var st=ov.querySelector("#lnStat");
+    var dept=ov.querySelector("#lnDept").value;
+    if(!useBackend()){ st.innerHTML='<span style="color:#c0392b">AI 백엔드 연결이 필요해요.</span>'; return; }
+    var body={ dept:dept, appUrl:location.href.split("#")[0] };
+    var url, btn;
+    if(kind==="youtube"){
+      var urls=(ov.querySelector("#lnUrls").value||"").split("\n").map(function(s){return s.trim();}).filter(Boolean);
+      if(!urls.length){ st.innerHTML='<span style="color:#c0392b">유튜브 URL을 입력하세요.</span>'; return; }
+      body.urls=urls; url="/api/learn/youtube-apply"; btn=ov.querySelector("#lnYt");
+    } else { url="/api/learn/benchmark-start"; btn=ov.querySelector("#lnBm"); }
+    var oldTxt=btn.textContent; btn.disabled=true; btn.textContent="접수 중…";
+    (async function(){
+      try{ await wakeServer(90000);
+        var r=await fetch(backendOrigin()+url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+        var d=await r.json(); if(d.error) throw new Error(d.error);
+        st.innerHTML='<span style="color:#0e7a52">✔ 학습 접수됐어요. <b>앱을 닫아도 계속 진행</b>되고, 완료되면 카카오톡으로 알려드려요.</span>';
+        btn.textContent="학습 중… (닫아도 됩니다)";
+        pollLearnJob(d.jobId, ov, btn, oldTxt);
+      }catch(e){
+        st.innerHTML='<span style="color:#c0392b">실패: '+esc(e.message||String(e))+'</span>';
+        btn.disabled=false; btn.textContent=oldTxt;
+      }
+    })();
+  }
+  ov.querySelector("#lnYt").addEventListener("click", function(){ startLearn("youtube"); });
+  ov.querySelector("#lnBm").addEventListener("click", function(){ startLearn("benchmark"); });
+}
+function pollLearnJob(jobId, ov, btn, oldTxt){
+  var tries=0;
+  var t=setInterval(async function(){
+    tries++; if(tries>72){ clearInterval(t); return; }             // 6분까지 화면 갱신
+    if(ov && !document.body.contains(ov)){ clearInterval(t); return; }  // 닫아도 서버는 계속
+    try{
+      var r=await fetch(backendOrigin()+"/api/learn/status?id="+encodeURIComponent(jobId));
+      var d=await r.json(); if(!d || d.error) return;
+      var st=ov?ov.querySelector("#lnStat"):null;
+      if(d.status==="done"){
+        clearInterval(t);
+        if(st) st.innerHTML='<span style="color:#0e7a52">✔ 학습 완료'+(d.analyzed?(" — 영상 "+d.analyzed+"편 분석"):"")+'! 품질 공식이 갱신됐어요.</span>';
+        if(ov && ov.querySelector("#lnResult")){
+          ov.querySelector("#lnResult").innerHTML='<div style="background:#f7fbff;border:1px solid #d9e8fb;border-radius:9px;padding:10px 12px"><div style="font-size:11px;font-weight:800;color:#1668c7;margin-bottom:5px">🧠 새로 배운 품질 공식</div><div style="font-size:11.5px;color:#1c2838;line-height:1.6;white-space:pre-wrap;max-height:280px;overflow:auto">'+esc(d.knowledge||"")+'</div></div>';
+        }
+        if(btn){ btn.disabled=false; btn.textContent=oldTxt; }
+      } else if(d.status==="error"){
+        clearInterval(t);
+        if(st) st.innerHTML='<span style="color:#c0392b">학습 실패: '+esc(d.error||"원인 미상")+'</span>';
+        if(btn){ btn.disabled=false; btn.textContent=oldTxt; }
+      }
+    }catch(_){}
+  }, 5000);
 }
 // ===== 상품페이지 스튜디오 =====
 function openProductModal(){
@@ -3238,6 +3329,7 @@ function renderOfficeBoard(keys){
       +'<button class="cbtn conn" id="obAnalytics">📈 성과</button>'
       +'<button class="cbtn conn" id="obWebtoon">🎨 웹툰</button>'
       +'<button class="cbtn conn" id="obProduct">🛍️ 상품페이지</button>'
+      +'<button class="cbtn conn" id="obLearn">📚 학습</button>'
       +'<button class="cbtn conn" id="obSched">⏰ 예약 발행</button></div>'
     +'<div class="ob-grid">'+cards+'</div>'
     +'<div class="o2-vp" id="o2vp" style="display:none"></div>'
@@ -3250,6 +3342,7 @@ function bindOffice(){
   var oba=document.getElementById("obAnalytics"); if(oba) oba.addEventListener("click", openAnalyticsModal);
   var obw=document.getElementById("obWebtoon"); if(obw) obw.addEventListener("click", openWebtoonModal);
   var obp=document.getElementById("obProduct"); if(obp) obp.addEventListener("click", openProductModal);
+  var obl=document.getElementById("obLearn"); if(obl) obl.addEventListener("click", openLearnModal);
   document.querySelectorAll("[data-obmeet]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation();
     STATE.meetingPrefillDept=b.getAttribute("data-obmeet"); STATE.view="meeting";
     document.querySelectorAll(".vtab").forEach(function(t){ t.classList.toggle("on", t.dataset.v==="meeting"); }); render(); }); });
