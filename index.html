@@ -847,7 +847,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v156</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v157</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -1486,8 +1486,21 @@ async function cloudBackupSave(){
   if(!useBackend()) throw new Error("백엔드 연결이 필요해요.");
   try{ await pushState(); }catch(e){}
   await wakeServer(50000);
-  var r=await fetch(backendOrigin()+"/api/cloud-backup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ data: stateSnapshot() })});
-  var d=await r.json(); if(d.error) throw new Error(d.error);
+  var snap = stateSnapshot();
+  var r=await fetch(backendOrigin()+"/api/cloud-backup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ data: snap })});
+  var d=await r.json();
+  // 덮어쓰기 보호: 기존 백업보다 내용이 크게 적으면 서버가 막는다 → 사용자에게 확인
+  if(r.status===409 && d && d.기존백업){
+    var msg = "⚠️ 덮어쓰기 보호\n\n이 기기의 데이터가 기존 백업보다 훨씬 적어요.\n"
+      + "기존 백업: "+(d.기존백업.저장시각||"?")+" (내용량 "+(d.기존백업.점수||0)+")\n"
+      + "이번 백업: 내용량 "+((d.이번백업&&d.이번백업.점수)||0)+"\n\n"
+      + "그대로 저장하면 다른 기기에서 저장한 백업이 사라집니다.\n정말 덮어쓸까요?";
+    if(!confirm(msg)) throw new Error("덮어쓰기를 취소했어요. (기존 백업은 그대로 있습니다)");
+    var r2=await fetch(backendOrigin()+"/api/cloud-backup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ data: snap, force:true })});
+    var d2=await r2.json(); if(d2.error) throw new Error(d2.error);
+    return d2.at;
+  }
+  if(d.error) throw new Error(d.error);
   return d.at;
 }
 async function cloudBackupLoad(){
