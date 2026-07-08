@@ -16,8 +16,8 @@
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
   body{font-family:'JetBrains Mono',monospace;background:#eef1f7;color:#1f2a37}
-  #root{max-width:820px;margin:0 auto;height:100vh;display:flex;flex-direction:column}
-  .vtabs{display:flex;gap:5px;padding:9px 12px;background:#ffffff;border-bottom:1px solid #e2e7f0;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  #root{width:100%;max-width:820px;margin:0 auto;height:100vh;display:flex;flex-direction:column;box-sizing:border-box}
+  .vtabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);width:100%;box-sizing:border-box;gap:5px;padding:9px 12px;background:#ffffff;border-bottom:1px solid #e2e7f0;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .vtabs::-webkit-scrollbar{display:none}
   .vtab{flex:1 1 0;min-width:0;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:3px;background:#ffffff;border:1px solid #d4dae6;border-radius:9px;padding:8px 11px;font-size:11px;letter-spacing:-.2px;color:#5a6677;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .15s}
   .ccard{background:#fff;border:1px solid #e2e7f0;border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(30,55,100,.05)}
@@ -847,7 +847,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v157</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v158</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -1410,7 +1410,21 @@ function agoText(ts){ if(!ts) return "없음"; var s=Math.floor((Date.now()-ts)/
 function dateTimeText(ts){ if(!ts) return ""; var d=(typeof ts==="number")?new Date(ts):new Date(ts); if(isNaN(d.getTime())) return (typeof ts==="string"?ts:""); var p=function(n){return (n<10?"0":"")+n;}; return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes()); }
 // 화면 배율(기기별 '크게 보기') — 셸 높이를 보정해 상·하단 바가 안 깨지게
 function getUiScale(){ try{ var v=parseFloat(localStorage.getItem("uiScale")||"1"); return (v>=1&&v<=2)?v:1; }catch(e){ return 1; } }
-function applyUiScale(){ try{ var r=document.getElementById("root"); if(!r) return; var s=getUiScale(); if(s===1){ r.style.zoom=""; r.style.height="100vh"; } else { r.style.zoom=String(s); r.style.height=(100/s).toFixed(3)+"vh"; } }catch(e){} }
+function applyUiScale(){ try{
+  var r=document.getElementById("root"); if(!r) return;
+  var s=getUiScale();
+  // zoom을 max-width가 걸린 #root에 직접 적용하면 Chrome에서 폭 계산이 깨진다(탭이 좁아짐).
+  // → max-width 없는 래퍼(#zoomwrap)에만 zoom을 적용한다.
+  var w=document.getElementById("zoomwrap");
+  if(!w){
+    w=document.createElement("div"); w.id="zoomwrap";
+    w.style.width="100%"; w.style.height="100%";
+    r.parentNode.insertBefore(w, r); w.appendChild(r);
+  }
+  r.style.zoom="";   // 이전 버전이 root에 걸어둔 zoom 제거
+  if(s===1){ w.style.zoom=""; r.style.height="100vh"; }
+  else { w.style.zoom=String(s); r.style.height=(100/s).toFixed(3)+"vh"; }
+}catch(e){} }
 function setUiScale(s){ try{ localStorage.setItem("uiScale", String(s)); }catch(e){} applyUiScale(); }
 // 이 기기 자율수행 유지(윈도우·태블릿) — 화면 안 꺼짐 + 주기적으로 서버 깨워 자율수행
 function deviceAuto(){ try{ var d=JSON.parse(localStorage.getItem("deviceAuto")||"{}"); return { wake:!!d.wake, auto:!!d.auto, min:Math.max(5,Math.min(180, +d.min||20)) }; }catch(e){ return { wake:false, auto:false, min:20 }; } }
