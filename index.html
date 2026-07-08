@@ -842,7 +842,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v143</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v145</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -2049,8 +2049,19 @@ function contentApprovalHtml(){
       +'</div>';
     }).join("");
 }
+function productCardHtml(html, name, cid, jobId){
+  var enc = encodeURIComponent(html);
+  return '<div style="margin:2px 0">'
+    +'<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">'
+      +'<button class="ib-btn" data-pcpreview="'+cid+'" style="flex:1;min-width:0;justify-content:center;background:#eef7ff;color:#1668c7">👁️ 전체 미리보기</button>'
+      +'<button class="ib-btn" data-pcdownload="'+cid+'" style="flex:1;min-width:0;justify-content:center;background:#eafaf0;color:#0e7a52">📥 HTML 저장</button>'
+      +(jobId?('<button class="ib-btn" data-pcedit="'+escapeHtml(String(jobId))+'" style="flex:1;min-width:0;justify-content:center;background:#fff4e6;color:#b9651a">✏️ 수정·추가</button>'):'')
+    +'</div>'
+    +'<iframe data-pcframe="'+cid+'" data-html="'+enc+'" data-name="'+escapeHtml(name)+'" style="width:100%;height:360px;border:1px solid #e3e8ef;border-radius:10px;background:#fff" sandbox="allow-same-origin"></iframe>'
+    +'</div>';
+}
 function renderContent(){
-  var CONTENT_DEPTS={ creation:1, publishing:1 };
+  var CONTENT_DEPTS={ creation:1, publishing:1, monetization:1 };
   // 완성 콘텐츠가 아니라 "방향을 되묻는 질문/선택 요청"은 제외
   function isAsk(t){
     if(!t) return true;
@@ -2101,7 +2112,7 @@ function renderContent(){
         +(firstLine?'<div class="cc-sum">'+escapeHtml(firstLine)+'…</div>':'')
         +'</div><span class="cc-arrow">▸</span></div>'
         +'<div class="cc-fold">'
-        +'<div class="cc-body">'+(storyboardHtml(x.m.text)||escapeHtml(x.m.text))+'</div>'
+        +'<div class="cc-body">'+(x.m._productHtml ? productCardHtml(x.m._productHtml, x.m._productName||"상품페이지", x.m._cid, x.m._pageJobId) : (storyboardHtml(x.m.text)||escapeHtml(x.m.text)))+'</div>'
         + blogButtons(x.i) + videoPlanHtml(x.m, x.i) + contentCommentsHtml(x.m, x.i)
         +'</div></div>';
     });
@@ -2244,6 +2255,43 @@ function saveToNote(title, text, prefix){
   clip();
 }
 function bindContent(){
+  // 상품페이지 미리보기 iframe 채우기 + 미리보기/다운로드 버튼
+  document.querySelectorAll('[data-pcframe]').forEach(function(f){
+    try{ var html=decodeURIComponent(f.getAttribute("data-html")||""); f.srcdoc=html; }catch(e){}
+  });
+  document.querySelectorAll('[data-pcpreview]').forEach(function(b){ b.addEventListener("click", function(){
+    var cid=b.getAttribute("data-pcpreview"); var f=document.querySelector('[data-pcframe="'+cid+'"]'); if(!f) return;
+    try{ var html=decodeURIComponent(f.getAttribute("data-html")||""); var w=window.open("","_blank"); w.document.open(); w.document.write(html); w.document.close(); }
+    catch(_){ alert("팝업이 차단됐어요. 아래 미리보기를 이용하세요."); }
+  }); });
+  document.querySelectorAll('[data-pcdownload]').forEach(function(b){ b.addEventListener("click", function(){
+    var cid=b.getAttribute("data-pcdownload"); var f=document.querySelector('[data-pcframe="'+cid+'"]'); if(!f) return;
+    try{ var html=decodeURIComponent(f.getAttribute("data-html")||""); var nm=f.getAttribute("data-name")||"상품페이지";
+      var blob=new Blob([html],{type:"text/html"}); var url=URL.createObjectURL(blob); var a=document.createElement("a");
+      a.href=url; a.download=nm.replace(/[^\w가-힣]+/g,"_")+".html"; document.body.appendChild(a); a.click();
+      setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },800);
+    }catch(_){ }
+  }); });
+  document.querySelectorAll('[data-pcedit]').forEach(function(b){ b.addEventListener("click", async function(){
+    var jobId=b.getAttribute("data-pcedit");
+    if(!useBackend()){ alert("AI 백엔드 연결이 필요해요."); return; }
+    var fb=prompt("무엇을 수정·추가할까요?\n(예: 히어로 문구를 더 감성적으로, 후기 섹션 추가, 색감을 따뜻하게)");
+    if(!fb || !fb.trim()) return;
+    b.disabled=true; var old=b.textContent; b.textContent="접수 중…";
+    try{ await wakeServer(90000);
+      var r=await fetch(backendOrigin()+"/api/product-page/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ baseId:jobId, feedback:fb.trim(), appUrl:location.href.split("#")[0] })});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      b.textContent="수정 중…";
+      alert("수정 작업이 접수됐어요.\n앱을 닫아도 계속 진행되고, 완료되면 카카오톡으로 알려드립니다.\n새 버전이 콘텐츠 탭에 추가돼요.");
+      pollPageJob(d.jobId, null, "");
+      // 결과가 들어오면 콘텐츠 탭 자동 갱신
+      var tries=0; var t=setInterval(async function(){
+        tries++; if(tries>60){ clearInterval(t); return; }
+        var added=await syncPageJobs(); if(added){ clearInterval(t); }
+      }, 10000);
+    }catch(e){ alert("실패: "+(e.message||e)); }
+    b.disabled=false; b.textContent=old;
+  }); });
   bindBlogButtons();
   document.querySelectorAll('[data-capprove]').forEach(function(b){ b.addEventListener("click", async function(){
     var id=b.getAttribute("data-capprove"); var st=document.getElementById("capprvstat_"+id);
@@ -2821,7 +2869,7 @@ function openProductModal(){
   var ov=document.createElement("div"); ov.className="modal-ov"; ov.id="pdModal";
   ov.innerHTML='<div class="modal-bx" style="max-width:600px">'
     +'<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:16px;font-weight:800;flex:1">🛍️ 상품페이지 스튜디오 <span style="font-size:11px;font-weight:600;color:#8a94a6">— 실제 HTML 페이지</span></div><button id="pdClose" style="border:none;background:#eef1f6;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
-    +'<div class="note" style="margin-bottom:10px;background:#fff0f5;border:1px solid #ffd9e6;border-radius:9px;padding:8px 10px;font-size:11px;line-height:1.5">커머스·그로스(윤소희) 부서가 <b>축적한 품질 공식</b>을 적용해, 바로 열리는 <b>완성형 HTML 상품페이지</b>를 만들어요. 먼저 "📚 학습"을 눌러 명품 페이지를 공부시키면 품질이 올라갑니다.</div>'
+    +'<div class="note" style="margin-bottom:10px;background:#fff0f5;border:1px solid #ffd9e6;border-radius:9px;padding:8px 10px;font-size:11px;line-height:1.5">커머스·그로스(윤소희) 부서가 <b>축적한 품질 공식</b>을 적용해 <b>완성형 HTML 상품페이지</b>를 만들어요.<br>✅ 접수 후 <b>앱을 닫아도 계속 제작</b>되고, 완료되면 <b>카카오톡 알림</b> + <b>콘텐츠 탭</b>에 저장됩니다. 콘텐츠 탭에서 <b>수정·추가</b>도 가능해요.</div>'
     +'<div style="display:flex;gap:8px;margin-bottom:10px"><button class="cbtn" id="pdLearn" style="flex:1;justify-content:center">📚 명품페이지 학습시키기</button><span class="note" id="pdLearnStat" style="flex:1;font-size:10.5px;align-self:center"></span></div>'
     +'<input id="pdBrand" placeholder="브랜드명 (기본: 민앤팜)" style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12.5px;margin-bottom:6px">'
     +'<input id="pdName" placeholder="상품명 (예: 고흥 유기농 유자청)" style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12.5px;margin-bottom:6px">'
@@ -2858,18 +2906,83 @@ function openProductModal(){
     if(!name){ st.innerHTML='<span style="color:#c0392b">상품명을 입력하세요.</span>'; return; }
     var photoLines=(ov.querySelector("#pdPhotos").value||"").split("\n").map(function(s){return s.trim();}).filter(Boolean);
     var photos=photoLines.map(function(u){ return { url:u }; });
-    btn.disabled=true; btn.textContent="윤소희가 페이지 디자인 중… (1~2분)";
+    btn.disabled=true; btn.textContent="접수 중…";
     try{ await wakeServer(90000);
-      var r=await fetch(backendOrigin()+"/api/product-page",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+      var r=await fetch(backendOrigin()+"/api/product-page/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
         product:name, brand:(ov.querySelector("#pdBrand").value||"").trim(), price:(ov.querySelector("#pdPrice").value||"").trim(),
-        info:(ov.querySelector("#pdInfo").value||"").trim(), photos:photos })});
+        info:(ov.querySelector("#pdInfo").value||"").trim(), photos:photos, appUrl:location.href.split("#")[0] })});
       var d=await r.json(); if(d.error) throw new Error(d.error);
-      ov.querySelector("#pdResult").innerHTML=productResultHtml(d);
-      bindProductResult(ov, d.html||"", name);
-      st.innerHTML='<span style="color:#0e7a52">✔ 완성'+(d.appliedFormula?" (학습된 품질 공식 적용됨)":"")+' — 미리보기·다운로드하세요.</span>';
-    }catch(e){ st.innerHTML='<span style="color:#c0392b">실패: '+esc(e.message||String(e))+'</span>'; }
-    btn.disabled=false; btn.textContent="🛍️ 상품페이지 만들기";
+      st.innerHTML='<span style="color:#0e7a52">✔ 접수됐어요. <b>앱을 닫아도 계속 만들어집니다.</b> 완료되면 카카오톡으로 알려드리고, 콘텐츠 탭에 저장돼요.</span>';
+      btn.textContent="제작 중… (닫아도 됩니다)";
+      pollPageJob(d.jobId, ov, name);
+    }catch(e){
+      st.innerHTML='<span style="color:#c0392b">실패: '+esc(e.message||String(e))+'</span>';
+      btn.disabled=false; btn.textContent="🛍️ 상품페이지 만들기";
+    }
   });
+}
+// 작업 상태 주기 확인(모달 열려 있는 동안만 — 닫아도 서버는 계속 진행)
+function pollPageJob(jobId, ov, name){
+  var tries=0;
+  var t=setInterval(async function(){
+    tries++;
+    if(tries>60){ clearInterval(t); return; }
+    if(ov && !document.body.contains(ov)){ clearInterval(t); return; }
+    try{
+      var r=await fetch(backendOrigin()+"/api/product-page/status?id="+encodeURIComponent(jobId));
+      var d=await r.json(); if(!d || d.error) return;
+      var st=ov?ov.querySelector("#pdStat"):null, btn=ov?ov.querySelector("#pdRun"):null;
+      if(d.status==="done"){
+        clearInterval(t);
+        savePageJobToContent(jobId, d.html||"", d.product||name, !!d.appliedFormula);
+        if(ov && ov.querySelector("#pdResult")){ ov.querySelector("#pdResult").innerHTML=productResultHtml(d); bindProductResult(ov, d.html||"", d.product||name); }
+        if(st) st.innerHTML='<span style="color:#0e7a52">✔ 완성'+(d.appliedFormula?" (학습된 품질 공식 적용됨)":"")+' — 콘텐츠 탭에도 저장됐어요.</span>';
+        if(btn){ btn.disabled=false; btn.textContent="🛍️ 상품페이지 만들기"; }
+      } else if(d.status==="error"){
+        clearInterval(t);
+        if(st) st.innerHTML='<span style="color:#c0392b">실패: '+esc(d.error||"원인 미상")+'</span>';
+        if(btn){ btn.disabled=false; btn.textContent="🛍️ 상품페이지 만들기"; }
+      }
+    }catch(_){}
+  }, 5000);
+}
+// 완성 결과를 콘텐츠 탭(STATE.messages)에 저장 — 중복 방지
+function savePageJobToContent(jobId, html, name, applied){
+  try{
+    STATE.messages = STATE.messages || [];
+    var exists = STATE.messages.some(function(m){ return m._pageJobId && String(m._pageJobId)===String(jobId); });
+    if(exists) return false;
+    STATE.messages.push({
+      role:"agent", deptId:"monetization", _forceContent:true,
+      _pageJobId:String(jobId), _productHtml:html||"", _productName:name||"상품페이지",
+      text:"🛍️ 상품페이지: "+(name||"")+(applied?" (학습 공식 적용)":""),
+      at:Date.now(), time:(new Date()).toLocaleString("ko-KR")
+    });
+    saveState();
+    return true;
+  }catch(_){ return false; }
+}
+// 앱 열 때/주기적으로: 백그라운드에서 완성된 결과를 받아와 콘텐츠 탭에 채움
+async function syncPageJobs(){
+  if(!useBackend()) return 0;
+  try{
+    var r=await fetch(backendOrigin()+"/api/product-page/list");
+    var d=await r.json(); if(!d || !d.jobs) return 0;
+    var added=0;
+    for(var i=0;i<d.jobs.length;i++){
+      var j=d.jobs[i];
+      if(j.status!=="done" || !j.hasHtml) continue;
+      var have=(STATE.messages||[]).some(function(m){ return m._pageJobId && String(m._pageJobId)===String(j.id); });
+      if(have) continue;
+      try{
+        var r2=await fetch(backendOrigin()+"/api/product-page/status?id="+encodeURIComponent(j.id));
+        var d2=await r2.json();
+        if(d2 && d2.status==="done" && d2.html){ if(savePageJobToContent(j.id, d2.html, d2.product, d2.appliedFormula)) added++; }
+      }catch(_){}
+    }
+    if(added){ try{ render(); }catch(_){} }
+    return added;
+  }catch(_){ return 0; }
 }
 function productResultHtml(d){
   return '<div style="display:flex;gap:7px;margin-bottom:8px">'
@@ -6151,6 +6264,9 @@ async function loadAndApplyPatches(){
   updateSaveStatus();
   updateWorkStatus();
   if(useBackend()) syncBackend();
+  // 백그라운드에서 완성된 상품페이지를 받아와 콘텐츠 탭에 채움(앱을 닫았다 열어도 결과 확보)
+  if(useBackend()) setTimeout(function(){ try{ syncPageJobs(); }catch(_){} }, 2500);
+  setInterval(function(){ if(useBackend() && !STATE.busy){ try{ syncPageJobs(); }catch(_){} } }, 60000);
   setInterval(function(){ updateSaveStatus(); updateWorkStatus(); }, 30000);
   setInterval(function(){ if(useBackend() && !STATE.busy) syncBackend(); }, 15000);
 })();
