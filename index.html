@@ -836,13 +836,14 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
     <button class="vtab" data-v="office">오피스</button>
     <button class="vtab" data-v="project">프로젝트</button>
     <button class="vtab" data-v="content">콘텐츠</button>
+    <button class="vtab" data-v="learn">📚 학습</button>
     <button class="vtab" data-v="record">기록·분석</button>
     <button class="vtab" data-v="settings">설정</button>
   </div>
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v146</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v154</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -2865,8 +2866,367 @@ function webtoonResultHtml(d){
   }
   return h;
 }
+// ===== 📚 학습 탭: 유튜브 영상 + 웹페이지(홈페이지·상세페이지)로 부서 전문성 키우기 =====
+function renderLearn(){
+  var opts = LEARN_DEPTS.map(function(d){
+    var a=AGENTS[d]||{}; var sel=(STATE.learnDept===d)?' selected':'';
+    var label=(a.no||"")+" "+(a.kr||d)+(d==="ops"?" 👑 (팀장 — 전 부서 학습 흡수)":"");
+    return '<option value="'+d+'"'+sel+'>'+esc(label)+'</option>';
+  }).join("");
+  viewEl.innerHTML =
+    '<div style="padding:14px 12px 40px;max-width:640px;margin:0 auto">'
+    +'<div style="font-size:18px;font-weight:800;color:#15324f;margin-bottom:10px">📚 학습 스튜디오</div>'
+    +'<div class="note" style="margin-bottom:12px;background:#eef7ff;border:1px solid #cfe4fb;border-radius:10px;padding:10px 12px;line-height:1.6">'
+      +'좋은 <b>유튜브 영상</b>이나 <b>홈페이지·상세페이지 주소</b>를 넣으면, 부서가 그걸 직접 분석해 <b>품질 공식</b>을 만들어 쌓습니다. '
+      +'쌓인 공식은 이후 그 부서의 <b>모든 결과물에 자동 적용</b>돼요.<br>'
+      +'✅ 접수 후 <b>앱을 닫아도 계속 진행</b>되고, 완료되면 <b>카카오톡</b>으로 알려드립니다.'
+    +'</div>'
+
+    +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:6px">학습시킬 부서</div>'
+      +'<select id="lnDept" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:13px">'+opts+'</select>'
+      +'<div class="note" id="lnOpsNote" style="display:none;margin-top:7px;background:#fff8ec;border:1px solid #ffe1bf;border-radius:8px;padding:7px 9px;color:#b9651a">👑 팀장은 <b>직접 학습하지 않고, 모든 부서의 학습을 자동으로 흡수</b>해 총괄 품질 기준으로 승격합니다. 아래에서 그 기준을 확인하세요.</div>'
+    +'</div>'
+
+    +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🎬 유튜브 영상으로 학습</div>'
+      +'<div class="note" style="margin-bottom:6px">영상의 <b>화면·편집·자막·리듬까지 실제로 보고</b> 배웁니다. 최대 3개, 줄바꿈으로 구분.</div>'
+      +'<textarea id="lnYtUrls" placeholder="https://youtu.be/영상ID&#10;https://www.youtube.com/watch?v=영상ID" style="width:100%;box-sizing:border-box;min-height:66px;padding:10px 12px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:7px"></textarea>'
+      +'<button class="cbtn conn" id="lnYtBtn" style="width:100%;justify-content:center">🎬 이 영상으로 학습시키기</button>'
+    +'</div>'
+
+    +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🌐 홈페이지·상세페이지로 학습</div>'
+      +'<div class="note" style="margin-bottom:6px">페이지의 <b>구성·카피·CTA·여백·타이포그래피</b>를 분석해 배웁니다. (예: 명품 브랜드 상품페이지)</div>'
+      +'<textarea id="lnWebUrls" placeholder="https://www.chanel.com/kr/high-jewelry/&#10;https://브랜드사이트.com/product/123" style="width:100%;box-sizing:border-box;min-height:66px;padding:10px 12px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:7px"></textarea>'
+      +'<button class="cbtn conn" id="lnWebBtn" style="width:100%;justify-content:center">🌐 이 페이지로 학습시키기</button>'
+    +'</div>'
+
+    +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🔎 웹에서 알아서 찾아 학습</div>'
+      +'<div class="note" style="margin-bottom:6px">URL 없이도, 그 분야 <b>고품질 사례를 스스로 조사</b>해 배웁니다.</div>'
+      +'<button class="cbtn" id="lnBmBtn" style="width:100%;justify-content:center">🔎 알아서 조사해 학습</button>'
+    +'</div>'
+
+    +'<div style="background:#fffaf3;border:1px solid #ffe0b8;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#b9651a;margin-bottom:4px">🏢 전 부서 협업 심화 학습 <span style="font-size:10.5px;font-weight:600;color:#a8814f">— 예제 만들고 채점까지</span></div>'
+      +'<div class="note" style="margin-bottom:6px">URL을 주면 <b>팀장이 부서를 배정</b> → 각 부서가 가이드라인 → <b>제작부가 예제 제작</b> → <b>검수부가 채점</b> → 점수 낮으면 <b>자동 재제작</b> → 전 부서 지식 갱신.<br>유튜브·웹페이지 모두 가능 (최대 4개). 5~10분 걸려요.</div>'
+      +'<textarea id="lnDeepUrls" placeholder="https://www.chanel.com/kr/high-jewelry/&#10;https://youtu.be/영상ID" style="width:100%;box-sizing:border-box;min-height:66px;padding:10px 12px;border:1px solid #f0d6ae;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:7px"></textarea>'
+      +'<button class="cbtn conn" id="lnDeepBtn" style="width:100%;justify-content:center;background:#fff3e0;color:#b9651a;border-color:#f0d6ae">🏢 전 부서 협업 심화 학습 시작</button>'
+    +'</div>'
+
+    +'<div style="background:#f6f2ff;border:1px solid #ded2f7;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#5b3bb5;margin-bottom:4px">👑 팀장에게 제안 받기 <span style="font-size:10.5px;font-weight:600;color:#8a7bb8">— 요청 안 해도 먼저 제시</span></div>'
+      +'<div class="note" style="margin-bottom:6px">팀장이 플랫폼 현황(부서 성장·학습·최근 작업)을 스스로 살펴보고 <b>지금 뭘 해야 하는지</b> 제안합니다.</div>'
+      +'<input id="lnFocus" placeholder="(선택) 특별히 봐줬으면 하는 부분" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #ded2f7;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:7px">'
+      +'<div style="display:flex;gap:6px">'
+        +'<button class="cbtn" id="lnSuggestBtn" style="flex:1;justify-content:center;background:#f0eaff;color:#5b3bb5;border-color:#ded2f7">👑 제안 받기</button>'
+        +'<button class="cbtn" id="lnSelfBtn" style="flex:1;justify-content:center;background:#eef7ff;color:#1668c7;border-color:#cfe4fb">🔍 자가진단 → 가이드라인</button>'
+      +'</div>'
+      +'<div id="lnSuggest" style="margin-top:8px"></div>'
+      +'<details style="margin-top:8px"><summary style="font-size:11.5px;font-weight:700;color:#5b3bb5;cursor:pointer">🧠 팀장의 판단 이력 (승인·거절로 학습 중)</summary><div id="lnGuideLog" style="margin-top:6px;font-size:11px;line-height:1.7">불러오는 중…</div></details>'
+    +'</div>'
+    +'<div class="note" id="lnStat" style="margin-bottom:10px"></div>'
+    +'<div id="lnProposals" style="margin-bottom:12px"></div>'
+    +'<div id="lnResult" style="margin-bottom:12px"></div>'
+
+    +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:6px">🧠 이 부서가 지금까지 배운 품질 공식</div>'
+      +'<div id="lnKnow" style="font-size:12px;color:#2b3543;line-height:1.65;white-space:pre-wrap">불러오는 중…</div>'
+      +'<div class="note" id="lnKnowMeta" style="margin-top:6px"></div>'
+    +'</div>'
+    +'</div>';
+}
+function bindLearn(){
+  var deptSel=document.getElementById("lnDept");
+  if(!deptSel) return;
+  function curDept(){ return deptSel.value; }
+  function loadKnow(){
+    var box=document.getElementById("lnKnow"), meta=document.getElementById("lnKnowMeta");
+    if(!useBackend()){ box.textContent="AI 백엔드 연결이 필요해요."; return; }
+    box.textContent="불러오는 중…"; if(meta) meta.textContent="";
+    fetch(backendOrigin()+"/api/learn/knowledge?dept="+encodeURIComponent(curDept()))
+      .then(function(r){return r.json();}).then(function(k){
+        box.textContent=(k&&k.knowledge)?k.knowledge:"아직 배운 게 없어요. 위에서 영상이나 페이지로 학습시켜 보세요.";
+        if(meta && k && k.at){ meta.textContent="출처: "+(k.source||"-")+" · 갱신: "+new Date(k.at).toLocaleString("ko-KR"); }
+      }).catch(function(){ box.textContent="불러오기 실패"; });
+  }
+  function applyOpsMode(){
+    var isOps = (curDept()==="ops");
+    ["lnYtBtn","lnWebBtn","lnBmBtn"].forEach(function(id){
+      var b=document.getElementById(id); if(!b) return;
+      b.disabled=isOps; b.style.opacity=isOps?"0.45":"1";
+    });
+    var n=document.getElementById("lnOpsNote");
+    if(n) n.style.display = isOps ? "block" : "none";
+  }
+  deptSel.addEventListener("change", function(){ STATE.learnDept=curDept(); saveState(); applyOpsMode(); loadKnow(); });
+  applyOpsMode();
+  loadKnow();
+  loadProposals();
+
+  function start(kind, urlsEl, btn){
+    var st=document.getElementById("lnStat");
+    if(!useBackend()){ st.innerHTML='<span style="color:#c0392b">AI 백엔드 연결이 필요해요.</span>'; return; }
+    var body={ dept:curDept(), appUrl:location.href.split("#")[0] };
+    var ep;
+    if(kind==="youtube" || kind==="web" || kind==="deep"){
+      var urls=(urlsEl.value||"").split("\n").map(function(s){return s.trim();}).filter(Boolean);
+      if(!urls.length){ st.innerHTML='<span style="color:#c0392b">URL을 입력하세요.</span>'; return; }
+      body.urls=urls;
+      ep = (kind==="youtube") ? "/api/learn/youtube-apply" : (kind==="web") ? "/api/learn/web-apply" : "/api/learn/deep-start";
+    } else { ep="/api/learn/benchmark-start"; }
+    var oldTxt=btn.textContent; btn.disabled=true; btn.textContent="접수 중…";
+    document.getElementById("lnResult").innerHTML="";
+    (async function(){
+      try{ await wakeServer(90000);
+        var r=await fetch(backendOrigin()+ep,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+        var d=await r.json(); if(d.error) throw new Error(d.error);
+        st.innerHTML='<span style="color:#0e7a52">✔ 학습 접수됐어요. <b>앱을 닫아도 계속 진행</b>되고, 완료되면 카카오톡으로 알려드려요. (2~5분)</span>';
+        btn.textContent="학습 중… (닫아도 됩니다)";
+        pollLearnTab(d.jobId, btn, oldTxt, loadKnow);
+      }catch(e){
+        st.innerHTML='<span style="color:#c0392b">실패: '+esc(e.message||String(e))+'</span>';
+        btn.disabled=false; btn.textContent=oldTxt;
+      }
+    })();
+  }
+  var yb=document.getElementById("lnYtBtn");  if(yb) yb.addEventListener("click", function(){ start("youtube", document.getElementById("lnYtUrls"), yb); });
+  var wb=document.getElementById("lnWebBtn"); if(wb) wb.addEventListener("click", function(){ start("web", document.getElementById("lnWebUrls"), wb); });
+  var bb=document.getElementById("lnBmBtn");  if(bb) bb.addEventListener("click", function(){ start("benchmark", null, bb); });
+  var db=document.getElementById("lnDeepBtn"); if(db) db.addEventListener("click", function(){ start("deep", document.getElementById("lnDeepUrls"), db); });
+  var sf=document.getElementById("lnSelfBtn");
+  if(sf) sf.addEventListener("click", async function(){
+    if(!useBackend()){ alert("AI 백엔드 연결이 필요해요."); return; }
+    sf.disabled=true; var so=sf.textContent; sf.textContent="팀장이 진단 중… (1~2분)";
+    try{ await wakeServer(90000);
+      var r=await fetch(backendOrigin()+"/api/ops/self-review",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ appUrl:location.href.split("#")[0] })});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      if(!d.needed){ alert(d.note||"팀장 판단: 지금은 플랫폼 변경이 필요하지 않아요."); }
+      else { alert("팀장이 개선 가이드라인을 만들었어요:\n"+(d.proposal&&d.proposal.title||"")+"\n\n아래 승인 센터에서 확인하세요."); loadProposals(); loadGuideLog(); }
+    }catch(e){ alert("실패: "+(e.message||e)); }
+    sf.disabled=false; sf.textContent=so;
+  });
+  loadGuideLog();
+  var sg=document.getElementById("lnSuggestBtn");
+  if(sg) sg.addEventListener("click", async function(){
+    if(!useBackend()){ alert("AI 백엔드 연결이 필요해요."); return; }
+    var out=document.getElementById("lnSuggest");
+    sg.disabled=true; var o=sg.textContent; sg.textContent="팀장이 검토 중… (1분)";
+    out.innerHTML="";
+    try{ await wakeServer(90000);
+      var r=await fetch(backendOrigin()+"/api/ops/suggest",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ focus:(document.getElementById("lnFocus").value||"").trim() })});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      out.innerHTML='<div style="background:#fff;border:1px solid #e3daf7;border-radius:9px;padding:10px 12px;font-size:11.5px;color:#1c2838;line-height:1.65;white-space:pre-wrap;max-height:340px;overflow:auto">'+esc(d.suggestions||"")+'</div>'
+        +'<button class="cbtn" id="lnMakeProposal" style="width:100%;justify-content:center;margin-top:7px;background:#f0eaff;color:#5b3bb5;border-color:#ded2f7">🛠 이 제안으로 플랫폼 변경 요청 만들기</button>';
+      var mk=document.getElementById("lnMakeProposal");
+      if(mk) mk.addEventListener("click", async function(){
+        mk.disabled=true; var mo=mk.textContent; mk.textContent="팀장이 설계 중… (1~2분)";
+        try{
+          var r2=await fetch(backendOrigin()+"/api/patch/propose",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ request:(d.suggestions||""), appUrl:location.href.split("#")[0] })});
+          var d2=await r2.json(); if(d2.error) throw new Error(d2.error);
+          if(!d2.needed){ alert(d2.note||"팀장 판단: 지금은 플랫폼 변경이 필요하지 않아요."); }
+          else { alert("변경 요청을 만들었어요: "+(d2.proposal&&d2.proposal.title||"")+"\n아래 승인 센터에서 확인하세요."); loadProposals(); }
+        }catch(e){ alert("실패: "+(e.message||e)); }
+        mk.disabled=false; mk.textContent=mo;
+      });
+    }catch(e){ out.innerHTML='<span style="color:#c0392b;font-size:11.5px">실패: '+esc(e.message||String(e))+'</span>'; }
+    sg.disabled=false; sg.textContent=o;
+  });
+}
+function deepResultHtml(rs){
+  if(!rs) return "";
+  var ex=String(rs.example||"");
+  var isHtml=/^\s*<!doctype html|^\s*<html/i.test(ex);
+  var scoreColor = rs.score>=80 ? "#0e7a52" : (rs.score>=60 ? "#b9651a" : "#c0392b");
+  var h='<div style="background:#fffaf3;border:1px solid #ffe0b8;border-radius:12px;padding:12px 13px">'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="font-size:12.5px;font-weight:800;color:#b9651a;flex:1">🏢 협업 심화학습 결과</div>'
+      +'<div style="font-size:12px;font-weight:800;color:'+scoreColor+'">검수 '+(rs.score||0)+'/100</div>'
+      +'<div style="font-size:10.5px;color:#a8814f">'+(rs.round||1)+'라운드</div></div>'
+    +'<div style="font-size:11.5px;color:#3a4452;margin-bottom:8px"><b>학습 목표</b><br>'+esc(rs.goal||"")+'</div>';
+  if(rs.depts && rs.depts.length){
+    h+='<div style="font-size:11.5px;color:#3a4452;margin-bottom:8px"><b>참여 부서</b><br>'
+      + rs.depts.map(function(d){ return '· '+esc(d.kr)+' — '+esc(d.focus||""); }).join("<br>")+'</div>';
+  }
+  var rv=rs.review||{};
+  if(rv.strengths && rv.strengths.length) h+='<div style="font-size:11.5px;color:#0e7a52;margin-bottom:6px"><b>👍 강점</b><br>'+rv.strengths.map(function(s){return '· '+esc(s);}).join("<br>")+'</div>';
+  if(rv.gaps && rv.gaps.length) h+='<div style="font-size:11.5px;color:#c0392b;margin-bottom:8px"><b>🔧 부족분 → 다음 학습 과제로 반영됨</b><br>'+rv.gaps.map(function(s){return '· '+esc(s);}).join("<br>")+'</div>';
+  if(ex){
+    h+='<div style="font-size:11.5px;font-weight:800;color:#15324f;margin:8px 0 5px">📦 제작부가 만든 예제</div>';
+    if(isHtml){
+      h+='<button class="ib-btn" id="lnExOpen" style="width:100%;justify-content:center;background:#eef7ff;color:#1668c7;margin-bottom:6px">👁️ 예제 전체 보기</button>'
+        +'<iframe id="lnExFrame" style="width:100%;height:320px;border:1px solid #e3e8ef;border-radius:9px;background:#fff" sandbox="allow-same-origin"></iframe>';
+    } else {
+      h+='<div style="font-size:11.5px;color:#1c2838;line-height:1.65;white-space:pre-wrap;background:#fff;border:1px solid #eef1f6;border-radius:9px;padding:10px 12px;max-height:300px;overflow:auto">'+esc(ex)+'</div>';
+    }
+  }
+  if(rs.updated && rs.updated.length) h+='<div class="note" style="margin-top:8px">✔ 지식 갱신된 부서: <b>'+esc(rs.updated.join(", "))+'</b> (경험치 +4)</div>';
+  h+='</div>';
+  return h;
+}
+function loadGuideLog(){
+  var box=document.getElementById("lnGuideLog");
+  if(!box || !useBackend()) return;
+  fetch(backendOrigin()+"/api/ops/guideline-log").then(function(r){return r.json();}).then(function(d){
+    var lg=(d&&d.log)||[];
+    if(!lg.length){ box.innerHTML='<span style="color:#8a94a6">아직 판단 이력이 없어요. 학습하거나 자가진단하면 쌓입니다.</span>'; return; }
+    var apv=lg.filter(function(g){return g.decided==="approved";}).length;
+    var rej=lg.filter(function(g){return g.decided==="rejected";}).length;
+    box.innerHTML='<div style="color:#5b3bb5;font-weight:700;margin-bottom:4px">승인 '+apv+' · 거절 '+rej+' · 대기 '+(lg.length-apv-rej)+'  <span style="font-weight:500;color:#8a94a6">(3건 결정될 때마다 팀장이 판단 기준을 스스로 정리)</span></div>'
+      + lg.slice().reverse().map(function(g){
+        var mark = g.decided==="approved" ? '<span style="color:#0e7a52">✅</span>' : (g.decided==="rejected" ? '<span style="color:#c0392b">❌</span>' : '<span style="color:#b9651a">⏳</span>');
+        return '<div style="color:#3a4452">'+mark+' <b>'+esc(g.title)+'</b> <span style="color:#8a94a6">('+(g.kind==="backend-change"?"백엔드":"앱화면")+(g.source?(" · "+esc(g.source)):"")+')</span></div>';
+      }).join("");
+  }).catch(function(){ box.textContent="불러오기 실패"; });
+}
+function guideRow(label, text){
+  if(!text || !String(text).trim()) return "";
+  return '<div style="margin-bottom:6px"><div style="font-weight:800;color:#5b3bb5;margin-bottom:2px">'+esc(label)+'</div>'
+    +'<div style="color:#1c2838;white-space:pre-wrap">'+esc(text)+'</div></div>';
+}
+function loadProposals(){
+  var box=document.getElementById("lnProposals");
+  if(!box || !useBackend()) return;
+  Promise.all([
+    fetch(backendOrigin()+"/api/patch/proposals").then(function(r){return r.json();}).catch(function(){return {proposals:[]};}),
+    fetch(backendOrigin()+"/api/cost/pending").then(function(r){return r.json();}).catch(function(){return {approvals:[]};})
+  ]).then(function(rs){
+    var patches=(rs[0]&&rs[0].proposals)||[], costs=(rs[1]&&rs[1].approvals)||[];
+    if(!patches.length && !costs.length){ box.innerHTML=""; return; }
+    var h='';
+    if(costs.length){
+      h+='<div style="background:#fff0f5;border:1px solid #ffd0e0;border-radius:12px;padding:12px 13px;margin-bottom:10px">'
+        +'<div style="font-size:12.5px;font-weight:800;color:#b02a5b;margin-bottom:6px">💸 유료 자원 승인 요청 <span style="font-weight:600;font-size:10.5px">(승인 전에는 실행되지 않습니다)</span></div>'
+        + costs.map(function(a){
+          var rows=(a.rows||[]).map(function(r){ return '· '+esc(r.항목)+' — ₩'+(r.원화||0).toLocaleString()+(r.비고?(' <span style="color:#8a94a6">('+esc(r.비고)+')</span>'):''); }).join("<br>");
+          return '<div style="background:#fff;border:1px solid #f5d3e0;border-radius:9px;padding:9px 11px;margin-bottom:7px">'
+            +'<div style="font-size:12px;font-weight:800;color:#15324f;margin-bottom:4px">'+esc(a.kind)+' · 예상 <span style="color:#b02a5b">₩'+(a.estKrw||0).toLocaleString()+'</span></div>'
+            +'<div style="font-size:11px;color:#3a4452;line-height:1.55;margin-bottom:4px">'+rows+'</div>'
+            +'<div style="font-size:11px;color:#b02a5b;margin-bottom:7px">유료 항목: '+esc((a.paid||[]).join(", ")||"-")+'</div>'
+            +'<div style="display:flex;gap:5px;flex-wrap:wrap">'
+              +'<button class="ib-btn" data-cost="approve" data-cid="'+a.id+'" style="flex:1;min-width:90px;justify-content:center;background:#eafaf0;color:#0e7a52">✅ 승인(유료)</button>'
+              +'<button class="ib-btn" data-cost="bypass" data-cid="'+a.id+'" style="flex:1;min-width:90px;justify-content:center;background:#eef7ff;color:#1668c7">🆓 무료 우회</button>'
+              +'<button class="ib-btn" data-cost="cancel" data-cid="'+a.id+'" style="flex:1;min-width:70px;justify-content:center;background:#fdecea;color:#c0392b">취소</button>'
+            +'</div></div>';
+        }).join("")
+        +'</div>';
+    }
+    if(patches.length){
+      h+='<div style="background:#fff4e6;border:1px solid #ffd9a8;border-radius:12px;padding:12px 13px">'
+        +'<div style="font-size:12.5px;font-weight:800;color:#b9651a;margin-bottom:6px">🛠 팀장이 플랫폼 변경 승인을 요청했어요 <span style="font-weight:600;font-size:10.5px">(승인 전에는 적용되지 않습니다)</span></div>'
+        + patches.map(function(p){
+          var isBe=(p.kind==="backend-change");
+          var badge = isBe
+            ? '<span style="font-size:10px;font-weight:800;color:#5b3bb5;background:#f0eaff;border:1px solid #ded2f7;border-radius:6px;padding:2px 6px">📝 백엔드 요청서 (자동적용 불가)</span>'
+            : '<span style="font-size:10px;font-weight:800;color:#0e7a52;background:#eafaf0;border:1px solid #cfe9dc;border-radius:6px;padding:2px 6px">🛠 앱 화면 변경 (승인 시 즉시 적용)</span>';
+          return '<div style="background:#fff;border:1px solid #f0dcc0;border-radius:9px;padding:9px 11px;margin-bottom:7px">'
+            +'<div style="margin-bottom:5px">'+badge+(p.source?(' <span style="font-size:10px;color:#a8814f">'+esc(p.source)+'</span>'):'')+'</div>'
+            +'<div style="font-size:12px;font-weight:800;color:#15324f;margin-bottom:3px">'+esc(p.title)+'</div>'
+            +'<div style="font-size:11.5px;color:#3a4452;line-height:1.55;margin-bottom:3px">'+esc(p.desc)+'</div>'
+            +'<div style="font-size:11px;color:#8a6d1a">근거: '+esc(p.reason||"")+'</div>'
+            +(p.impact?('<div style="font-size:11px;color:#0e7a52;margin-bottom:6px">기대 효과: '+esc(p.impact)+'</div>'):'<div style="margin-bottom:6px"></div>')
+            +(isBe&&p.backendRequest?('<details style="margin-bottom:7px"><summary style="font-size:11px;font-weight:700;color:#5b3bb5;cursor:pointer">📄 개발 가이드라인 보기</summary>'
+              + (p.guideline ? ('<div style="margin-top:6px;font-size:11px;line-height:1.6">'
+                  + guideRow("🎯 수정 대상", p.guideline.target)
+                  + guideRow("📍 현재 동작", p.guideline.current)
+                  + guideRow("🔧 변경 내용", p.guideline.change)
+                  + (p.guideline.codeSketch ? '<div style="margin-bottom:6px"><div style="font-weight:800;color:#5b3bb5;margin-bottom:2px">💻 코드 스케치</div><pre style="margin:0;background:#1c2230;color:#e6edf3;border-radius:8px;padding:8px 10px;font-size:10.5px;line-height:1.5;overflow:auto;max-height:180px">'+esc(p.guideline.codeSketch)+'</pre></div>' : '')
+                  + guideRow("✅ 검증 방법", p.guideline.verify)
+                  + guideRow("⚠️ 위험·주의", p.guideline.risk)
+                  + guideRow("↩️ 롤백", p.guideline.rollback)
+                  + '</div>')
+                : ('<div style="font-size:11px;color:#1c2838;line-height:1.6;white-space:pre-wrap;background:#faf8ff;border:1px solid #e3daf7;border-radius:8px;padding:8px 10px;margin-top:5px;max-height:220px;overflow:auto">'+esc(p.backendRequest)+'</div>'))
+              +'<button class="ib-btn copy" data-prcopy="'+p.id+'" style="margin-top:6px;width:100%;justify-content:center">📋 가이드라인 전체 복사 (Claude에 붙여넣기)</button></details>'):'')
+            +'<div style="display:flex;gap:6px">'
+              +'<button class="ib-btn" data-prok="'+p.id+'" style="flex:1;justify-content:center;background:#eafaf0;color:#0e7a52">'+(isBe?'✅ 승인(요청서 확정)':'✅ 승인하고 적용')+'</button>'
+              +'<button class="ib-btn" data-prno="'+p.id+'" style="flex:1;justify-content:center;background:#fdecea;color:#c0392b">✕ 거절</button>'
+            +'</div></div>';
+        }).join("")
+        +'</div>';
+    }
+    box.innerHTML=h;
+    // 비용 승인/우회/취소
+    box.querySelectorAll("[data-cost]").forEach(function(b){
+      b.addEventListener("click", async function(){
+        var mode=b.getAttribute("data-cost"), id=b.getAttribute("data-cid");
+        if(mode==="approve" && !confirm("유료로 진행할까요? 비용이 발생합니다.")) return;
+        b.disabled=true; var o=b.textContent; b.textContent="처리 중…";
+        try{
+          var r=await fetch(backendOrigin()+"/api/cost/decide",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:+id, mode:mode})});
+          var d=await r.json(); if(d.error) throw new Error(d.error);
+          alert(mode==="cancel" ? "취소했어요. 비용이 발생하지 않았습니다."
+              : (mode==="bypass" ? "무료로 우회해 실행합니다.\n(AI 이미지 대신 [사진 자리]로 표시돼요)" : "승인했어요. 실행합니다."));
+          loadProposals();
+        }catch(e){ alert("실패: "+(e.message||e)); b.disabled=false; b.textContent=o; }
+      });
+    });
+    box.querySelectorAll("[data-prcopy]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.preventDefault();
+        var id=b.getAttribute("data-prcopy");
+        var pr=patches.filter(function(x){return String(x.id)===String(id);})[0];
+        if(pr) ibCopyText(pr.backendRequest||"", b);
+      });
+    });
+    // 플랫폼 변경 승인/거절
+    box.querySelectorAll("[data-prok],[data-prno]").forEach(function(b){
+      b.addEventListener("click", async function(){
+        var ok=b.hasAttribute("data-prok");
+        var id=b.getAttribute(ok?"data-prok":"data-prno");
+        if(ok && !confirm("이 변경을 앱에 적용할까요?\n(문제가 생기면 설정에서 패치를 끄거나 삭제할 수 있어요)")) return;
+        b.disabled=true; b.textContent="처리 중…";
+        try{
+          var r=await fetch(backendOrigin()+"/api/patch/decide",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:+id, approve:ok})});
+          var d2=await r.json(); if(d2.error) throw new Error(d2.error);
+          alert(ok ? ("적용했어요: "+(d2.title||"")+"\n앱을 새로고침하면 반영됩니다.") : "거절했어요. 플랫폼은 변경되지 않았습니다.");
+          loadProposals();
+          if(ok){ try{ loadAndApplyPatches(); }catch(_){} }
+        }catch(e){ alert("실패: "+(e.message||e)); b.disabled=false; b.textContent=ok?"✅ 승인하고 적용":"✕ 거절"; }
+      });
+    });
+  }).catch(function(){});
+}
+function pollLearnTab(jobId, btn, oldTxt, onDone){
+  var tries=0, lastStep="";
+  var t=setInterval(async function(){
+    tries++; if(tries>150){ clearInterval(t); return; }        // 12분까지 화면 갱신
+    if(STATE.view!=="learn"){ clearInterval(t); return; }      // 탭 벗어나도 서버는 계속 진행
+    try{
+      var r=await fetch(backendOrigin()+"/api/learn/status?id="+encodeURIComponent(jobId));
+      var d=await r.json(); if(!d || d.error) return;
+      var st=document.getElementById("lnStat");
+      if(d.status==="running" && d.step && d.step!==lastStep){
+        lastStep=d.step;
+        if(st) st.innerHTML='<span style="color:#1668c7">⏳ '+esc(d.step)+'…  <span style="color:#8a94a6">(앱을 닫아도 계속 진행돼요)</span></span>';
+      }
+      if(d.status==="done"){
+        clearInterval(t);
+        if(st) st.innerHTML='<span style="color:#0e7a52">✔ 학습 완료'+(d.analyzed?(" — "+d.analyzed+"개 분석"):"")+'! 품질 공식이 갱신됐어요.</span>';
+        var res=document.getElementById("lnResult");
+        if(res){
+          if(d.kind==="deep" && d.result){
+            res.innerHTML=deepResultHtml(d.result);
+            var ex=String(d.result.example||"");
+            var fr=document.getElementById("lnExFrame"); if(fr){ try{ fr.srcdoc=ex; }catch(_){} }
+            var op=document.getElementById("lnExOpen");
+            if(op) op.addEventListener("click", function(){ try{ var w=window.open("","_blank"); w.document.open(); w.document.write(ex); w.document.close(); }catch(_){ alert("팝업이 차단됐어요."); } });
+          } else {
+            res.innerHTML='<div style="background:#f7fbff;border:1px solid #d9e8fb;border-radius:10px;padding:11px 13px"><div style="font-size:11.5px;font-weight:800;color:#1668c7;margin-bottom:5px">🧠 새로 배운 품질 공식</div><div style="font-size:12px;color:#1c2838;line-height:1.65;white-space:pre-wrap;max-height:320px;overflow:auto">'+esc(d.knowledge||"")+'</div></div>';
+          }
+        }
+        if(btn){ btn.disabled=false; btn.textContent=oldTxt; }
+        if(onDone) try{ onDone(); }catch(_){}
+        setTimeout(function(){ try{ loadProposals(); }catch(_){} }, 1500);   // 팀장이 변경 승인을 요청했을 수 있음
+      } else if(d.status==="error"){
+        clearInterval(t);
+        if(st) st.innerHTML='<span style="color:#c0392b">학습 실패: '+esc(d.error||"원인 미상")+'</span>';
+        if(btn){ btn.disabled=false; btn.textContent=oldTxt; }
+      }
+    }catch(_){}
+  }, 5000);
+}
 // ===== 학습 스튜디오: 유튜브 URL·웹 벤치마크로 부서 전문성 키우기 =====
-var LEARN_DEPTS = ["strategy","creation","publishing","analytics","monetization","advisory","scout"];
+var LEARN_DEPTS = ["strategy","creation","publishing","analytics","monetization","advisory","scout","ops"];
 function openLearnModal(){
   var opts = LEARN_DEPTS.map(function(d){
     var a=AGENTS[d]||{}; return '<option value="'+d+'">'+esc((a.no||"")+" "+(a.kr||d))+'</option>';
@@ -2967,6 +3327,8 @@ function openProductModal(){
     +'<input id="pdPrice" placeholder="가격 (예: 18,000원 / 선택)" style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12.5px;margin-bottom:6px">'
     +'<textarea id="pdInfo" placeholder="상품 정보·특징·스토리 (예: 고흥 청정해풍 맞고 자란 유자, 무농약, 3대째 전통방식...)" style="width:100%;box-sizing:border-box;min-height:70px;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:6px"></textarea>'
     +'<textarea id="pdPhotos" placeholder="(선택) 사진 URL을 줄바꿈으로. 없으면 비워두면 AI이미지 자리로 표시됩니다." style="width:100%;box-sizing:border-box;min-height:44px;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:11.5px;margin-bottom:8px"></textarea>'
+    +'<label class="ps-chk" style="display:flex;align-items:center;gap:7px;border:1px solid #ffd0e0;background:#fff7fa;border-radius:9px;padding:8px 10px;margin-bottom:6px;font-size:11.5px"><input type="checkbox" id="pdAiImg"> 사진 없는 자리에 <b>AI 이미지 생성</b> <span style="color:#b02a5b">(유료 · 승인 필요)</span></label>'
+    +'<div class="note" id="pdCost" style="margin-bottom:7px"></div>'
     +'<button class="cbtn conn" id="pdRun" style="width:100%;justify-content:center">🛍️ 상품페이지 만들기</button>'
     +'<div class="note" id="pdStat" style="margin-top:6px"></div>'
     +'<div id="pdResult" style="margin-top:10px"></div>'
@@ -2975,6 +3337,19 @@ function openProductModal(){
   function close(){ try{ document.body.removeChild(ov); }catch(e){} }
   ov.addEventListener("click", function(e){ if(e.target===ov) close(); });
   ov.querySelector("#pdClose").addEventListener("click", close);
+  // 예상 비용 미리보기
+  function refreshCost(){
+    var el=ov.querySelector("#pdCost"); if(!el || !useBackend()) return;
+    var ai=ov.querySelector("#pdAiImg").checked ? "1" : "0";
+    fetch(backendOrigin()+"/api/cost/estimate?kind=product-page&aiImages="+ai)
+      .then(function(r){return r.json();}).then(function(d){
+        var paid=(d.paid||[]).length;
+        el.innerHTML='💸 예상 비용 약 <b>₩'+((d.estKrw||0).toLocaleString())+'</b>'
+          + (paid ? ' <span style="color:#b02a5b">· 유료 자원 포함 → 실행 전 승인 요청</span>' : ' <span style="color:#0e7a52">· 무료 범위</span>');
+      }).catch(function(){ el.textContent=""; });
+  }
+  ov.querySelector("#pdAiImg").addEventListener("change", refreshCost);
+  refreshCost();
   // 학습시키기(벤치마크 학습 수동 실행)
   ov.querySelector("#pdLearn").addEventListener("click", async function(){
     var st=ov.querySelector("#pdLearnStat"), btn=ov.querySelector("#pdLearn");
@@ -3001,8 +3376,14 @@ function openProductModal(){
     try{ await wakeServer(90000);
       var r=await fetch(backendOrigin()+"/api/product-page/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
         product:name, brand:(ov.querySelector("#pdBrand").value||"").trim(), price:(ov.querySelector("#pdPrice").value||"").trim(),
-        info:(ov.querySelector("#pdInfo").value||"").trim(), photos:photos, appUrl:location.href.split("#")[0] })});
+        info:(ov.querySelector("#pdInfo").value||"").trim(), photos:photos,
+        aiImages: ov.querySelector("#pdAiImg").checked, appUrl:location.href.split("#")[0] })});
       var d=await r.json(); if(d.error) throw new Error(d.error);
+      if(d.pendingApproval){
+        st.innerHTML='<span style="color:#b02a5b">💸 유료 자원이 필요해 <b>승인을 요청</b>했어요 (예상 ₩'+((d.estKrw||0).toLocaleString())+').<br>카카오톡 또는 <b>📚 학습 탭</b>에서 승인·무료우회·취소를 선택하세요.</span>';
+        btn.disabled=false; btn.textContent="🛍️ 상품페이지 만들기";
+        return;
+      }
       st.innerHTML='<span style="color:#0e7a52">✔ 접수됐어요. <b>앱을 닫아도 계속 만들어집니다.</b> 완료되면 카카오톡으로 알려드리고, 콘텐츠 탭에 저장돼요.</span>';
       btn.textContent="제작 중… (닫아도 됩니다)";
       pollPageJob(d.jobId, ov, name);
@@ -3342,7 +3723,7 @@ function bindOffice(){
   var oba=document.getElementById("obAnalytics"); if(oba) oba.addEventListener("click", openAnalyticsModal);
   var obw=document.getElementById("obWebtoon"); if(obw) obw.addEventListener("click", openWebtoonModal);
   var obp=document.getElementById("obProduct"); if(obp) obp.addEventListener("click", openProductModal);
-  var obl=document.getElementById("obLearn"); if(obl) obl.addEventListener("click", openLearnModal);
+  var obl=document.getElementById("obLearn"); if(obl) obl.addEventListener("click", function(){ STATE.view="learn"; saveState(); render(); });
   document.querySelectorAll("[data-obmeet]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation();
     STATE.meetingPrefillDept=b.getAttribute("data-obmeet"); STATE.view="meeting";
     document.querySelectorAll(".vtab").forEach(function(t){ t.classList.toggle("on", t.dataset.v==="meeting"); }); render(); }); });
@@ -3621,6 +4002,7 @@ function render(){
     if(STATE.view==="analytics") STATE.view="record";
     if(STATE.view==="console") renderConsole();
     else if(STATE.view==="content") renderContent();
+    else if(STATE.view==="learn") renderLearn();
     else if(STATE.view==="results") renderResults();
     else if(STATE.view==="mobile") renderMobile();
     else if(STATE.view==="record") renderRecord();
@@ -3630,6 +4012,7 @@ function render(){
     else renderSettings();
     if(STATE.view==="settings") bindSettings();
     else if(STATE.view==="content") bindContent();
+    else if(STATE.view==="learn") bindLearn();
     else if(STATE.view==="results"){ bindResults(); loadApprovals(); }
     else if(STATE.view==="record") bindRecord();
     else if(STATE.view==="office") bindOffice();
