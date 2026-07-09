@@ -847,7 +847,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v184</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v187</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -3435,7 +3435,7 @@ function pollRepurpose(jobId, btn, oldTxt, out){
     try{
       var r=await fetch(backendOrigin()+"/api/repurpose/status?id="+encodeURIComponent(jobId));
       var d=await r.json(); if(!d||d.error) return;
-      if(d.status==="running" && d.step){ out.innerHTML='<span style="color:#1668c7">⏳ '+esc(d.step)+'… <span style="color:#8a94a6">(앱 닫아도 진행)</span></span>'; }
+      if(d.status==="running" && d.step){ out.innerHTML='<span style="color:#1668c7">⏳ '+esc(d.step)+'… <span style="color:#8a94a6">(앱 닫아도 진행)</span></span>'; if(btn){ var _s=String(d.step); btn.textContent="⏳ "+(_s.length>18?_s.slice(0,18)+"…":_s+"…"); } }
       if(d.status==="done"){ clearInterval(t);
         var v=d.variants||{}; var KR={instagram:"📸 인스타 피드",reels:"🎬 릴스",shorts:"▶️ 유튜브 쇼츠",blog:"📝 블로그",youtube:"🎥 유튜브 설명란",thread:"🧵 스레드/X",kakao:"💬 카카오채널"};
         var h='<div style="font-weight:800;color:#0e7a52;margin-bottom:6px">✔ 변환 완료 — 플랫폼별 결과</div>';
@@ -3727,6 +3727,7 @@ function pollLearnTab(jobId, btn, oldTxt, onDone){
       if(d.status==="running" && d.step && d.step!==lastStep){
         lastStep=d.step;
         if(st) st.innerHTML='<span style="color:#1668c7">⏳ '+esc(d.step)+'…  <span style="color:#8a94a6">(앱을 닫아도 계속 진행돼요)</span></span>';
+        if(btn){ var _s=String(d.step); btn.textContent="⏳ "+(_s.length>20?_s.slice(0,20)+"…":_s+"…"); }
       }
       if(d.status==="done"){
         clearInterval(t);
@@ -3934,6 +3935,7 @@ function pollPageJob(jobId, ov, name){
       var r=await fetch(backendOrigin()+"/api/product-page/status?id="+encodeURIComponent(jobId));
       var d=await r.json(); if(!d || d.error) return;
       var st=ov?ov.querySelector("#pdStat"):null, btn=ov?ov.querySelector("#pdRun"):null;
+      if(d.status==="running" && d.step){ if(st) st.innerHTML='<span style="color:#1668c7">⏳ '+esc(d.step)+'… <span style="color:#8a94a6">(앱 닫아도 진행)</span></span>'; if(btn){ var _s=String(d.step); btn.textContent="⏳ "+(_s.length>18?_s.slice(0,18)+"…":_s+"…"); } }
       if(d.status==="done"){
         clearInterval(t);
         savePageJobToContent(jobId, d.html||"", d.product||name, !!d.appliedFormula);
