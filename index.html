@@ -847,7 +847,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v170</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v174</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -2909,6 +2909,7 @@ function renderLearn(){
   viewEl.innerHTML =
     '<div style="padding:14px 12px 40px;max-width:640px;margin:0 auto">'
     +'<div style="font-size:18px;font-weight:800;color:#15324f;margin-bottom:10px">📚 학습 스튜디오</div>'
+    +'<div id="lnActive" style="margin-bottom:12px"></div>'
     +'<div class="note" style="margin-bottom:12px;background:#eef7ff;border:1px solid #cfe4fb;border-radius:10px;padding:10px 12px;line-height:1.6">'
       +'좋은 <b>유튜브 영상</b>이나 <b>홈페이지·상세페이지 주소</b>를 넣으면, 부서가 그걸 직접 분석해 <b>품질 공식</b>을 만들어 쌓습니다. '
       +'쌓인 공식은 이후 그 부서의 <b>모든 결과물에 자동 적용</b>돼요.<br>'
@@ -3072,6 +3073,8 @@ function bindLearn(){
   loadKnow();
   loadApplied(curDept());
   loadHistory(curDept());
+  window._lnRefresh = function(){ try{ loadKnow(); loadApplied(curDept()); loadHistory(curDept()); }catch(_){} };
+  startActivePoll();
   loadProposals();
 
   function start(kind, urlsEl, btn){
@@ -3243,6 +3246,43 @@ function loadApplied(dept){
       }).join("")+'</div>';
     box.innerHTML=h;
   }).catch(function(){ box.textContent="불러오기 실패"; });
+}
+function loadActiveJobs(){
+  var box=document.getElementById("lnActive"); if(!box||!useBackend()) return;
+  fetch(backendOrigin()+"/api/learn/list").then(function(r){return r.json();}).then(function(d){
+    var all=(d&&d.jobs)||[];
+    var jobs=all.filter(function(j){return j.status==="queued"||j.status==="running";});
+    var now=Date.now();
+    if(!jobs.length){
+      box.innerHTML="";
+      if(window._lnPrevActive>0 && window._lnRefresh){ try{ window._lnRefresh(); }catch(_){} }  // 방금 다 끝남 → 지식·이력 갱신
+      window._lnPrevActive=0; return;
+    }
+    window._lnPrevActive=jobs.length;
+    function el(sec){ return (sec<60)?(sec+"초"):(Math.floor(sec/60)+"분 "+(sec%60)+"초"); }
+    box.innerHTML='<div style="background:#f0fbf5;border:1px solid #bfe6cf;border-radius:12px;padding:11px 13px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#0e7a52;margin-bottom:4px">🔄 진행 중인 학습 '+jobs.length+'건 <span style="font-weight:600;font-size:10.5px;color:#6f9e84">— 앱 닫아도 계속돼요</span></div>'
+      + jobs.map(function(j){
+          var kind=(j.kind==="youtube")?"🎬 유튜브":(j.kind==="web")?"🌐 웹페이지":(j.kind==="deep")?"🏢 심화학습":(j.kind==="benchmark")?"📊 벤치마크":"📚 학습";
+          var start=j.startedAt||j.at||now;
+          var sec=Math.max(0,Math.round((now-start)/1000));
+          var step=j.step||((j.status==="queued")?"대기 중":"준비 중");
+          var stuck=(j.status==="running" && sec>720);
+          return '<div style="border-top:1px solid #d8eede;padding:6px 0 4px">'
+            +'<div style="font-size:11.5px;color:#1c2838"><b>'+kind+'</b> <span style="color:#8a94a6">'+esc(j.dept||"")+'</span></div>'
+            +'<div style="font-size:11px;color:'+(stuck?"#b9651a":"#0e7a52")+';margin-top:1px">'+(stuck?"⚠️":"⏳")+' '+esc(step)+'… <span style="color:#8a94a6">('+el(sec)+' 경과'+(stuck?" · 오래 걸려요, 멈춘 듯하면 새로고침":"")+')</span></div>'
+            +'</div>';
+        }).join("")
+      +'</div>';
+  }).catch(function(){});
+}
+function startActivePoll(){
+  if(window._lnActiveTimer) clearInterval(window._lnActiveTimer);
+  loadActiveJobs();
+  window._lnActiveTimer=setInterval(function(){
+    if(STATE.view!=="learn"){ clearInterval(window._lnActiveTimer); window._lnActiveTimer=null; return; }
+    loadActiveJobs();
+  }, 4000);
 }
 function loadHistory(dept){
   var box=document.getElementById("lnHistory");
