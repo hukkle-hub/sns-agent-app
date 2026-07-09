@@ -847,7 +847,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v176</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v181</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -1747,7 +1747,7 @@ async function syncBackend(full){
 }
 async function pushState(){
   if(!useBackend()) return;
-  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn, usdKrw:STATE.usdKrw, monthLimitKrw:STATE.monthLimitKrw, geminiMonthLimitKrw:STATE.geminiMonthLimitKrw, paidGeminiOn:STATE.paidGeminiOn, nightSearchOn:STATE.nightSearchOn, leaderAutoOn:STATE.leaderAutoOn, contentNotify:STATE.contentNotify, researchMode:STATE.researchMode }) }); }catch(e){}
+  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn, usdKrw:STATE.usdKrw, monthLimitKrw:STATE.monthLimitKrw, geminiMonthLimitKrw:STATE.geminiMonthLimitKrw, paidGeminiOn:STATE.paidGeminiOn, nightSearchOn:STATE.nightSearchOn, leaderAutoOn:STATE.leaderAutoOn, contentNotify:STATE.contentNotify, researchMode:STATE.researchMode, appBase:location.href.split("#")[0] }) }); }catch(e){}
 }
 // 총괄: 1개 이상 부서 배정 (다중 분배)
 async function route(instruction){
@@ -2900,6 +2900,8 @@ function webtoonResultHtml(d){
 // ===== 📚 학습 탭: 유튜브 영상 + 웹페이지(홈페이지·상세페이지)로 부서 전문성 키우기 =====
 function renderLearn(){
   var curLD = STATE.learnDept || "auto";
+  var RP_PLATS=[["instagram","인스타 피드"],["reels","릴스"],["shorts","유튜브 쇼츠"],["blog","블로그"],["youtube","유튜브 설명란"],["thread","스레드/X"],["kakao","카카오채널"]];
+  var rpChips=RP_PLATS.map(function(x){ return '<button type="button" class="rpchip" data-p="'+x[0]+'" style="padding:6px 10px;border-radius:16px;border:1px solid #d6deea;background:#fff;color:#5a6472;font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer">'+x[1]+'</button>'; }).join("");
   var opts = LEARN_DEPTS.map(function(d){
     var a=AGENTS[d]||{}; var sel=(curLD===d)?' selected':'';
     var label = (d==="auto") ? "🤖 자동 — 팀장이 알아서 배정 (권장)"
@@ -2924,6 +2926,46 @@ function renderLearn(){
       +'</div>'
       +'<div class="note" id="rmNote" style="margin-top:7px"></div>'
       +'<div id="rmCost" style="margin-top:6px"></div>'
+    +'</div>'
+
+    +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🏷 브랜드 학습 <span style="font-weight:600;font-size:10.5px;color:#8a94a6">— 모든 콘텐츠의 기준</span></div>'
+      +'<div class="note" style="margin-bottom:6px">고흥/민앤팜 <b>브랜드 가이드·톤·제품 사실</b>을 넣으면 이후 <b>모든 생성물이 이 기준</b>을 따릅니다. 자료를 붙여넣거나 URL을 주면 AI가 정리해요.</div>'
+      +'<textarea id="brandBox" placeholder="브랜드 가이드/톤/제품 사실 또는 참고 자료를 붙여넣기" style="width:100%;box-sizing:border-box;min-height:88px;padding:10px 12px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:6px">불러오는 중…</textarea>'
+      +'<input id="brandUrl" placeholder="(선택) 브랜드 자료 URL — 예: 소개 페이지" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:6px">'
+      +'<div style="display:flex;gap:6px">'
+        +'<button class="cbtn" id="brandSaveBtn" style="flex:1;justify-content:center;background:#eef2f8;color:#15324f;border-color:#dde5f0">💾 그대로 저장</button>'
+        +'<button class="cbtn conn" id="brandDistillBtn" style="flex:1;justify-content:center">✨ AI로 정리해 저장</button>'
+      +'</div>'
+      +'<div class="note" id="brandStat" style="margin-top:6px"></div>'
+    +'</div>'
+
+    +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">♻️ 원소스 → 멀티플랫폼 변환</div>'
+      +'<div class="note" style="margin-bottom:6px">콘텐츠 1개를 <b>플랫폼별로 자동 재가공</b>합니다(브랜드·품질 공식 반영). 앱 닫아도 진행돼요.</div>'
+      +'<textarea id="rpSource" placeholder="원본 콘텐츠(글/대본/설명)를 붙여넣기" style="width:100%;box-sizing:border-box;min-height:78px;padding:10px 12px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:7px"></textarea>'
+      +'<div id="rpPlatforms" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">'+rpChips+'</div>'
+      +'<button class="cbtn conn" id="rpBtn" style="width:100%;justify-content:center">♻️ 선택 플랫폼으로 변환</button>'
+      +'<div id="rpResult" style="margin-top:8px"></div>'
+    +'</div>'
+
+    +'<div style="background:#f6fff9;border:1px solid #bfe6cf;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#0e7a52;margin-bottom:4px">🚀 자율 개선 제안 <span style="font-weight:600;font-size:10.5px;color:#6f9e84">— 팀장이 웹 조사로 스스로 개선안 제시</span></div>'
+      +'<div class="note" style="margin-bottom:6px">팀장이 <b>웹에서 최신 사례를 조사</b>해 품질 개선안을 냅니다. <b>승인하면 품질 공식에 반영</b>되고, 승인·거절에서 배워 제안이 점점 좋아져요. (하루 1회 자동으로도 제안)</div>'
+      +'<button class="cbtn conn" id="impBtn" style="width:100%;justify-content:center">🔍 개선안 스스로 찾기</button>'
+      +'<div id="impList" style="margin-top:8px"></div>'
+    +'</div>'
+
+    +'<div style="background:#fbfdf7;border:1px solid #d9e8bf;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#5a7a1a;margin-bottom:4px">🌲 에버그린 재발행 <span style="font-weight:600;font-size:10.5px;color:#8aa35a">— 성과 좋았던 콘텐츠 재활용</span></div>'
+      +'<div class="note" style="margin-bottom:6px">잘 나갔던 글을 <b>즐겨찾기로 저장</b>해두면, 나중에 <b>새로 각색해 재게시</b>할 수 있어요. (오래 안 쓴 건 자동으로 재발행을 추천)</div>'
+      +'<textarea id="egText" placeholder="성과 좋았던 콘텐츠(글/캡션)를 붙여넣기" style="width:100%;box-sizing:border-box;min-height:60px;padding:9px 11px;border:1px solid #d9e8bf;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:6px"></textarea>'
+      +'<div style="display:flex;gap:6px;margin-bottom:7px">'
+        +'<input id="egNote" placeholder="(선택) 메모 — 예: 유자청 릴스, 저장 많았음" style="flex:2;box-sizing:border-box;padding:8px 10px;border:1px solid #d9e8bf;border-radius:9px;font-family:inherit;font-size:11.5px">'
+        +'<input id="egScore" type="number" min="0" max="100" placeholder="성과점수(선택)" style="flex:1;box-sizing:border-box;padding:8px 10px;border:1px solid #d9e8bf;border-radius:9px;font-family:inherit;font-size:11.5px">'
+      +'</div>'
+      +'<button class="cbtn" id="egAddBtn" style="width:100%;justify-content:center;background:#eef7e0;color:#5a7a1a;border-color:#d9e8bf">⭐ 에버그린에 추가</button>'
+      +'<div id="egList" style="margin-top:8px"></div>'
     +'</div>'
 
     +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
@@ -2978,6 +3020,14 @@ function renderLearn(){
       +'<input id="lnDgYt" placeholder="(선택) 테스트할 유튜브 URL" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #f4cccc;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:7px">'
       +'<button class="cbtn" id="lnDiagBtn" style="width:100%;justify-content:center;background:#fdecec;color:#c0392b;border-color:#f4cccc">🔧 지금 진단하기</button>'
       +'<div id="lnDiag" style="margin-top:8px"></div>'
+    +'</div>'
+    +'<div style="background:#f7f9fc;border:1px solid #dde5f0;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🩺 시스템 상태 <span style="font-size:10.5px;font-weight:600;color:#8a94a6">— 오류·작업·API를 한눈에</span></div>'
+      +'<div style="display:flex;gap:6px;margin-bottom:7px">'
+        +'<button class="cbtn" id="lnHealthBtn" style="flex:1;justify-content:center;background:#eef2f8;color:#15324f;border-color:#dde5f0">🩺 상태 새로고침</button>'
+        +'<button class="cbtn" id="lnSelfTestBtn" style="flex:1;justify-content:center;background:#eef7ff;color:#1668c7;border-color:#cfe4fb">🧪 자가 점검</button>'
+      +'</div>'
+      +'<div id="lnHealth" style="font-size:11.5px;line-height:1.6">불러오는 중…</div>'
     +'</div>'
     +'<div class="note" id="lnStat" style="margin-bottom:10px"></div>'
     +'<div id="lnProposals" style="margin-bottom:12px"></div>'
@@ -3075,6 +3125,23 @@ function bindLearn(){
   loadHistory(curDept());
   window._lnRefresh = function(){ try{ loadKnow(); loadApplied(curDept()); loadHistory(curDept()); }catch(_){} };
   startActivePoll();
+  var hb=document.getElementById("lnHealthBtn"); if(hb) hb.addEventListener("click", loadHealth);
+  var stb=document.getElementById("lnSelfTestBtn"); if(stb) stb.addEventListener("click", function(){ runSelfTest(false); });
+  loadHealth();
+  loadBrand();
+  var bs=document.getElementById("brandSaveBtn"); if(bs) bs.addEventListener("click", function(){ saveBrand(false); });
+  var bd=document.getElementById("brandDistillBtn"); if(bd) bd.addEventListener("click", function(){ saveBrand(true); });
+  bindRepurposeChips();
+  var rpb=document.getElementById("rpBtn"); if(rpb) rpb.addEventListener("click", startRepurpose);
+  var ib=document.getElementById("impBtn"); if(ib) ib.addEventListener("click", runImprove);
+  loadImprove();
+  var eab=document.getElementById("egAddBtn");
+  if(eab) eab.addEventListener("click", function(){
+    var t=document.getElementById("egText"), n=document.getElementById("egNote"), sc=document.getElementById("egScore");
+    var text=(t.value||"").trim(); if(!text){ alert("내용을 입력하세요."); return; }
+    egAdd(text, (n.value||"").trim(), +sc.value||0, function(){ t.value=""; n.value=""; sc.value=""; });
+  });
+  loadEvergreen();
   loadProposals();
 
   function start(kind, urlsEl, btn){
@@ -3275,6 +3342,195 @@ function loadActiveJobs(){
         }).join("")
       +'</div>';
   }).catch(function(){});
+}
+function loadHealth(){
+  var box=document.getElementById("lnHealth"); if(!box||!useBackend()) return;
+  box.textContent="불러오는 중…";
+  fetch(backendOrigin()+"/api/health").then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ box.textContent="불러오기 실패"; return; }
+    var okAll=(d.status==="ok");
+    var h='<div style="font-weight:800;color:'+(okAll?"#0e7a52":"#c0392b")+';margin-bottom:5px">'+(okAll?"🟢 정상":"🟠 점검 필요")+'</div>';
+    if(d.problems&&d.problems.length){ h+='<div style="color:#c0392b;margin-bottom:6px">'+d.problems.map(function(p){return "· "+esc(p);}).join("<br>")+'</div>'; }
+    var lj=d.jobs.learn, pj=d.jobs.page, a=d.api;
+    h+='<div style="color:#3a4452"><b>작업</b> — 학습: 진행 '+(lj.queued+lj.running)+' · 완료 '+lj.done+' · 실패 '+lj.error+(lj.stuck?(' · <span style="color:#c0392b">멈춤 '+lj.stuck+'</span>'):"")
+      +'<br>상품페이지: 진행 '+(pj.queued+pj.running)+' · 완료 '+pj.done+' · 실패 '+pj.error+(pj.stuck?(' · <span style="color:#c0392b">멈춤 '+pj.stuck+'</span>'):"")+'</div>';
+    h+='<div style="color:#3a4452;margin-top:4px"><b>API</b> — Gemini키 '+(a.geminiKey?"✅":"❌")+' · 조사모드 '+(a.researchMode==="paid"?"💳 유료":"🆓 무료")+(a.cooldownActive?(' · <span style="color:#b9651a">쿨다운 '+a.cooldownSec+'초</span>'):"")+' · 오늘 검색 '+a.searchesToday+'회</div>';
+    if(d.storage&&d.storage.saveFailStreak>0) h+='<div style="color:#c0392b;margin-top:4px">💾 저장 실패 '+d.storage.saveFailStreak+'회 — '+esc(d.storage.lastSaveErr)+'</div>';
+    var g=(d.errors&&d.errors.groups)||[];
+    if(g.length){
+      h+='<details style="margin-top:6px"><summary style="cursor:pointer;font-weight:700;color:#c0392b">⚠️ 최근 오류 '+d.errors.last24h+'건/24시간 (묶음 '+g.length+') — 펼치기</summary><div style="margin-top:4px">'
+        + g.map(function(x){ var when=new Date(x.last).toLocaleString("ko-KR",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});
+            return '<div style="border-top:1px solid #eef1f6;padding:4px 0"><b style="color:#c0392b">'+esc(x.where)+'</b> ×'+x.count+' <span style="color:#b0b6c0;font-size:10px">'+when+'</span><br><span style="color:#5a6472">'+esc(x.msg)+'</span></div>'; }).join("")
+        + '</div><button class="cbtn" id="lnClearErr" style="width:100%;justify-content:center;margin-top:6px;font-size:11px;background:#fff;color:#8a94a6;border-color:#e6ebf2">오류 로그 비우기</button></details>';
+    } else { h+='<div style="color:#0e7a52;margin-top:5px">✔ 최근 오류 없음</div>'; }
+    box.innerHTML=h;
+    var ce=document.getElementById("lnClearErr");
+    if(ce) ce.addEventListener("click", function(){ fetch(backendOrigin()+"/api/ops/clear-errors",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"}).then(function(){ loadHealth(); }).catch(function(){}); });
+  }).catch(function(){ box.textContent="불러오기 실패"; });
+}
+function runSelfTest(deep){
+  var box=document.getElementById("lnHealth"); if(!box||!useBackend()) return;
+  box.innerHTML='<span style="color:#1668c7">🧪 자가 점검 실행 중… ('+(deep?"AI 포함, 20~40초":"10~20초")+')</span>';
+  fetch(backendOrigin()+"/api/selftest"+(deep?"?deep=1":"")).then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ box.textContent="점검 실패"; return; }
+    var h='<div style="font-weight:800;color:'+(d.fail?"#c0392b":"#0e7a52")+';margin-bottom:5px">🧪 자가 점검 — 통과 '+d.pass+'/'+d.total+(d.fail?(" · 실패 "+d.fail):"")+'</div>';
+    h+=d.results.map(function(r){ return '<div style="border-top:1px solid #eef1f6;padding:4px 0;color:'+(r.ok?"#0e7a52":"#c0392b")+'">'+(r.ok?"✅":"❌")+' '+esc(r.name)+' <span style="color:#8a94a6">('+r.ms+'ms)</span><br><span style="margin-left:16px;color:#5a6472">'+esc(r.detail)+'</span></div>'; }).join("");
+    h+='<div style="display:flex;gap:6px;margin-top:7px"><button class="cbtn" id="lnHealthBack" style="flex:1;justify-content:center;font-size:11px;background:#eef2f8;color:#15324f;border-color:#dde5f0">🩺 상태로</button>'+(deep?"":'<button class="cbtn" id="lnSelfDeep" style="flex:1;justify-content:center;font-size:11px;background:#eef7ff;color:#1668c7;border-color:#cfe4fb">🔬 AI까지 점검</button>')+'</div>';
+    box.innerHTML=h;
+    var b1=document.getElementById("lnHealthBack"); if(b1) b1.addEventListener("click", loadHealth);
+    var b2=document.getElementById("lnSelfDeep"); if(b2) b2.addEventListener("click", function(){ runSelfTest(true); });
+  }).catch(function(){ box.textContent="점검 실패"; });
+}
+function loadBrand(){
+  var box=document.getElementById("brandBox"); if(!box||!useBackend()){ if(box) box.value=""; return; }
+  fetch(backendOrigin()+"/api/brand").then(function(r){return r.json();}).then(function(d){ box.value=(d&&d.text)||""; }).catch(function(){ box.value=""; });
+}
+function saveBrand(distill){
+  var box=document.getElementById("brandBox"), url=document.getElementById("brandUrl"), st=document.getElementById("brandStat");
+  if(!useBackend()){ if(st) st.innerHTML='<span style="color:#c0392b">백엔드 연결이 필요해요.</span>'; return; }
+  var text=(box.value||"").trim(), u=(url.value||"").trim();
+  if(!text && !u){ st.innerHTML='<span style="color:#c0392b">브랜드 자료나 URL을 입력하세요.</span>'; return; }
+  st.innerHTML=distill?'<span style="color:#1668c7">✨ AI가 정리 중… (10~30초)</span>':'저장 중…';
+  var body=distill?{ material:text, url:u, distill:true }:{ text:text };
+  fetch(backendOrigin()+"/api/brand",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+    .then(function(r){return r.json();}).then(function(d){ if(d.error) throw new Error(d.error);
+      if(d.text!=null) box.value=d.text;
+      st.innerHTML='<span style="color:#0e7a52">✔ 브랜드 프로필 '+(d.mode==="distilled"?"정리·저장됨 — 이제 모든 콘텐츠에 반영돼요":"저장됨")+'</span>';
+    }).catch(function(e){ st.innerHTML='<span style="color:#c0392b">실패: '+esc(e.message||String(e))+'</span>'; });
+}
+function bindRepurposeChips(){
+  var wrap=document.getElementById("rpPlatforms"); if(!wrap) return;
+  wrap.querySelectorAll(".rpchip").forEach(function(c){
+    c.addEventListener("click", function(){
+      var on=c.getAttribute("data-on")==="1"; c.setAttribute("data-on", on?"0":"1");
+      c.style.background=on?"#fff":"#eef7ff"; c.style.color=on?"#5a6472":"#1668c7"; c.style.borderColor=on?"#d6deea":"#7fb6ef";
+    });
+  });
+}
+function startRepurpose(){
+  var src=document.getElementById("rpSource"), btn=document.getElementById("rpBtn"), out=document.getElementById("rpResult");
+  if(!useBackend()){ out.innerHTML='<span style="color:#c0392b">백엔드 연결이 필요해요.</span>'; return; }
+  var source=(src.value||"").trim();
+  var plats=[]; document.querySelectorAll("#rpPlatforms .rpchip").forEach(function(c){ if(c.getAttribute("data-on")==="1") plats.push(c.getAttribute("data-p")); });
+  if(!source){ out.innerHTML='<span style="color:#c0392b">원본 콘텐츠를 입력하세요.</span>'; return; }
+  if(!plats.length){ out.innerHTML='<span style="color:#c0392b">변환할 플랫폼을 1개 이상 선택하세요.</span>'; return; }
+  var oldTxt=btn.textContent; btn.disabled=true; btn.textContent="접수 중…"; out.innerHTML="";
+  (async function(){
+    try{ await wakeServer(90000);
+      var r=await fetch(backendOrigin()+"/api/repurpose/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ source:source, platforms:plats, appUrl:location.href.split("#")[0] })});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      btn.textContent="변환 중… (닫아도 됩니다)";
+      out.innerHTML='<span style="color:#0e7a52">✔ 접수됐어요. 앱 닫아도 계속 진행되고 완료 시 카톡으로 알려드려요.</span>';
+      pollRepurpose(d.jobId, btn, oldTxt, out);
+    }catch(e){ out.innerHTML='<span style="color:#c0392b">실패: '+esc(e.message||String(e))+'</span>'; btn.disabled=false; btn.textContent=oldTxt; }
+  })();
+}
+function pollRepurpose(jobId, btn, oldTxt, out){
+  var tries=0;
+  var t=setInterval(async function(){
+    tries++; if(tries>150){ clearInterval(t); return; }
+    if(STATE.view!=="learn"){ clearInterval(t); return; }
+    try{
+      var r=await fetch(backendOrigin()+"/api/repurpose/status?id="+encodeURIComponent(jobId));
+      var d=await r.json(); if(!d||d.error) return;
+      if(d.status==="running" && d.step){ out.innerHTML='<span style="color:#1668c7">⏳ '+esc(d.step)+'… <span style="color:#8a94a6">(앱 닫아도 진행)</span></span>'; }
+      if(d.status==="done"){ clearInterval(t);
+        var v=d.variants||{}; var KR={instagram:"📸 인스타 피드",reels:"🎬 릴스",shorts:"▶️ 유튜브 쇼츠",blog:"📝 블로그",youtube:"🎥 유튜브 설명란",thread:"🧵 스레드/X",kakao:"💬 카카오채널"};
+        var h='<div style="font-weight:800;color:#0e7a52;margin-bottom:6px">✔ 변환 완료 — 플랫폼별 결과</div>';
+        h+=Object.keys(v).map(function(p){ var id="rpv_"+p; return '<div style="border:1px solid #e6ebf2;border-radius:9px;padding:9px 10px;margin-bottom:7px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><b style="font-size:11.5px;color:#15324f;flex:1">'+(KR[p]||p)+'</b><button class="cbtn" data-copy="'+id+'" style="padding:3px 9px;font-size:10.5px;background:#eef7ff;color:#1668c7;border-color:#cfe4fb">복사</button><button class="cbtn" data-star="'+id+'" data-note="'+esc(KR[p]||p)+'" style="padding:3px 9px;font-size:10.5px;background:#eef7e0;color:#5a7a1a;border-color:#d9e8bf">⭐ 에버그린</button></div><div id="'+id+'" style="font-size:11.5px;color:#1c2838;line-height:1.6;white-space:pre-wrap;max-height:260px;overflow:auto">'+esc(v[p]||"")+'</div></div>'; }).join("");
+        out.innerHTML=h;
+        out.querySelectorAll("[data-copy]").forEach(function(b){ b.addEventListener("click", function(){ var el=document.getElementById(b.getAttribute("data-copy")); if(el){ try{ navigator.clipboard.writeText(el.textContent); b.textContent="복사됨"; setTimeout(function(){b.textContent="복사";},1200); }catch(_){} } }); });
+        out.querySelectorAll("[data-star]").forEach(function(b){ b.addEventListener("click", function(){ var el=document.getElementById(b.getAttribute("data-star")); if(el){ egAdd(el.textContent, b.getAttribute("data-note"), 0, function(){ b.textContent="저장됨"; b.disabled=true; }); } }); });
+        if(btn){ btn.disabled=false; btn.textContent=oldTxt; }
+      } else if(d.status==="error"){ clearInterval(t); out.innerHTML='<span style="color:#c0392b">변환 실패: '+esc(d.error||"원인 미상")+'</span>'; if(btn){ btn.disabled=false; btn.textContent=oldTxt; } }
+    }catch(_){}
+  }, 4000);
+}
+function impCard(p){
+  return '<div class="impcard" style="border:1px solid #bfe6cf;border-radius:10px;padding:10px 11px;margin-bottom:8px;background:#fff">'
+    +'<div style="font-size:11.5px;font-weight:800;color:#15324f">'+esc(p.deptKr)+' <span style="color:#8a94a6;font-weight:600">'+(p.sourceVia==="free-web"?"🌐 무료조사":p.sourceVia==="grounding"?"🔎 grounding":p.sourceVia?("· "+esc(p.sourceVia)):"")+'</span></div>'
+    +'<div style="font-size:12px;font-weight:700;color:#0e7a52;margin:2px 0">'+esc(p.title)+'</div>'
+    +(p.why?'<div style="font-size:11px;color:#5a6472;margin-bottom:3px"><b>왜:</b> '+esc(p.why)+'</div>':"")
+    +'<details style="margin:3px 0"><summary style="cursor:pointer;font-size:11px;color:#1668c7">개선 내용 보기</summary><div style="white-space:pre-wrap;font-size:11px;color:#2b3543;background:#f6fff9;border:1px solid #d8eede;border-radius:8px;padding:8px;margin-top:4px">'+esc(p.improvement)+'</div></details>'
+    +(p.expect?'<div style="font-size:11px;color:#6f9e84;margin-bottom:6px"><b>기대:</b> '+esc(p.expect)+'</div>':"")
+    +'<div style="display:flex;gap:6px"><button class="cbtn imp-ok" data-id="'+p.id+'" style="flex:1;justify-content:center;background:#e9f8ef;color:#0e7a52;border-color:#bfe6cf">✅ 승인·반영</button><button class="cbtn imp-no" data-id="'+p.id+'" style="flex:1;justify-content:center;background:#fff;color:#8a94a6;border-color:#e6ebf2">🚫 거절</button></div>'
+    +'</div>';
+}
+function bindImpButtons(){
+  document.querySelectorAll(".imp-ok").forEach(function(b){ b.addEventListener("click", function(){ decideImp(b.getAttribute("data-id"), true, b); }); });
+  document.querySelectorAll(".imp-no").forEach(function(b){ b.addEventListener("click", function(){ decideImp(b.getAttribute("data-id"), false, b); }); });
+}
+function decideImp(id, approve, btn){
+  if(!useBackend()) return;
+  var card=btn.closest(".impcard"); if(card) card.style.opacity="0.6";
+  btn.disabled=true; btn.textContent=approve?"반영 중…":"처리 중…";
+  fetch(backendOrigin()+"/api/improve/decide",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id, approve:approve})})
+    .then(function(r){return r.json();}).then(function(d){ if(d.error) throw new Error(d.error);
+      loadImprove(); if(approve && window._lnRefresh){ try{ window._lnRefresh(); }catch(_){} }
+    }).catch(function(e){ alert("실패: "+(e.message||e)); loadImprove(); });
+}
+function loadImprove(){
+  var box=document.getElementById("impList"); if(!box||!useBackend()) return;
+  fetch(backendOrigin()+"/api/improve/list").then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ box.innerHTML=""; return; }
+    var pend=(d.proposals||[]).filter(function(p){return p.status==="pending";});
+    var h = pend.length ? pend.map(impCard).join("") : "";
+    h+='<div class="note" style="margin-top:4px;color:#6f9e84">팀장이 지금까지 '+(d.learnedFrom||0)+'건의 승인·거절에서 학습했어요'+(pend.length?"":" · 대기 중인 제안 없음")+'</div>';
+    box.innerHTML=h; bindImpButtons();
+  }).catch(function(){});
+}
+function runImprove(){
+  var btn=document.getElementById("impBtn"), box=document.getElementById("impList");
+  if(!useBackend()){ if(box) box.innerHTML='<span style="color:#c0392b">백엔드 연결이 필요해요.</span>'; return; }
+  var o=btn.textContent; btn.disabled=true; btn.textContent="팀장이 조사·제안 중… (1~2분)";
+  (async function(){
+    try{ await wakeServer(120000);
+      var r=await fetch(backendOrigin()+"/api/improve/propose",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ appUrl:location.href.split("#")[0] })});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      if(!d.ok) alert(d.note||"제안 생성 실패");
+      loadImprove();
+    }catch(e){ alert("실패: "+(e.message||e)); }
+    btn.disabled=false; btn.textContent=o;
+  })();
+}
+function egAdd(text, note, score, done){
+  if(!useBackend()) return;
+  fetch(backendOrigin()+"/api/evergreen/add",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ text:text, note:note||"", score:score||0 })})
+    .then(function(r){return r.json();}).then(function(d){ if(d.error) throw new Error(d.error); if(done) done(); loadEvergreen(); }).catch(function(e){ alert("실패: "+(e.message||e)); });
+}
+function loadEvergreen(){
+  var box=document.getElementById("egList"); if(!box||!useBackend()) return;
+  fetch(backendOrigin()+"/api/evergreen/list").then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){ box.innerHTML=""; return; }
+    var items=d.items||[];
+    if(!items.length){ box.innerHTML='<span style="color:#8aa35a;font-size:11px">아직 저장된 에버그린이 없어요. 잘 나갔던 글을 추가해두세요.</span>'; return; }
+    box.innerHTML=items.map(function(x){
+      return '<div class="egcard" style="border:1px solid #d9e8bf;border-radius:10px;padding:9px 10px;margin-bottom:7px;background:#fff">'
+        +'<div style="font-size:11px;color:#5a7a1a"><b>'+(x.note?esc(x.note):"(메모 없음)")+'</b>'+(x.score?(' · 성과 '+x.score):"")+' · <span style="color:#8a94a6">'+x.daysIdle+'일째 미사용</span></div>'
+        +'<div style="font-size:11px;color:#3a4452;white-space:pre-wrap;max-height:70px;overflow:auto;margin:3px 0">'+esc(String(x.text||"").slice(0,220))+(x.text&&x.text.length>220?"…":"")+'</div>'
+        +'<div style="display:flex;gap:6px"><button class="cbtn eg-refresh" data-id="'+x.id+'" style="flex:1;justify-content:center;font-size:11px;background:#eef7e0;color:#5a7a1a;border-color:#d9e8bf">♻️ 새로 각색</button><button class="cbtn eg-del" data-id="'+x.id+'" style="padding:5px 10px;font-size:11px;background:#fff;color:#c0392b;border-color:#f0d6d6">🗑</button></div>'
+        +'<div class="eg-out" style="margin-top:6px"></div>'
+        +'</div>';
+    }).join("");
+    box.querySelectorAll(".eg-del").forEach(function(b){ b.addEventListener("click", function(){ fetch(backendOrigin()+"/api/evergreen/remove",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:b.getAttribute("data-id")})}).then(function(){ loadEvergreen(); }); }); });
+    box.querySelectorAll(".eg-refresh").forEach(function(b){ b.addEventListener("click", function(){ egRefresh(b.getAttribute("data-id"), b); }); });
+  }).catch(function(){});
+}
+function egRefresh(id, btn){
+  if(!useBackend()) return;
+  var card=btn.closest(".egcard"); var out=card?card.querySelector(".eg-out"):null;
+  var o=btn.textContent; btn.disabled=true; btn.textContent="각색 중… (20~40초)";
+  fetch(backendOrigin()+"/api/evergreen/refresh",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id})})
+    .then(function(r){return r.json();}).then(function(d){ if(d.error) throw new Error(d.error);
+      if(out){ var rid="egr_"+id;
+        out.innerHTML='<div style="border:1px solid #d9e8bf;border-radius:8px;padding:8px;background:#fbfdf7"><div style="display:flex;gap:6px;align-items:center;margin-bottom:4px"><b style="flex:1;font-size:11px;color:#5a7a1a">✨ 새 버전</b><button class="cbtn" id="'+rid+'_c" style="padding:3px 9px;font-size:10.5px;background:#eef7ff;color:#1668c7;border-color:#cfe4fb">복사</button><button class="cbtn" id="'+rid+'_r" style="padding:3px 9px;font-size:10.5px;background:#eef7e0;color:#5a7a1a;border-color:#d9e8bf">♻️ 변환으로</button></div><div id="'+rid+'" style="font-size:11.5px;color:#1c2838;line-height:1.6;white-space:pre-wrap;max-height:240px;overflow:auto">'+esc(d.refreshed||"")+'</div></div>';
+        var el=document.getElementById(rid);
+        var cb=document.getElementById(rid+"_c"); if(cb) cb.addEventListener("click", function(){ try{ navigator.clipboard.writeText(el.textContent); cb.textContent="복사됨"; setTimeout(function(){cb.textContent="복사";},1200);}catch(_){}});
+        var rb=document.getElementById(rid+"_r"); if(rb) rb.addEventListener("click", function(){ var src=document.getElementById("rpSource"); if(src){ src.value=el.textContent; src.scrollIntoView({behavior:"smooth",block:"center"}); } });
+      }
+      loadEvergreen();
+    }).catch(function(e){ if(out) out.innerHTML='<span style="color:#c0392b;font-size:11px">실패: '+esc(e.message||String(e))+'</span>'; })
+    .finally(function(){ btn.disabled=false; btn.textContent=o; });
 }
 function startActivePoll(){
   if(window._lnActiveTimer) clearInterval(window._lnActiveTimer);
