@@ -847,7 +847,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v161</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v169</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -1747,7 +1747,7 @@ async function syncBackend(full){
 }
 async function pushState(){
   if(!useBackend()) return;
-  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn, usdKrw:STATE.usdKrw, monthLimitKrw:STATE.monthLimitKrw, geminiMonthLimitKrw:STATE.geminiMonthLimitKrw, paidGeminiOn:STATE.paidGeminiOn, nightSearchOn:STATE.nightSearchOn, leaderAutoOn:STATE.leaderAutoOn, contentNotify:STATE.contentNotify }) }); }catch(e){}
+  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn, usdKrw:STATE.usdKrw, monthLimitKrw:STATE.monthLimitKrw, geminiMonthLimitKrw:STATE.geminiMonthLimitKrw, paidGeminiOn:STATE.paidGeminiOn, nightSearchOn:STATE.nightSearchOn, leaderAutoOn:STATE.leaderAutoOn, contentNotify:STATE.contentNotify, researchMode:STATE.researchMode }) }); }catch(e){}
 }
 // 총괄: 1개 이상 부서 배정 (다중 분배)
 async function route(instruction){
@@ -2916,6 +2916,16 @@ function renderLearn(){
     +'</div>'
 
     +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:6px">🔎 웹조사 방식 <span style="font-weight:600;font-size:10.5px;color:#8a94a6">— 학습할 때 자료를 어떻게 조사할지 선택</span></div>'
+      +'<div style="display:flex;gap:7px">'
+        +'<button class="rmode" id="rmFree" data-mode="free" style="flex:1;justify-content:center;padding:9px;border-radius:9px;border:1px solid #e6ebf2;background:#fff;color:#5a6472;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">🆓 무료 웹조사</button>'
+        +'<button class="rmode" id="rmPaid" data-mode="paid" style="flex:1;justify-content:center;padding:9px;border-radius:9px;border:1px solid #e6ebf2;background:#fff;color:#5a6472;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">💳 유료 grounding</button>'
+      +'</div>'
+      +'<div class="note" id="rmNote" style="margin-top:7px"></div>'
+      +'<div id="rmCost" style="margin-top:6px"></div>'
+    +'</div>'
+
+    +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
       +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:6px">학습시킬 부서 <span style="font-weight:600;font-size:10.5px;color:#8a94a6">— 자동이면 URL만 주면 됩니다</span></div>'
       +'<select id="lnDept" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:13px">'+opts+'</select>'
       +'<div class="note" id="lnAutoNote" style="display:none;margin-top:7px;background:#eef7ff;border:1px solid #cfe4fb;border-radius:8px;padding:7px 9px;color:#1668c7">🤖 URL만 넣으면 <b>팀장이 자료를 보고 배울 부서를 직접 정합니다</b>. 배정된 부서들이 각자 관점으로 배우고, 팀장이 그걸 다시 흡수해요.</div>'
@@ -2978,6 +2988,11 @@ function renderLearn(){
       +'<div class="note" id="lnKnowMeta" style="margin-top:6px"></div>'
     +'</div>'
     +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-top:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🎬 유튜브·웹 학습 이력 <span style="font-size:10.5px;font-weight:600;color:#8a94a6">— 언제·무엇으로·무슨 결과</span></div>'
+      +'<div class="note" style="margin-bottom:7px">유튜브 링크 학습이 <b>어떤 영상을 분석했고 무엇을 배웠는지</b> 정확히 기록합니다.</div>'
+      +'<div id="lnHistory" style="font-size:11.5px;line-height:1.65">불러오는 중…</div>'
+    +'</div>'
+    +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-top:12px">'
       +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🧾 학습 적용 기록</div>'
       +'<div class="note" style="margin-bottom:7px">배운 품질 공식이 <b>실제로 어떤 결과물에 쓰였는지</b> 기록합니다.</div>'
       +'<div id="lnApplied" style="font-size:11.5px;line-height:1.7">불러오는 중…</div>'
@@ -2987,6 +3002,39 @@ function renderLearn(){
 function bindLearn(){
   var deptSel=document.getElementById("lnDept");
   if(!deptSel) return;
+  (function(){
+    if(!STATE.researchMode) STATE.researchMode="free";
+    var bFree=document.getElementById("rmFree"), bPaid=document.getElementById("rmPaid"), note=document.getElementById("rmNote");
+    function apply(){
+      var paid=(STATE.researchMode==="paid");
+      if(bFree){ bFree.style.background=paid?"#fff":"#eef7ff"; bFree.style.color=paid?"#5a6472":"#1668c7"; bFree.style.borderColor=paid?"#e6ebf2":"#7fb6ef"; }
+      if(bPaid){ bPaid.style.background=paid?"#f6f2ff":"#fff"; bPaid.style.color=paid?"#5b3bb5":"#5a6472"; bPaid.style.borderColor=paid?"#b9a5ec":"#e6ebf2"; }
+      if(note){ note.innerHTML = paid
+        ? '💳 <b>유료 grounding</b> — Gemini 구글검색으로 실제 최신 검색근거를 붙여 조사합니다. <b>결제(빌링)가 켜진 키가 필요</b>하고 비용이 나올 수 있어요. 안 되면 자동으로 무료 조사로 폴백합니다.'
+        : '🆓 <b>무료 웹조사</b> — DuckDuckGo로 웹을 찾아 본문을 읽고 종합합니다. <b>비용·한도 걱정 없음</b>. (구글검색 grounding은 건너뜀)'; }
+      var cost=document.getElementById("rmCost");
+      if(cost){ if(paid){ loadResearchCost(); } else { cost.innerHTML=""; } }
+    }
+    function loadResearchCost(){
+      var box=document.getElementById("rmCost"); if(!box||!useBackend()) return;
+      box.innerHTML='<span style="font-size:11px;color:#8a94a6">예상 비용 계산 중…</span>';
+      fetch(backendOrigin()+"/api/research/cost").then(function(r){return r.json();}).then(function(d){
+        if(!d||!d.ok){ box.innerHTML=""; return; }
+        var pc=d.perCall, tc=d.todayCost, t=d.today, rt=d.rates;
+        function n(x){ return (x||0).toLocaleString(); }
+        box.innerHTML='<div style="background:#faf7ff;border:1px solid #e7dcfb;border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.65;color:#3a4452">'
+          +'<b>💳 grounding 예상 비용</b> <span style="color:#8a94a6">(환율 ₩'+n(rt.usdKrw)+'/$ 기준)</span><br>'
+          +'· <b>조사 1회당</b>: 토큰 ~'+n(pc.avgIn)+' in / ~'+n(pc.avgOut)+' out ≈ <b>₩'+n(pc.tokenKrw)+'</b> + 구글검색 <b>₩'+n(pc.groundingKrw)+'</b> = <b style="color:#b02a5b">약 ₩'+n(pc.totalKrw)+'/회</b><br>'
+          +'· <b>오늘 사용</b>: grounding '+n(t.groundingSearches)+'건 · 토큰 '+n(t.tokIn)+' in / '+n(t.tokOut)+' out ≈ <b>₩'+n(tc.totalKrw)+'</b><br>'
+          +'· <span style="color:#8a94a6">결제 켠 프로젝트는 구글검색 하루 '+n(rt.freeGroundingPerDay)+'건까지 무료 (오늘 남은 '+n(tc.freeGroundingLeft)+'건). 이 한도 안에선 검색비 ₩0, 토큰비만 발생.</span>'
+          +'</div>';
+      }).catch(function(){ box.innerHTML=""; });
+    }
+    function set(mode){ STATE.researchMode=mode; saveState(); apply(); if(useBackend()) pushState(); }
+    if(bFree) bFree.addEventListener("click", function(){ set("free"); });
+    if(bPaid) bPaid.addEventListener("click", function(){ set("paid"); });
+    apply();
+  })();
   function curDept(){ return deptSel.value; }
   function loadKnow(){
     var box=document.getElementById("lnKnow"), meta=document.getElementById("lnKnowMeta");
@@ -2997,8 +3045,14 @@ function bindLearn(){
       .then(function(r){return r.json();}).then(function(k){
         var isAuto=(curDept()==="auto");
         box.textContent=(k&&k.knowledge)?k.knowledge:(isAuto?"아직 배운 게 없어요. 위에 URL을 넣고 학습시키면 팀장이 부서를 배정해 배웁니다.":"아직 배운 게 없어요. 위에서 영상이나 페이지로 학습시켜 보세요.");
-        if(isAuto && meta) meta.textContent="👑 팀장 총괄 기준 (모든 부서 학습을 흡수한 결과)";
-        if(meta && k && k.at){ meta.textContent="출처: "+(k.source||"-")+" · 갱신: "+new Date(k.at).toLocaleString("ko-KR"); }
+        if(meta){
+          if(k && k.at){
+            var _dt=new Date(k.at);
+            var _when=_dt.toLocaleDateString("ko-KR")+" "+_dt.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
+            meta.innerHTML=(isAuto?"👑 팀장 총괄 기준(전 부서 학습 흡수)":("출처: "+esc(k.source||"-")))+' · 📅 <b>'+_when+'</b> 갱신';
+          } else if(isAuto){ meta.textContent="👑 팀장 총괄 기준 (모든 부서 학습을 흡수한 결과)"; }
+          else { meta.textContent=""; }
+        }
       }).catch(function(){ box.textContent="불러오기 실패"; });
   }
   function applyOpsMode(){
@@ -3012,10 +3066,11 @@ function bindLearn(){
     var an=document.getElementById("lnAutoNote");
     if(an) an.style.display = isAuto ? "block" : "none";
   }
-  deptSel.addEventListener("change", function(){ STATE.learnDept=curDept(); saveState(); applyOpsMode(); loadKnow(); loadApplied(curDept()); });
+  deptSel.addEventListener("change", function(){ STATE.learnDept=curDept(); saveState(); applyOpsMode(); loadKnow(); loadApplied(curDept()); loadHistory(curDept()); });
   applyOpsMode();
   loadKnow();
   loadApplied(curDept());
+  loadHistory(curDept());
   loadProposals();
 
   function start(kind, urlsEl, btn){
@@ -3115,6 +3170,11 @@ function bindLearn(){
       h+='<div style="margin:5px 0"><b>Gemini 키</b>: '+(k.present?('<span style="color:#0e7a52;font-weight:800">✅ 있음</span> ('+esc(k.source)+')'):'<span style="color:#c0392b;font-weight:800">❌ 없음 — Render 환경변수 GEMINI_API_KEY 확인</span>')+(k.paidModeOn?' · 유료모드 ON':'')+'</div>';
       if(cd.active) h+='<div style="margin:5px 0;color:#b9651a"><b>쿨다운</b>: '+cd.untilSec+'초 남음 (연속 한도 '+cd.streak+'회) — 무료 한도에 걸린 상태</div>';
       h+=row("구글 검색(grounding)", g.search);
+      if(g.freeSearch){
+        var fs=g.freeSearch;
+        h+='<div style="margin:5px 0"><b>무료 웹검색(DuckDuckGo)</b>: '+(fs.ok?('<span style="color:#0e7a52;font-weight:800">✅ 정상</span> <span style="color:#5a6472">('+(fs.count||0)+'건)</span>'):('<span style="color:#c0392b;font-weight:800">❌ 실패</span>'+(fs.reason?(' <span style="color:#c0392b">'+esc(fs.reason)+'</span>'):' <span style="color:#8a94a6">— Render에서 차단된 듯</span>')))+'</div>';
+        if(fs.ok && fs.urls && fs.urls.length){ h+='<div style="margin:0 0 5px 8px;color:#5a6472;font-size:10.5px">'+fs.urls.map(function(u){return '· '+esc(u);}).join("<br>")+'</div>'; }
+      }
       if(g.youtube) h+=row("유튜브 분석", g.youtube);
       h+=row("웹페이지 수집", g.web);
       h+='</div>';
@@ -3128,9 +3188,12 @@ function deepResultHtml(rs){
   var ex=String(rs.example||"");
   var isHtml=/^\s*<!doctype html|^\s*<html/i.test(ex);
   var scoreColor = rs.score>=80 ? "#0e7a52" : (rs.score>=60 ? "#b9651a" : "#c0392b");
+  var scoreBadge = (rs.scored===false)
+    ? '<div style="font-size:11px;font-weight:800;color:#8a6d1a">검수 채점 불가</div>'
+    : '<div style="font-size:12px;font-weight:800;color:'+scoreColor+'">검수 '+(rs.score||0)+'/100</div>';
   var h='<div style="background:#fffaf3;border:1px solid #ffe0b8;border-radius:12px;padding:12px 13px">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="font-size:12.5px;font-weight:800;color:#b9651a;flex:1">🏢 협업 심화학습 결과</div>'
-      +'<div style="font-size:12px;font-weight:800;color:'+scoreColor+'">검수 '+(rs.score||0)+'/100</div>'
+      +scoreBadge
       +'<div style="font-size:10.5px;color:#a8814f">'+(rs.round||1)+'라운드</div></div>'
     +'<div style="font-size:11.5px;color:#3a4452;margin-bottom:8px"><b>학습 목표</b><br>'+esc(rs.goal||"")+'</div>';
   if(rs.depts && rs.depts.length){
@@ -3178,6 +3241,57 @@ function loadApplied(dept){
           + ' <span style="color:#b0b6c0;font-size:10.5px">'+new Date(r.at).toLocaleString("ko-KR")+'</span></div>';
       }).join("")+'</div>';
     box.innerHTML=h;
+  }).catch(function(){ box.textContent="불러오기 실패"; });
+}
+function loadHistory(dept){
+  var box=document.getElementById("lnHistory");
+  if(!box || !useBackend()) return;
+  box.textContent="불러오는 중…";
+  var q = (dept && dept!=="auto" && dept!=="ops") ? ("?dept="+encodeURIComponent(dept)) : "";
+  fetch(backendOrigin()+"/api/learn/history"+q).then(function(r){return r.json();}).then(function(d){
+    var rows=(d&&d.rows)||[];
+    if(!rows.length){ box.innerHTML='<span style="color:#8a94a6">아직 유튜브·웹 학습 이력이 없어요. 위에서 유튜브 URL로 학습시키면 여기에 정확한 결과가 남습니다.</span>'; return; }
+    box.innerHTML = rows.map(function(r){
+      var dt=new Date(r.at);
+      var when=dt.toLocaleDateString("ko-KR")+" "+dt.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
+      var kindLabel=(r.kind==="youtube")?"🎬 유튜브":(r.kind==="web")?"🌐 웹페이지":(r.kind==="benchmark")?"📊 벤치마크":"📚 학습";
+      var head='<div style="display:flex;gap:6px;align-items:baseline;margin-bottom:3px">'
+        +'<span style="font-weight:800;color:#15324f">'+kindLabel+'</span>'
+        +'<span style="color:#3a4452">'+esc(r.deptKr||r.dept||"")+'</span>'
+        +'<span style="flex:1"></span>'
+        +'<span style="color:#b0b6c0;font-size:10.5px">📅 '+when+'</span></div>';
+      var stat = r.ok===false
+        ? '<div style="color:#c0392b;font-size:11px">❌ 실패'+(r.note?(" — "+esc(r.note)):"")+'</div>'
+        : '<div style="color:#0e7a52;font-size:11px">✅ '+(r.analyzed||0)+'편 분석'+(r.failed?(" · "+r.failed+"편 실패"):"")+(r.kept?' · <span style="color:#b9651a">기존 지식 보존(새 결과 부실)</span>':(typeof r.resultLen==="number"?(' · 공식 '+r.resultLen+'자'+(typeof r.priorLen==="number"?(' (이전 '+r.priorLen+'자)'):"")):""))+'</div>';
+      var vids="";
+      if(r.videos && r.videos.length){
+        vids=r.videos.map(function(v){
+          if(!v.ok){
+            return '<div style="margin:5px 0 6px 2px;line-height:1.5"><span style="color:#c0392b">✕</span> <a href="'+esc(v.url)+'" target="_blank" style="color:#1668c7;word-break:break-all">'+esc(v.url)+'</a><br><span style="margin-left:12px;color:#c0392b;font-size:10.5px">'+esc(v.error||"실패")+'</span></div>';
+          }
+          var h='<div style="margin:6px 0;padding:8px 9px;background:#fbfcfe;border:1px solid #eef1f6;border-radius:9px">';
+          h+='<div style="line-height:1.5"><span style="color:#0e7a52">▶</span> <a href="'+esc(v.url)+'" target="_blank" style="color:#1668c7;word-break:break-all;font-weight:700">'+esc(v.url)+'</a></div>';
+          if(v.unstructured){
+            h+='<div style="margin-top:4px;color:#5a6472;font-size:11px;white-space:pre-wrap">'+esc((v.raw||"").slice(0,300))+'…</div></div>';
+            return h;
+          }
+          if(v.keyMoments && v.keyMoments.length){
+            h+='<div style="margin-top:5px"><div style="font-size:10.5px;font-weight:800;color:#8a6d1a">📍 주목한 구간</div>'
+              + v.keyMoments.map(function(m){ return '<div style="font-size:11px;color:#3a4452;margin:1px 0 1px 4px">· <b>'+esc(m.at||"")+'</b> — '+esc(m.observed||"")+'</div>'; }).join("")
+              + '</div>';
+          }
+          function line(icon,label,val,color){ return val ? ('<div style="margin-top:4px;font-size:11px;line-height:1.5"><span style="font-weight:800;color:'+color+'">'+icon+' '+label+'</span> '+esc(val)+'</div>') : ""; }
+          h+=line("💡","요점",v.keyPoint,"#1668c7");
+          h+=line("🧭","이해",v.understanding,"#5b3bb5");
+          h+=line("🔗","추리·근거",v.reasoning,"#0e7a52");
+          h+=line("🚀","앞으로의 비전",v.vision,"#b02a5b");
+          h+='</div>';
+          return h;
+        }).join("");
+      }
+      var learned = r.result ? ('<details style="margin-top:3px"><summary style="cursor:pointer;color:#5b3bb5;font-size:10.5px;font-weight:700">🧠 이 학습으로 갱신된 공식 보기</summary><div style="white-space:pre-wrap;color:#2b3543;font-size:11px;background:#faf9ff;border:1px solid #ece7fb;border-radius:8px;padding:8px;margin-top:4px">'+esc(r.result)+((r.resultLen||0)>500?"…":"")+'</div></details>') : "";
+      return '<div style="border-top:1px solid #eef1f6;padding:8px 0">'+head+stat+vids+learned+'</div>';
+    }).join("");
   }).catch(function(){ box.textContent="불러오기 실패"; });
 }
 function loadGuideLog(){
