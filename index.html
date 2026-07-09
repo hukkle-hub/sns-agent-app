@@ -847,7 +847,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v187</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v188</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -2949,6 +2949,23 @@ function renderLearn(){
       +'<div id="rpResult" style="margin-top:8px"></div>'
     +'</div>'
 
+    +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🎬 AI 영상 기획 <span style="font-weight:600;font-size:10.5px;color:#8a94a6">— 콘셉트 + 콘텐츠 캘린더 + 장면 프롬프트</span></div>'
+      +'<div class="note" style="margin-bottom:6px">제품/주제를 넣으면 <b>트렌드 리서치 → 후킹 콘셉트 → N일치 콘텐츠 플랜(장면 프롬프트 포함)</b>을 만들어요. 그 프롬프트를 힉스필드·Kling 등 영상툴에 넣어 제작하면 됩니다. 앱 닫아도 진행.</div>'
+      +'<textarea id="vpSource" placeholder="제품/주제 또는 URL — 예: 고흥 유자청, 한우 선물세트" style="width:100%;box-sizing:border-box;min-height:56px;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:7px"></textarea>'
+      +'<div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">'
+        +'<div id="vpPlats" style="display:flex;gap:5px;flex:1">'
+          +'<button type="button" class="vpchip" data-p="shorts" style="padding:6px 9px;border-radius:16px;border:1px solid #d6deea;background:#fff;color:#5a6472;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">유튜브 쇼츠</button>'
+          +'<button type="button" class="vpchip" data-p="reels" style="padding:6px 9px;border-radius:16px;border:1px solid #d6deea;background:#fff;color:#5a6472;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">릴스</button>'
+          +'<button type="button" class="vpchip" data-p="tiktok" style="padding:6px 9px;border-radius:16px;border:1px solid #d6deea;background:#fff;color:#5a6472;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer">틱톡</button>'
+        +'</div>'
+        +'<input id="vpDays" type="number" min="3" max="30" value="14" style="width:58px;box-sizing:border-box;padding:7px 8px;border:1px solid #d6deea;border-radius:8px;font-family:inherit;font-size:11.5px;text-align:center">'
+        +'<span style="font-size:11px;color:#8a94a6">일치</span>'
+      +'</div>'
+      +'<button class="cbtn conn" id="vpBtn" style="width:100%;justify-content:center">🎬 영상 기획 시작</button>'
+      +'<div id="vpResult" style="margin-top:8px"></div>'
+    +'</div>'
+
     +'<div style="background:#f6fff9;border:1px solid #bfe6cf;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
       +'<div style="font-size:12.5px;font-weight:800;color:#0e7a52;margin-bottom:4px">🚀 자율 개선 제안 <span style="font-weight:600;font-size:10.5px;color:#6f9e84">— 팀장이 웹 조사로 스스로 개선안 제시</span></div>'
       +'<div class="note" style="margin-bottom:6px">팀장이 <b>웹에서 최신 사례를 조사</b>해 품질 개선안을 냅니다. <b>승인하면 품질 공식에 반영</b>되고, 승인·거절에서 배워 제안이 점점 좋아져요. (하루 1회 자동으로도 제안)</div>'
@@ -3135,6 +3152,8 @@ function bindLearn(){
   var bd=document.getElementById("brandDistillBtn"); if(bd) bd.addEventListener("click", function(){ saveBrand(true); });
   bindRepurposeChips();
   var rpb=document.getElementById("rpBtn"); if(rpb) rpb.addEventListener("click", startRepurpose);
+  bindVideoChips();
+  var vpb=document.getElementById("vpBtn"); if(vpb) vpb.addEventListener("click", startVideo);
   var ib=document.getElementById("impBtn"); if(ib) ib.addEventListener("click", runImprove);
   loadImprove();
   var eab=document.getElementById("egAddBtn");
@@ -3533,6 +3552,67 @@ function egRefresh(id, btn){
       loadEvergreen();
     }).catch(function(e){ if(out) out.innerHTML='<span style="color:#c0392b;font-size:11px">실패: '+esc(e.message||String(e))+'</span>'; })
     .finally(function(){ btn.disabled=false; btn.textContent=o; });
+}
+function bindVideoChips(){
+  var wrap=document.getElementById("vpPlats"); if(!wrap) return;
+  var chips=wrap.querySelectorAll(".vpchip");
+  function sel(c){ chips.forEach(function(x){ var on=(x===c); x.style.background=on?"#eef7ff":"#fff"; x.style.color=on?"#1668c7":"#5a6472"; x.style.borderColor=on?"#7fb6ef":"#d6deea"; x.setAttribute("data-on", on?"1":"0"); }); }
+  chips.forEach(function(c){ c.addEventListener("click", function(){ sel(c); }); });
+  if(chips[0]) sel(chips[0]);   // 기본: 쇼츠
+}
+function startVideo(){
+  var src=document.getElementById("vpSource"), btn=document.getElementById("vpBtn"), out=document.getElementById("vpResult"), daysEl=document.getElementById("vpDays");
+  if(!useBackend()){ if(out) out.innerHTML='<span style="color:#c0392b">백엔드 연결이 필요해요.</span>'; return; }
+  var source=(src.value||"").trim();
+  var plat="shorts"; document.querySelectorAll("#vpPlats .vpchip").forEach(function(c){ if(c.getAttribute("data-on")==="1") plat=c.getAttribute("data-p"); });
+  var days=Math.max(3, Math.min(30, +daysEl.value||14));
+  if(!source){ out.innerHTML='<span style="color:#c0392b">제품/주제를 입력하세요.</span>'; return; }
+  var oldTxt=btn.textContent; btn.disabled=true; btn.textContent="접수 중…"; out.innerHTML="";
+  (async function(){
+    try{ await wakeServer(90000);
+      var r=await fetch(backendOrigin()+"/api/video/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ source:source, platform:plat, days:days, appUrl:location.href.split("#")[0] })});
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      btn.textContent="기획 중… (닫아도 됩니다)";
+      out.innerHTML='<span style="color:#0e7a52">✔ 접수됐어요. 앱 닫아도 계속 진행되고 완료 시 카톡으로 알려드려요.</span>';
+      pollVideo(d.jobId, btn, oldTxt, out);
+    }catch(e){ out.innerHTML='<span style="color:#c0392b">실패: '+esc(e.message||String(e))+'</span>'; btn.disabled=false; btn.textContent=oldTxt; }
+  })();
+}
+function pollVideo(jobId, btn, oldTxt, out){
+  var tries=0;
+  var t=setInterval(async function(){
+    tries++; if(tries>200){ clearInterval(t); return; }
+    if(STATE.view!=="learn"){ clearInterval(t); return; }
+    try{
+      var r=await fetch(backendOrigin()+"/api/video/status?id="+encodeURIComponent(jobId));
+      var d=await r.json(); if(!d||d.error) return;
+      if(d.status==="running" && d.step){ out.innerHTML='<span style="color:#1668c7">⏳ '+esc(d.step)+'… <span style="color:#8a94a6">(앱 닫아도 진행)</span></span>'; if(btn){ var _s=String(d.step); btn.textContent="⏳ "+(_s.length>18?_s.slice(0,18)+"…":_s+"…"); } }
+      if(d.status==="done"){ clearInterval(t); renderVideoPlan(d, out); if(btn){ btn.disabled=false; btn.textContent=oldTxt; } }
+      else if(d.status==="error"){ clearInterval(t); out.innerHTML='<span style="color:#c0392b">기획 실패: '+esc(d.error||"원인 미상")+'</span>'; if(btn){ btn.disabled=false; btn.textContent=oldTxt; } }
+    }catch(_){}
+  }, 4000);
+}
+function renderVideoPlan(d, out){
+  var c=d.concept||{}, plan=d.days_plan||[];
+  var h='<div style="background:#f7fbff;border:1px solid #d9e8fb;border-radius:10px;padding:10px 11px;margin-bottom:8px">'
+    +'<div style="font-size:11.5px;font-weight:800;color:#1668c7;margin-bottom:3px">🎯 캠페인 콘셉트</div>'
+    +(c.concept?'<div style="font-size:12px;color:#15324f;font-weight:700">'+esc(c.concept)+'</div>':"")
+    +(c.target?'<div style="font-size:11px;color:#5a6472;margin-top:2px">타깃: '+esc(c.target)+'</div>':"")
+    +(c.tone?'<div style="font-size:11px;color:#5a6472">톤: '+esc(c.tone)+'</div>':"")
+    +((c.angles&&c.angles.length)?'<div style="font-size:11px;color:#3a4452;margin-top:4px">'+c.angles.map(function(a){return "• "+esc(a);}).join("<br>")+'</div>':"")
+    +'</div>';
+  h+='<div style="font-size:11.5px;font-weight:800;color:#15324f;margin-bottom:5px">📅 콘텐츠 플랜 '+plan.length+'일치 <span style="font-weight:600;color:#8a94a6">— 장면 프롬프트를 복사해 영상툴에 넣으세요</span></div>';
+  h+=plan.map(function(p,i){ var pid="vp_"+i;
+    return '<div style="border:1px solid #e6ebf2;border-radius:9px;padding:9px 10px;margin-bottom:7px">'
+      +'<div style="font-size:11.5px;font-weight:800;color:#15324f">'+(p.day||i+1)+'일차 · '+esc(p.hookType||"")+' <span style="color:#8a94a6;font-weight:600">'+(p.lengthSec?(p.lengthSec+"초"):"")+'</span></div>'
+      +(p.title?'<div style="font-size:12px;color:#1c2838;font-weight:700;margin:1px 0">'+esc(p.title)+'</div>':"")
+      +(p.persona?'<div style="font-size:10.5px;color:#8a94a6">페르소나: '+esc(p.persona)+'</div>':"")
+      +'<div style="background:#faf7ff;border:1px solid #e7dcfb;border-radius:7px;padding:7px;margin:5px 0"><div style="display:flex;gap:6px;align-items:center;margin-bottom:3px"><b style="flex:1;font-size:10.5px;color:#5b3bb5">🎬 장면 프롬프트</b><button class="cbtn" data-vc="'+pid+'" style="padding:2px 8px;font-size:10px;background:#f0eaff;color:#5b3bb5;border-color:#d9ccf5">복사</button></div><div id="'+pid+'" style="font-size:11px;color:#2b3543;line-height:1.55;white-space:pre-wrap">'+esc(p.scenePrompt||"")+'</div></div>'
+      +(p.caption?'<details style="margin-top:3px"><summary style="font-size:10.5px;color:#1668c7;cursor:pointer">캡션·해시태그</summary><div style="font-size:11px;color:#3a4452;white-space:pre-wrap;margin-top:3px">'+esc(p.caption)+(p.hashtags?("\n"+esc(p.hashtags)):"")+'</div></details>':"")
+      +'</div>';
+  }).join("");
+  out.innerHTML=h;
+  out.querySelectorAll("[data-vc]").forEach(function(b){ b.addEventListener("click", function(){ var el=document.getElementById(b.getAttribute("data-vc")); if(el){ try{ navigator.clipboard.writeText(el.textContent); b.textContent="복사됨"; setTimeout(function(){b.textContent="복사";},1200);}catch(_){}}}); });
 }
 function startActivePoll(){
   if(window._lnActiveTimer) clearInterval(window._lnActiveTimer);
