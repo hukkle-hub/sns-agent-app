@@ -847,7 +847,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v181</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v184</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -3034,9 +3034,9 @@ function renderLearn(){
     +'<div id="lnResult" style="margin-bottom:12px"></div>'
 
     +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
-      +'<details><summary style="font-size:12.5px;font-weight:800;color:#15324f;cursor:pointer">🧠 이 부서가 지금까지 배운 품질 공식 <span style="font-weight:600;font-size:10.5px;color:#8a94a6">— 눌러서 펼치기</span></summary>'
-        +'<div id="lnKnow" style="font-size:12px;color:#2b3543;line-height:1.65;white-space:pre-wrap;margin-top:8px">불러오는 중…</div>'
-        +'<div class="note" id="lnKnowMeta" style="margin-top:6px"></div>'
+      +'<details><summary style="font-size:12.5px;font-weight:800;color:#15324f;cursor:pointer">🧠 이 부서가 지금까지 배운 품질 공식 <span id="lnKnowWhen" style="font-weight:700;font-size:10.5px;color:#0e7a52"></span><span style="font-weight:600;font-size:10.5px;color:#8a94a6"> — 눌러서 펼치기</span></summary>'
+        +'<div class="note" id="lnKnowMeta" style="margin:8px 0 4px"></div>'
+        +'<div id="lnKnow" style="font-size:12px;color:#2b3543;line-height:1.65;white-space:pre-wrap;margin-top:4px">불러오는 중…</div>'
       +'</details>'
     +'</div>'
     +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-top:12px">'
@@ -3092,15 +3092,17 @@ function bindLearn(){
     var box=document.getElementById("lnKnow"), meta=document.getElementById("lnKnowMeta");
     if(!useBackend()){ box.textContent="AI 백엔드 연결이 필요해요."; return; }
     box.textContent="불러오는 중…"; if(meta) meta.textContent="";
+    var whenEl=document.getElementById("lnKnowWhen"); if(whenEl) whenEl.textContent="";
     var qd = (curDept()==="auto") ? "ops" : curDept();   // 자동 모드에선 팀장 총괄기준을 보여줌
     fetch(backendOrigin()+"/api/learn/knowledge?dept="+encodeURIComponent(qd))
       .then(function(r){return r.json();}).then(function(k){
         var isAuto=(curDept()==="auto");
         box.textContent=(k&&k.knowledge)?k.knowledge:(isAuto?"아직 배운 게 없어요. 위에 URL을 넣고 학습시키면 팀장이 부서를 배정해 배웁니다.":"아직 배운 게 없어요. 위에서 영상이나 페이지로 학습시켜 보세요.");
+        var _when="";
+        if(k && k.at){ var _dt=new Date(k.at); _when=_dt.toLocaleDateString("ko-KR")+" "+_dt.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"}); }
+        if(whenEl) whenEl.textContent = _when ? ("· 📅 "+_when+" 갱신") : "";
         if(meta){
           if(k && k.at){
-            var _dt=new Date(k.at);
-            var _when=_dt.toLocaleDateString("ko-KR")+" "+_dt.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
             meta.innerHTML=(isAuto?"👑 팀장 총괄 기준(전 부서 학습 흡수)":("출처: "+esc(k.source||"-")))+' · 📅 <b>'+_when+'</b> 갱신';
           } else if(isAuto){ meta.textContent="👑 팀장 총괄 기준 (모든 부서 학습을 흡수한 결과)"; }
           else { meta.textContent=""; }
