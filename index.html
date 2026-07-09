@@ -847,7 +847,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v158</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v159</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -2960,6 +2960,14 @@ function renderLearn(){
       +'<div id="lnSuggest" style="margin-top:8px"></div>'
       +'<details style="margin-top:8px"><summary style="font-size:11.5px;font-weight:700;color:#5b3bb5;cursor:pointer">🧠 팀장의 판단 이력 (승인·거절로 학습 중)</summary><div id="lnGuideLog" style="margin-top:6px;font-size:11px;line-height:1.7">불러오는 중…</div></details>'
     +'</div>'
+
+    +'<div style="background:#fff6f6;border:1px solid #f4cccc;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#c0392b;margin-bottom:4px">🔧 학습 진단 <span style="font-size:10.5px;font-weight:600;color:#cb8585">— 학습이 실패할 때 진짜 원인 확인</span></div>'
+      +'<div class="note" style="margin-bottom:6px">구글검색·유튜브 분석·웹수집을 실제로 한 번씩 테스트해 <b>진짜 에러(HTTP 코드·사유)</b>를 그대로 보여줍니다.</div>'
+      +'<input id="lnDgYt" placeholder="(선택) 테스트할 유튜브 URL" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #f4cccc;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:7px">'
+      +'<button class="cbtn" id="lnDiagBtn" style="width:100%;justify-content:center;background:#fdecec;color:#c0392b;border-color:#f4cccc">🔧 지금 진단하기</button>'
+      +'<div id="lnDiag" style="margin-top:8px"></div>'
+    +'</div>'
     +'<div class="note" id="lnStat" style="margin-bottom:10px"></div>'
     +'<div id="lnProposals" style="margin-bottom:12px"></div>'
     +'<div id="lnResult" style="margin-bottom:12px"></div>'
@@ -3077,6 +3085,42 @@ function bindLearn(){
       });
     }catch(e){ out.innerHTML='<span style="color:#c0392b;font-size:11.5px">실패: '+esc(e.message||String(e))+'</span>'; }
     sg.disabled=false; sg.textContent=o;
+  });
+  var dg=document.getElementById("lnDiagBtn");
+  if(dg) dg.addEventListener("click", async function(){
+    if(!useBackend()){ alert("AI 백엔드 연결이 필요해요."); return; }
+    var box=document.getElementById("lnDiag");
+    dg.disabled=true; var o=dg.textContent; dg.textContent="진단 중… (20~40초)"; box.innerHTML="";
+    try{ await wakeServer(60000);
+      var yt=(document.getElementById("lnDgYt").value||"").trim();
+      var q=yt?("?yt="+encodeURIComponent(yt)):"";
+      var r=await fetch(backendOrigin()+"/api/learn/diagnose"+q);
+      var d=await r.json(); if(d.error) throw new Error(d.error);
+      var g=d.diagnose||{};
+      function row(label, obj){
+        if(!obj) return '<div style="margin:5px 0"><b>'+label+'</b>: <span style="color:#8a94a6">테스트 안 함</span></div>';
+        var ok=obj.ok; var head=ok?'<span style="color:#0e7a52;font-weight:800">✅ 정상</span>':'<span style="color:#c0392b;font-weight:800">❌ 실패</span>';
+        var detail="";
+        if(obj.tried && obj.tried.length){
+          detail=obj.tried.map(function(t){
+            return '<div style="margin-left:8px;color:'+(t.ok?"#0e7a52":"#c0392b")+'">· '+esc(t.model||"")+(t.http?(" ["+t.http+"]"):"")+(t.code?(" "+esc(t.code)):"")+' — '+esc(t.ok?("OK"+(t.grounded?" (검색근거O)":" (검색근거X)")):(t.reason||""))+'</div>';
+          }).join("");
+        } else if(!ok && obj.reason){ detail='<div style="margin-left:8px;color:#c0392b">· '+esc(obj.reason)+'</div>'; }
+        else if(ok && obj.sample){ detail='<div style="margin-left:8px;color:#5a6472">· '+esc(obj.sample)+'…</div>'; }
+        else if(ok && typeof obj.len==="number"){ detail='<div style="margin-left:8px;color:#5a6472">· '+obj.len+'자 수집</div>'; }
+        return '<div style="margin:5px 0"><b>'+label+'</b>: '+head+detail+'</div>';
+      }
+      var k=g.key||{}, cd=g.cooldown||{};
+      var h='<div style="background:#fff;border:1px solid #f0d6d6;border-radius:9px;padding:11px 12px;font-size:11.5px;line-height:1.55;color:#1c2838">';
+      h+='<div style="margin:5px 0"><b>Gemini 키</b>: '+(k.present?('<span style="color:#0e7a52;font-weight:800">✅ 있음</span> ('+esc(k.source)+')'):'<span style="color:#c0392b;font-weight:800">❌ 없음 — Render 환경변수 GEMINI_API_KEY 확인</span>')+(k.paidModeOn?' · 유료모드 ON':'')+'</div>';
+      if(cd.active) h+='<div style="margin:5px 0;color:#b9651a"><b>쿨다운</b>: '+cd.untilSec+'초 남음 (연속 한도 '+cd.streak+'회) — 무료 한도에 걸린 상태</div>';
+      h+=row("구글 검색(grounding)", g.search);
+      if(g.youtube) h+=row("유튜브 분석", g.youtube);
+      h+=row("웹페이지 수집", g.web);
+      h+='</div>';
+      box.innerHTML=h;
+    }catch(e){ box.innerHTML='<span style="color:#c0392b;font-size:11.5px">진단 실패: '+esc(e.message||String(e))+'</span>'; }
+    dg.disabled=false; dg.textContent=o;
   });
 }
 function deepResultHtml(rs){
