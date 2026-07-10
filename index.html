@@ -17,7 +17,7 @@
   html,body{height:100%}
   body{font-family:'JetBrains Mono',monospace;background:#eef1f7;color:#1f2a37}
   #root{width:100%;max-width:820px;margin:0 auto;height:100vh;display:flex;flex-direction:column;box-sizing:border-box}
-  .vtabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);width:100%;box-sizing:border-box;gap:5px;padding:9px 12px;background:#ffffff;border-bottom:1px solid #e2e7f0;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .vtabs{display:flex;align-items:center;width:100%;box-sizing:border-box;gap:5px;padding:9px 12px;background:#ffffff;border-bottom:1px solid #e2e7f0;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .vtabs::-webkit-scrollbar{display:none}
   .vtab{flex:1 1 0;min-width:0;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:3px;background:#ffffff;border:1px solid #d4dae6;border-radius:9px;padding:8px 11px;font-size:11px;letter-spacing:-.2px;color:#5a6677;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .15s}
   .ccard{background:#fff;border:1px solid #e2e7f0;border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(30,55,100,.05)}
@@ -61,6 +61,11 @@
   .rep-line b{color:#7fd4ff}
   .rep-badge{display:inline-block;margin-top:8px;background:rgba(52,224,161,.16);color:#34e0a1;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px}
   .vtab.on{background:#5ed4e21a;border-color:#5ed4e2;color:#5ed4e2}
+  .vtab-gear{flex:0 0 46px;min-width:46px;font-size:17px;padding:8px 0}
+  .vsubtabs{display:flex;gap:6px;padding:6px 12px;background:#f7f9fc;border-bottom:1px solid #e2e7f0;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .vsubtabs::-webkit-scrollbar{display:none}
+  .vsub{white-space:nowrap;background:#fff;border:1px solid #d4dae6;border-radius:8px;padding:6px 15px;font-size:12px;color:#5a6677;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .15s}
+  .vsub.on{background:#5ed4e21a;border-color:#5ed4e2;color:#0e8aa0;font-weight:700}
   .topbar{display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#7c8696;padding:5px 12px;background:#ffffff;border-bottom:1px solid #e8ecf3;flex-shrink:0}
   .topbar b{color:#34e0a1}
   .memobtn{background:#ffffff;border:1px solid #d4dae6;border-radius:7px;color:#5a6677;font-size:9.5px;padding:3px 9px;cursor:pointer;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:4px}
@@ -836,18 +841,17 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
 <body>
 <div id="root">
   <div class="vtabs" id="vtabs">
-    <button class="vtab on" data-v="console">팀에이전트</button>
-    <button class="vtab" data-v="office">오피스</button>
-    <button class="vtab" data-v="project">프로젝트</button>
-    <button class="vtab" data-v="content">콘텐츠</button>
-    <button class="vtab" data-v="learn">학습</button>
-    <button class="vtab" data-v="record">기록·분석</button>
-    <button class="vtab" data-v="settings">설정</button>
+    <button class="vtab on" data-group="home">🏠 홈</button>
+    <button class="vtab" data-group="make">✍️ 만들기</button>
+    <button class="vtab" data-group="grow">📚 학습</button>
+    <button class="vtab" data-group="dept">🏢 부서</button>
+    <button class="vtab vtab-gear" data-group="settings" title="설정">⚙️</button>
   </div>
+  <div class="vsubtabs" id="vsubtabs" style="display:none"></div>
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v191</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v196</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -976,7 +980,7 @@ function avatar(id, size){
 var STATE = {
   view:"console", messages:[], busy:false, busyDept:null,
   autoPublish:false,
-  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], leaderDailyDirective:{}, dailyReview:{}, nightResearch:{}, leaderReport:{}, leaderAutoOn:true, capHistory:[], contentApprovals:[], nightSearchOn:true, briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0}, dailyGrowthOn:true, capability:{}, pubSchedules:[], usdKrw:0, monthLimitKrw:0, geminiMonthLimitKrw:100000, paidGeminiOn:false, contentNotify:true, crew:{}, crewExp:{},
+  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], leaderDailyDirective:{}, dailyReview:{}, nightResearch:{}, leaderReport:{}, leaderAutoOn:false, capHistory:[], contentApprovals:[], nightSearchOn:true, briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0}, dailyGrowthOn:true, capability:{}, pubSchedules:[], usdKrw:0, monthLimitKrw:0, geminiMonthLimitKrw:100000, paidGeminiOn:false, contentNotify:true, crew:{}, crewExp:{},
   autoBackup:0, savedAt:null, lastSync:null,
   schedule:{ mode:"hours", start:"09:00", end:"18:00", workMin:40, restMin:20 },
   safety:{ audit:false, dailyLimit:0, requireApproval:false },
@@ -3401,6 +3405,7 @@ function loadHealth(){
       +'<br>상품페이지: 진행 '+(pj.queued+pj.running)+' · 완료 '+pj.done+' · 실패 '+pj.error+(pj.stuck?(' · <span style="color:#c0392b">멈춤 '+pj.stuck+'</span>'):"")+'</div>';
     h+='<div style="color:#3a4452;margin-top:4px"><b>API</b> — Gemini키 '+(a.geminiKey?"✅":"❌")+' · 조사모드 '+(a.researchMode==="paid"?"💳 유료":"🆓 무료")+(a.cooldownActive?(' · <span style="color:#b9651a">쿨다운 '+a.cooldownSec+'초</span>'):"")+' · 오늘 검색 '+a.searchesToday+'회</div>';
     if(d.storage&&d.storage.saveFailStreak>0) h+='<div style="color:#c0392b;margin-top:4px">💾 저장 실패 '+d.storage.saveFailStreak+'회 — '+esc(d.storage.lastSaveErr)+'</div>';
+    if(d.rateWaits && d.rateWaits.last24h>0) h+='<div style="color:#8a94a6;margin-top:4px">🆓 무료 한도로 잠시 쉼 '+d.rateWaits.last24h+'회/24시간 — <span style="color:#0e7a52">오류 아님, 자동 재시도됨</span></div>';
     var g=(d.errors&&d.errors.groups)||[];
     if(g.length){
       h+='<details style="margin-top:6px"><summary style="cursor:pointer;font-weight:700;color:#c0392b">⚠️ 최근 오류 '+d.errors.last24h+'건/24시간 (묶음 '+g.length+') — 펼치기</summary><div style="margin-top:4px">'
@@ -3665,7 +3670,9 @@ function loadHistory(dept){
         +'<span style="color:#b0b6c0;font-size:10.5px">📅 '+when+'</span></div>';
       var stat = r.ok===false
         ? '<div style="color:#c0392b;font-size:11px">❌ 실패'+(r.note?(" — "+esc(r.note)):"")+'</div>'
-        : '<div style="color:#0e7a52;font-size:11px">✅ '+(r.analyzed||0)+'편 분석'+(r.failed?(" · "+r.failed+"편 실패"):"")+(r.kept?' · <span style="color:#b9651a">기존 지식 보존(새 결과 부실)</span>':(typeof r.resultLen==="number"?(' · 공식 '+r.resultLen+'자'+(typeof r.priorLen==="number"?(' (이전 '+r.priorLen+'자)'):"")):""))+'</div>';
+        : ((r.kind==="benchmark"||r.kind==="web"||r.kind==="deep")
+            ? '<div style="color:#0e7a52;font-size:11px">✅ '+esc(r.note||(r.kind==="deep"?"심화학습 완료":"학습 완료"))+(r.benchmark?(' <span style="color:#8a94a6">· '+esc(r.benchmark)+'</span>'):"")+(typeof r.score==="number"?(' <span style="color:#8a94a6">· '+r.score+'점</span>'):"")+'</div>'
+            : '<div style="color:#0e7a52;font-size:11px">✅ '+(r.analyzed||0)+'편 분석'+(r.failed?(" · "+r.failed+"편 실패"):"")+(r.kept?' · <span style="color:#b9651a">기존 지식 보존(새 결과 부실)</span>':(typeof r.resultLen==="number"?(' · 공식 '+r.resultLen+'자'+(typeof r.priorLen==="number"?(' (이전 '+r.priorLen+'자)'):"")):""))+'</div>');
       var vids="";
       if(r.videos && r.videos.length){
         vids=r.videos.map(function(v){
@@ -3935,6 +3942,10 @@ function pollLearnJob(jobId, ov, btn, oldTxt){
       var r=await fetch(backendOrigin()+"/api/learn/status?id="+encodeURIComponent(jobId));
       var d=await r.json(); if(!d || d.error) return;
       var st=ov?ov.querySelector("#lnStat"):null;
+      if(d.status==="running" && d.step){
+        if(st) st.innerHTML='<span style="color:#1668c7">⏳ '+esc(d.step)+'…  <span style="color:#8a94a6">(앱을 닫아도 계속 진행돼요)</span></span>';
+        if(btn){ var _s=String(d.step); btn.textContent="⏳ "+(_s.length>20?_s.slice(0,20)+"…":_s+"…"); }
+      }
       if(d.status==="done"){
         clearInterval(t);
         if(st) st.innerHTML='<span style="color:#0e7a52">✔ 학습 완료'+(d.analyzed?(" — 영상 "+d.analyzed+"편 분석"):"")+'! 품질 공식이 갱신됐어요.</span>';
@@ -4365,10 +4376,10 @@ function bindOffice(){
   var obl=document.getElementById("obLearn"); if(obl) obl.addEventListener("click", function(){ STATE.view="learn"; saveState(); render(); });
   document.querySelectorAll("[data-obmeet]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation();
     STATE.meetingPrefillDept=b.getAttribute("data-obmeet"); STATE.view="meeting";
-    document.querySelectorAll(".vtab").forEach(function(t){ t.classList.toggle("on", t.dataset.v==="meeting"); }); render(); }); });
+    render(); }); });
   document.querySelectorAll("[data-obcontent]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation();
     STATE.contentFilterDept=b.getAttribute("data-obcontent"); STATE.view="content";
-    document.querySelectorAll(".vtab").forEach(function(t){ t.classList.toggle("on", t.dataset.v==="content"); }); render(); }); });
+    render(); }); });
   var sb=document.getElementById("o2stale");
   if(sb) sb.addEventListener("click", async function(){
     if(!useBackend()){ alert("정체 점검에는 AI 백엔드 연결이 필요해요."); return; }
@@ -4448,12 +4459,31 @@ function bindOffice(){
   }); });
   window.addEventListener("resize", function(){ if(STATE.view==="office"){ vp.scrollLeft=cur()*vp.clientWidth; } });
 }
+var VIEW_GROUP={console:"home",mobile:"home",content:"make",learn:"grow",record:"grow",results:"grow",analytics:"grow",office:"dept",project:"dept",meeting:"dept",settings:"settings"};
+var GROUP_VIEWS={home:["console"],make:["content"],grow:["learn","record"],dept:["office","project"],settings:["settings"]};
+var GROUP_DEFAULT={home:"console",make:"content",grow:"learn",dept:"office",settings:"settings"};
+var SUBVIEW_LABEL={console:"홈",content:"콘텐츠",learn:"학습",record:"기록·분석",office:"오피스",project:"프로젝트",settings:"설정"};
+function curGroup(){ return VIEW_GROUP[STATE.view]||"home"; }
+function syncNav(){
+  var g=curGroup();
+  if(!STATE._lastInGroup) STATE._lastInGroup={};
+  STATE._lastInGroup[g]=STATE.view;
+  document.querySelectorAll("#vtabs .vtab").forEach(function(t){ t.classList.toggle("on", t.getAttribute("data-group")===g); });
+  var sub=document.getElementById("vsubtabs"); if(!sub) return;
+  var views=GROUP_VIEWS[g]||[];
+  if(views.length>1){
+    sub.innerHTML=views.map(function(v){ return '<button class="vsub'+(v===STATE.view?" on":"")+'" data-v="'+v+'">'+(SUBVIEW_LABEL[v]||v)+'</button>'; }).join("");
+    sub.style.display="flex";
+  } else { sub.innerHTML=""; sub.style.display="none"; }
+}
 document.getElementById("vtabs").addEventListener("click", function(e){
   const b = e.target.closest(".vtab"); if(!b) return;
-  STATE.view = b.dataset.v;
-  document.querySelectorAll(".vtab").forEach(t=>t.classList.toggle("on", t.dataset.v===STATE.view));
+  var g = b.getAttribute("data-group"); if(!g) return;
+  STATE.view = (STATE._lastInGroup && STATE._lastInGroup[g]) || GROUP_DEFAULT[g] || "console";
   render();
 });
+var _vsubEl=document.getElementById("vsubtabs");
+if(_vsubEl){ _vsubEl.addEventListener("click", function(e){ var b=e.target.closest(".vsub"); if(!b) return; STATE.view=b.getAttribute("data-v"); render(); }); }
 document.getElementById("memobtn").addEventListener("click", saveMemo);
 var _sideEl=document.getElementById("siderail");
 if(_sideEl){
@@ -4490,7 +4520,7 @@ if(_sideEl){
     var col=e.target.closest("[data-collapse]");
     if(col){ var ck=col.getAttribute("data-collapse"); var p2=dockPrefs(); p2.collapsed[ck]=!p2.collapsed[ck]; saveDockPrefs(p2); renderSideRail(); return; }
     var go=e.target.closest("[data-goto]");
-    if(go){ var v=go.getAttribute("data-goto"); if(v){ STATE.view=v; document.querySelectorAll(".vtab").forEach(function(t){ t.classList.toggle("on", t.dataset.v===STATE.view); }); render(); } }
+    if(go){ var v=go.getAttribute("data-goto"); if(v){ STATE.view=v; render(); } }
   });
   var _dragKey=null;
   _sideEl.addEventListener("dragstart", function(e){ var c=e.target.closest(".sr-card"); if(c){ _dragKey=c.getAttribute("data-key"); try{ e.dataTransfer.effectAllowed="move"; e.dataTransfer.setData("text/plain", _dragKey); }catch(_){} c.style.opacity=".5"; } });
@@ -4658,6 +4688,7 @@ function render(){
     else if(STATE.view==="meeting") bindMeeting();
     else if(STATE.view==="project") bindProject();
     else bindComposer();
+    try{ syncNav(); }catch(_nv){}
     // 콘솔 입력창 복원: 작성 중이던 내용·커서·포커스 그대로 (키보드도 안 닫힘)
     if(STATE.view==="console" && _draft && _draft.v){
       try{ var _inp1=viewEl.querySelector("#inp");
@@ -6984,8 +7015,8 @@ function renderRecord(){
       +(topD?' · 최다 성장 <b>'+escapeHtml(AGENTS[topD].kr)+'</b>(Lv'+(Math.floor(topLv/5)+1)+')':'')
       +'<div class="learnbnr-sub">각 부서를 펼치면 무엇을 배웠는지(학습 노트)와 압축된 전문성이 보여요. 활동 3회마다 자동 압축되고, 피드백(회의 별점·팀장 평가)도 학습에 반영돼요.</div>'
       + leaderReportHtml()
-      +'<div class="lrauto'+(STATE.leaderAutoOn!==false?' on':'')+'" id="leaderAutoRow">'
-        +'<div class="lrauto-t"><b>🧑‍💼 팀장에게 맡기기</b><div class="lrauto-s">'+(STATE.leaderAutoOn!==false?'ON — 매일 자동으로 회고·연구·지시가 돌아가요 (앱 안 열어도)':'OFF — 자동 실행 꺼짐 (직접 실행만)')+'</div></div>'
+      +'<div class="lrauto'+(STATE.leaderAutoOn===true?' on':'')+'" id="leaderAutoRow">'
+        +'<div class="lrauto-t"><b>🧑\u200d💼 자동 백그라운드 학습</b><div class="lrauto-s">'+(STATE.leaderAutoOn===true?'⚠️ ON — 매일 자동으로 연구·학습·지시가 돌아갑니다 (앱 안 열어도 <b>토큰이 계속 소모</b>돼요)':'✅ OFF — 자동 실행 꺼짐. <b>내가 URL로 학습시킬 때만</b> 토큰을 씁니다 (비용 절약)')+'</div></div>'
         +'<div class="lrauto-sw" id="leaderAutoSw"><span class="lrauto-knob"></span></div>'
       +'</div>'
       +'<button class="cbtn conn" id="leaderRunAll" style="margin-top:8px;width:100%;justify-content:center;background:linear-gradient(135deg,#1f5fa8,#6a5acd);color:#fff;border:none;font-weight:700;padding:11px">▶ 지금 즉시 1회 실행 (회고·연구·지시·평가)</button>'
@@ -7146,7 +7177,7 @@ function bindRecord(){
   });
   var leaderAutoSw=document.getElementById("leaderAutoSw"), leaderAutoRow=document.getElementById("leaderAutoRow");
   function toggleLeaderAuto(){
-    STATE.leaderAutoOn = (STATE.leaderAutoOn===false) ? true : false;
+    STATE.leaderAutoOn = !(STATE.leaderAutoOn===true);
     saveState(); if(useBackend()) pushState();
     render();
   }
