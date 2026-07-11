@@ -853,7 +853,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v225</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v227</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -3403,13 +3403,41 @@ function cyResultModal(id, kind){
   }).catch(function(){});
 }
 // 공통 유틸
-// v220: 미리보기 HTML 정리 — 문서 내부 링크가 앱(부모 창)을 덮어쓰지 않게 새 탭으로 강제
+// v226: 미리보기 안전 실드
+// ① 샌드박스(opaque origin)에서 localStorage 접근은 SecurityError를 던져 페이지 스크립트 전체가 죽는다.
+//    → AI가 만든 페이지가 스크롤 리빌(opacity:0 → JS로 보이게)을 쓰면 화면이 통째로 비어 보인다.
+// ② 잘린 HTML(</html> 없음)도 빈 화면이 된다.
+// 두 경우를 iframe 안에서 스스로 진단해 부모(앱)에 알리고, 리빌 실패면 강제로 보이게 만든다.
+var PREVIEW_SHIM = '<script>(function(){'
+ + 'try{ window.localStorage.getItem("_t"); }catch(e){'
+ +   'var mem={};var stub={getItem:function(k){return (k in mem)?mem[k]:null;},setItem:function(k,v){mem[k]=String(v);},removeItem:function(k){delete mem[k];},clear:function(){mem={};},key:function(i){return Object.keys(mem)[i]||null;}};'
+ +   'Object.defineProperty(stub,"length",{get:function(){return Object.keys(mem).length;}});'
+ +   'try{Object.defineProperty(window,"localStorage",{value:stub,configurable:true});Object.defineProperty(window,"sessionStorage",{value:stub,configurable:true});}catch(_){}'
+ + '}'
+ + 'function report(forced){'
+ +   'try{var b=document.body;var txt=b?(b.innerText||"").trim():"";'
+ +   'parent.postMessage({__pv:1,textLen:txt.length,nodes:b?b.querySelectorAll("*").length:0,'
+ +   'closed:/<\\/html\\s*>/i.test(document.documentElement.outerHTML),forced:!!forced},"*");}catch(_){}'
+ + '}'
+ + 'function unhide(){'
+ +   'var b=document.body; if(!b) return false;'
+ +   'var all=b.querySelectorAll("*"), hid=0;'
+ +   'for(var i=0;i<all.length;i++){var cs=getComputedStyle(all[i]);if(cs.opacity==="0"||cs.visibility==="hidden")hid++;}'
+ +   'if(all.length>3 && hid > all.length*0.5){'
+ +     'var st=document.createElement("style");'
+ +     'st.textContent="*{opacity:1 !important;visibility:visible !important;transform:none !important;animation:none !important;filter:none !important}";'
+ +     'document.head.appendChild(st); return true;'
+ +   '} return false;'
+ + '}'
+ + 'window.addEventListener("load",function(){ setTimeout(function(){ var f=unhide(); report(f); },900); });'
+ + 'setTimeout(function(){ if(document.readyState!=="complete"){ var f=unhide(); report(f); } },3500);'
+ + '})();<\/script>';
+
 function prepPreviewHtml(html){
   var doc=String(html||"");
-  if(!/<base\b/i.test(doc)){
-    if(/<head[^>]*>/i.test(doc)) doc=doc.replace(/<head([^>]*)>/i, '<head$1><base target="_blank">');
-    else doc='<base target="_blank">'+doc;
-  }
+  var inject = '<base target="_blank">' + PREVIEW_SHIM;
+  if(/<head[^>]*>/i.test(doc)) doc=doc.replace(/<head([^>]*)>/i, '<head$1>'+inject);
+  else doc = inject + doc;
   return doc;
 }
 // v220: window.open("","_blank") + document.write 방식은 PWA(홈화면 앱)에서
@@ -3426,11 +3454,29 @@ function openHtml(html, title){
     +'<b style="font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">👁️ '+escapeHtml(nm)+'</b>'
     +'<button id="ohNew" style="border:none;border-radius:8px;padding:7px 10px;font-size:11.5px;font-weight:700;background:#2b6ef0;color:#fff;cursor:pointer;font-family:inherit">🔗 새 창</button>'
     +'<button id="ohSave" style="border:none;border-radius:8px;padding:7px 10px;font-size:11.5px;font-weight:700;background:#22b07a;color:#fff;cursor:pointer;font-family:inherit">📥 저장</button>'
+    +'<button id="ohSrc" style="border:none;border-radius:8px;padding:7px 10px;font-size:11.5px;font-weight:700;background:#4a5566;color:#fff;cursor:pointer;font-family:inherit">📄 원본</button>'
     +'<button id="ohClose" style="border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;background:#3a4557;color:#fff;cursor:pointer;font-family:inherit">✕</button>'
     +'</div>'
+    +'<div id="ohDiag" style="display:none;padding:10px 12px;background:#fff4e5;border-bottom:1px solid #f0dcbb;font-size:11.5px;line-height:1.5;color:#7a5a1a"></div>'
     +'<iframe id="ohFrame" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" style="flex:1;width:100%;border:none;background:#fff"></iframe>';
   document.body.appendChild(ov);
   var fr=ov.querySelector("#ohFrame");
+  var diag=ov.querySelector("#ohDiag");
+
+  // 🔎 iframe 안의 실드가 보내는 진단 수신 — "빈 화면"의 진짜 원인을 알려준다
+  var rawLen = String(html).length;
+  var closed = /<\/html\s*>/i.test(String(html));
+  function onMsg(ev){
+    var d=ev&&ev.data; if(!d||d.__pv!==1) return;
+    var msgs=[];
+    if(d.forced) msgs.push("⚠️ 페이지 애니메이션(스크롤 리빌)이 작동하지 않아 내용이 숨겨져 있었어요. <b>강제로 표시했습니다.</b>");
+    if(d.textLen<20 && d.nodes<10) msgs.push("⚠️ HTML에 내용이 거의 없어요 (글자 "+d.textLen+"자, 태그 "+d.nodes+"개).");
+    if(!closed) msgs.push("⚠️ HTML이 <b>중간에 잘렸습니다</b> (&lt;/html&gt; 없음, 총 "+rawLen.toLocaleString()+"자). 🔁 고쳐줘로 다시 뽑아주세요.");
+    if(d.textLen<20 && closed && d.nodes>=10) msgs.push("문서는 정상인데 글자가 안 보여요. <b>📄 원본</b>을 눌러 실제 코드를 확인해 주세요.");
+    if(msgs.length && diag){ diag.style.display="block"; diag.innerHTML=msgs.join("<br>"); }
+  }
+  window.addEventListener("message", onMsg);
+
   try{ fr.srcdoc=doc; }catch(e){ ov.remove(); alert("미리보기를 열지 못했어요: "+(e.message||e)); return; }
   var _u=null;
   function blobUrl(){ if(!_u){ _u=URL.createObjectURL(new Blob([doc],{type:"text/html;charset=utf-8"})); } return _u; }
@@ -3442,7 +3488,18 @@ function openHtml(html, title){
     try{ var a=document.createElement("a"); a.href=blobUrl(); a.download=nm.replace(/[^\w가-힣]+/g,"_")+".html";
       document.body.appendChild(a); a.click(); document.body.removeChild(a); }catch(_){}
   };
-  ov.querySelector("#ohClose").onclick=function(){ try{ if(_u) URL.revokeObjectURL(_u); }catch(_){} ov.remove(); };
+  ov.querySelector("#ohSrc").onclick=function(){
+    var pre=document.createElement("div");
+    pre.style.cssText="position:fixed;inset:0;z-index:100001;background:#0f1218;display:flex;flex-direction:column";
+    pre.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:9px 11px;background:#1b2330;color:#fff">'
+      +'<b style="flex:1;font-size:12.5px">📄 원본 HTML — '+String(html).length.toLocaleString()+'자 · '+(/<\/html\s*>/i.test(String(html))?"✅ 정상 종료":"⚠️ 잘림(&lt;/html&gt; 없음)")+'</b>'
+      +'<button id="ohSrcClose" style="border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;background:#3a4557;color:#fff;cursor:pointer;font-family:inherit">✕</button></div>'
+      +'<pre style="flex:1;overflow:auto;margin:0;padding:12px;color:#cfe3ff;background:#0f1218;font-size:10.5px;line-height:1.45;white-space:pre-wrap;word-break:break-all"></pre>';
+    pre.querySelector("pre").textContent=String(html);
+    document.body.appendChild(pre);
+    pre.querySelector("#ohSrcClose").onclick=function(){ try{ pre.remove(); }catch(_){} };
+  };
+  ov.querySelector("#ohClose").onclick=function(){ try{ window.removeEventListener("message", onMsg); }catch(_){} try{ if(_u) URL.revokeObjectURL(_u); }catch(_){} ov.remove(); };
 }
 function copyText(text, btn){
   try{ navigator.clipboard.writeText(text).then(function(){ if(btn){ var o=btn.textContent; btn.textContent="✓ 복사됨"; setTimeout(function(){ btn.textContent=o; },1500); } }); }
@@ -7101,8 +7158,8 @@ function renderSettings(){
     +'<div class="keyrow" style="margin-top:6px"><input type="text" id="nvModelIn" placeholder="모델 ID (예: meta/llama-3.1-70b-instruct)" value="'+escapeHtml(STATE.nvidiaModel||"")+'"><button class="cbtn conn" id="nvModelSave">저장</button></div>'
     +'<div class="keyrow" style="margin-top:5px;gap:6px"><button class="cbtn conn" id="nvModelsBtn" style="flex:1">📋 사용가능 모델</button><button class="cbtn conn" id="nvTestBtn" style="flex:1">🧪 연결 테스트</button></div>'
     +'<div class="note" style="margin-top:5px">먼저 Render 환경변수 <b>NVIDIA_API_KEY</b>(build.nvidia.com의 nvapi- 키)를 등록하세요. 무료 모델은 품질이 낮을 수 있어 <b>기본은 꺼둠</b> — 켜면 Claude 비용을 크게 아껴요. 약 40 RPM·무료 크레딧 한도가 있어요. 모델 ID는 위 \'사용가능 모델\'로 확인해 넣으세요(비우면 기본값).</div></div>'
-    +'<div class="mengine"><div class="mengine-t">🔁 디자인 검수 루프 (목표 기반)</div>'
-    +'<div class="note" style="margin-bottom:5px">디자인(상품페이지·홈페이지·티스토리 스킨)을 만든 뒤 <b>검수관이 비주얼 기준(색·레이아웃·시그니처·클리셰 회피)을 충족할 때까지 자동 수정</b>하는 최대 횟수. 많을수록 품질↑·비용/시간↑. (0=끔)</div>'
+    +'<div class="mengine"><div class="mengine-t">🔁 결과물 검수 루프 (목표 기반)</div>'
+    +'<div class="note" style="margin-bottom:5px">만들고 끝내지 않고 <b>검수관이 기준을 충족할 때까지 자동으로 다시 고칩니다.</b><br>· <b>디자인</b>(상품페이지·홈페이지·티스토리 스킨) → 색·레이아웃·시그니처·클리셰 회피를 점검<br>· <b>📊 리서치 보고서</b> → <b>지어낸 숫자·일반론</b>을 감사관(정유진)이 잡아냄 (근거 검수)<br>횟수가 많을수록 품질↑ 비용↑. 0이면 만들고 바로 끝.</div>'
     +'<div class="mengine-opts">'+[0,1,2,3].map(function(n){ var cur=(STATE.designReviewLoops==null?1:+STATE.designReviewLoops); return '<span class="mchip'+(cur===n?" on":"")+'" data-drl="'+n+'">'+(n===0?"끔":n+"회")+'</span>'; }).join(" ")+'</div></div>'
     // 🎨 브랜드 디자인 시스템 (design.md) — 모든 화면을 한 브랜드로
     +'<div class="mengine"><div class="mengine-t">🎨 브랜드 디자인 규칙 (도면)</div>'
