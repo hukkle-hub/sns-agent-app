@@ -853,7 +853,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v219</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v225</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -1837,7 +1837,7 @@ async function syncBackend(full){
 }
 async function pushState(){
   if(!useBackend()) return;
-  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn, usdKrw:STATE.usdKrw, monthLimitKrw:STATE.monthLimitKrw, geminiMonthLimitKrw:STATE.geminiMonthLimitKrw, paidGeminiOn:STATE.paidGeminiOn, freeLLMFirst:STATE.freeLLMFirst, nvidiaModel:STATE.nvidiaModel, designReviewLoops:STATE.designReviewLoops, nightSearchOn:STATE.nightSearchOn, leaderAutoOn:STATE.leaderAutoOn, contentNotify:STATE.contentNotify, researchMode:STATE.researchMode, appBase:location.href.split("#")[0] }) }); }catch(e){}
+  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn, usdKrw:STATE.usdKrw, monthLimitKrw:STATE.monthLimitKrw, geminiMonthLimitKrw:STATE.geminiMonthLimitKrw, paidGeminiOn:STATE.paidGeminiOn, freeLLMFirst:STATE.freeLLMFirst, nvidiaModel:STATE.nvidiaModel, designReviewLoops:STATE.designReviewLoops, designSystem:STATE.designSystem, viralGate:STATE.viralGate, viralMin:STATE.viralMin, nightSearchOn:STATE.nightSearchOn, leaderAutoOn:STATE.leaderAutoOn, contentNotify:STATE.contentNotify, researchMode:STATE.researchMode, appBase:location.href.split("#")[0] }) }); }catch(e){}
 }
 // 총괄: 1개 이상 부서 배정 (다중 분배)
 async function route(instruction){
@@ -2179,7 +2179,7 @@ function productCardHtml(html, name, cid, jobId){
       +'<button class="ib-btn" data-pcdownload="'+cid+'" style="flex:1;min-width:0;justify-content:center;background:#eafaf0;color:#0e7a52">📥 HTML 저장</button>'
       +(jobId?('<button class="ib-btn" data-pcedit="'+escapeHtml(String(jobId))+'" style="flex:1;min-width:0;justify-content:center;background:#fff4e6;color:#b9651a">✏️ 수정·추가</button>'):'')
     +'</div>'
-    +'<iframe data-pcframe="'+cid+'" data-html="'+enc+'" data-name="'+escapeHtml(name)+'" style="width:100%;height:360px;border:1px solid #e3e8ef;border-radius:10px;background:#fff" sandbox="allow-same-origin"></iframe>'
+    +'<iframe data-pcframe="'+cid+'" data-html="'+enc+'" data-name="'+escapeHtml(name)+'" style="width:100%;height:360px;border:1px solid #e3e8ef;border-radius:10px;background:#fff" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>'
     +'</div>';
 }
 function renderContent(){
@@ -2379,12 +2379,12 @@ function saveToNote(title, text, prefix){
 function bindContent(){
   // 상품페이지 미리보기 iframe 채우기 + 미리보기/다운로드 버튼
   document.querySelectorAll('[data-pcframe]').forEach(function(f){
-    try{ var html=decodeURIComponent(f.getAttribute("data-html")||""); f.srcdoc=html; }catch(e){}
+    try{ var html=decodeURIComponent(f.getAttribute("data-html")||""); f.srcdoc=prepPreviewHtml(html); }catch(e){}
   });
   document.querySelectorAll('[data-pcpreview]').forEach(function(b){ b.addEventListener("click", function(){
     var cid=b.getAttribute("data-pcpreview"); var f=document.querySelector('[data-pcframe="'+cid+'"]'); if(!f) return;
-    try{ var html=decodeURIComponent(f.getAttribute("data-html")||""); var w=window.open("","_blank"); w.document.open(); w.document.write(html); w.document.close(); }
-    catch(_){ alert("팝업이 차단됐어요. 아래 미리보기를 이용하세요."); }
+    try{ var html=decodeURIComponent(f.getAttribute("data-html")||""); openHtml(html, f.getAttribute("data-name")||"상품페이지"); }
+    catch(e){ alert("미리보기를 열지 못했어요: "+(e.message||e)); }
   }); });
   document.querySelectorAll('[data-pcdownload]').forEach(function(b){ b.addEventListener("click", function(){
     var cid=b.getAttribute("data-pcdownload"); var f=document.querySelector('[data-pcframe="'+cid+'"]'); if(!f) return;
@@ -3018,9 +3018,10 @@ function webtoonResultHtml(d){
 // ===== 📚 학습 탭: 유튜브 영상 + 웹페이지(홈페이지·상세페이지)로 부서 전문성 키우기 =====
 // ===================== 🔄 선순환 파이프라인 UI (4종 결과물 + 지시메모 + 자연어 + 피드백 학습) =====================
 var _cyPollTimer=null;
-var CY_OUTS=[["sns","📱 SNS"],["blog","📝 블로그"],["youtube","🎬 유튜브"],["page","🛍️ 상품페이지"]];
-var CY_LABEL={sns:"📱 SNS 게시물",blog:"📝 블로그 글",youtube:"🎬 유튜브 기획",page:"🛍️ 상품페이지"};
-function cyOuts(){ if(!STATE.cycleOut) STATE.cycleOut={sns:true,blog:false,youtube:false,page:false}; return STATE.cycleOut; }
+var CY_OUTS=[["sns","📱 SNS"],["blog","📝 블로그"],["cafe","☕ 카페글"],["youtube","🎬 유튜브"],["page","🛍️ 상품페이지"],["home","🏠 홈페이지"],["report","📊 리서치 보고서"]];
+var CY_LABEL={sns:"📱 SNS 게시물",blog:"📝 블로그 글",cafe:"☕ 카페글 (네이버·다음)",youtube:"🎬 유튜브 기획",page:"🛍️ 상품페이지",home:"🏠 홈페이지",report:"📊 리서치 보고서"};
+var CY_HTMLKINDS={page:1,home:1,report:1};   // HTML로 나오는 결과물(미리보기로 열기)
+function cyOuts(){ if(!STATE.cycleOut) STATE.cycleOut={sns:true,blog:false,cafe:false,youtube:false,page:false,home:false,report:false}; return STATE.cycleOut; }
 function cyDayChips(){
   var D=[["1","월"],["2","화"],["3","수"],["4","목"],["5","금"],["6","토"],["0","일"]];
   return D.map(function(x){ return '<button type="button" class="cyday" data-d="'+x[0]+'" style="padding:5px 11px;border-radius:14px;border:1px solid #d6deea;background:#fff;color:#5a6472;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer">'+x[1]+'</button>'; }).join("");
@@ -3063,7 +3064,11 @@ function renderCycle(){
           +'<textarea id="cyInfo" rows="2" placeholder="예) 100ml 12,000원, 무농약" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:13px;resize:vertical"></textarea>'
           +'<div style="margin-top:12px;font-size:12px;font-weight:800;color:#3a4658;margin-bottom:6px">무엇을 생성할까요? (복수 선택)</div>'
           +'<div style="display:flex;gap:8px;flex-wrap:wrap">'+outBtns+'</div>'
-          +'<button id="cyRun" class="cbtn conn" style="width:100%;justify-content:center;margin-top:12px;padding:12px;font-size:14px">▶ 지금 실행</button>'
+          +'<label id="cyItvRow" style="display:flex;align-items:center;gap:8px;margin-top:12px;padding:9px 11px;background:#fffaf0;border:1px solid #f0e0c0;border-radius:9px;cursor:pointer">'
+            +'<input type="checkbox" id="cyItv" '+(STATE.cycleInterview?'checked':'')+' style="width:16px;height:16px">'
+            +'<span style="font-size:12px;color:#7a5a1a;line-height:1.45"><b>🎤 먼저 3가지만 물어보기</b><br><span style="font-size:10.5px;color:#a08a5a">만들기 전에 방향을 가르는 질문 3개를 받아요. 재생성이 줄어 결과도 좋고 비용도 아껴요.</span></span>'
+          +'</label>'
+          +'<button id="cyRun" class="cbtn conn" style="width:100%;justify-content:center;margin-top:10px;padding:12px;font-size:14px">▶ 지금 실행</button>'
           +'<div id="cyStat" class="note" style="margin-top:8px;font-size:12px;min-height:16px"></div>'
           // 예약
           +'<details style="margin-top:10px;border-top:1px solid #eef1f6;padding-top:6px">'
@@ -3097,14 +3102,17 @@ function bindCycle(){
     var o=cyOuts();
     return { url:(document.getElementById("cyUrl")||{}).value||"", topic:(document.getElementById("cyTopic")||{}).value||"",
       memo:(document.getElementById("cyMemo")||{}).value||"", info:(document.getElementById("cyInfo")||{}).value||"",
-      sns:!!o.sns, blog:!!o.blog, youtube:!!o.youtube, page:!!o.page };
+      sns:!!o.sns, blog:!!o.blog, cafe:!!o.cafe, youtube:!!o.youtube, page:!!o.page, home:!!o.home, report:!!o.report };
   }
   // 지금 실행 (직접 입력)
   var runBtn=document.getElementById("cyRun"), stat=document.getElementById("cyStat");
+  var itvCb=document.getElementById("cyItv");
+  if(itvCb) itvCb.addEventListener("change", function(){ STATE.cycleInterview=!!itvCb.checked; saveState(); });
   if(runBtn) runBtn.addEventListener("click", function(){
     var v=formInputs();
     if(!v.topic.trim()){ if(stat) stat.innerHTML='<span style="color:#c0392b">주제를 입력하세요.</span>'; return; }
-    if(!v.sns&&!v.blog&&!v.youtube&&!v.page){ if(stat) stat.innerHTML='<span style="color:#c0392b">결과물을 하나 이상 선택하세요.</span>'; return; }
+    if(!v.sns&&!v.blog&&!v.cafe&&!v.youtube&&!v.page&&!v.home&&!v.report){ if(stat) stat.innerHTML='<span style="color:#c0392b">결과물을 하나 이상 선택하세요.</span>'; return; }
+    if(itvCb && itvCb.checked){ openCycleInterview(v, runBtn, stat); return; }
     cycleStart(v, runBtn, stat);
   });
   // 예약 등록 (직접 입력)
@@ -3112,7 +3120,7 @@ function bindCycle(){
   if(rvBtn) rvBtn.addEventListener("click", function(){
     var v=formInputs();
     if(!v.topic.trim()){ if(rvStat) rvStat.innerHTML='<span style="color:#c0392b">주제를 먼저 입력하세요.</span>'; return; }
-    if(!v.sns&&!v.blog&&!v.youtube&&!v.page){ if(rvStat) rvStat.innerHTML='<span style="color:#c0392b">결과물을 선택하세요.</span>'; return; }
+    if(!v.sns&&!v.blog&&!v.cafe&&!v.youtube&&!v.page&&!v.home&&!v.report){ if(rvStat) rvStat.innerHTML='<span style="color:#c0392b">결과물을 선택하세요.</span>'; return; }
     var repeat=(document.getElementById("cyRepeat")||{}).value||"once", time=(document.getElementById("cyTime")||{}).value||"";
     var days=[]; viewEl.querySelectorAll('.cyday[data-on="1"]').forEach(function(d){ days.push(parseInt(d.getAttribute("data-d"),10)); });
     if(!time){ if(rvStat) rvStat.innerHTML='<span style="color:#c0392b">시각을 정하세요.</span>'; return; }
@@ -3139,7 +3147,7 @@ function bindCycle(){
 function showNlConfirm(p, box){
   if(!box) return;
   var DN=["일","월","화","수","목","금","토"];
-  var outs=[]; if(p.outputs.sns)outs.push("SNS"); if(p.outputs.blog)outs.push("블로그"); if(p.outputs.youtube)outs.push("유튜브"); if(p.outputs.page)outs.push("상품페이지");
+  var outs=[]; if(p.outputs.sns)outs.push("SNS"); if(p.outputs.blog)outs.push("블로그"); if(p.outputs.cafe)outs.push("카페글"); if(p.outputs.youtube)outs.push("유튜브"); if(p.outputs.page)outs.push("상품페이지"); if(p.outputs.home)outs.push("홈페이지"); if(p.outputs.report)outs.push("리서치 보고서");
   var when=(p.repeat==="once"?"1회":(p.repeat==="daily"?"매일":"매주 "+(p.days||[]).map(function(x){return DN[x];}).join("·")))+" "+p.time;
   box.innerHTML='<div style="background:#f7fbff;border:1px solid #cfe4fb;border-radius:10px;padding:12px">'
     +'<div style="font-size:12px;font-weight:800;color:#2f6fe0;margin-bottom:8px">이렇게 이해했어요 — 맞나요?</div>'
@@ -3157,7 +3165,7 @@ function showNlConfirm(p, box){
     +'<div id="cyNlDo" class="note" style="font-size:12px;margin-top:6px;min-height:14px"></div>'
   +'</div>';
   var doStat=box.querySelector("#cyNlDo");
-  var payload={ url:p.url, topic:p.topic, memo:p.memo, info:"", sns:!!p.outputs.sns, blog:!!p.outputs.blog, youtube:!!p.outputs.youtube, page:!!p.outputs.page };
+  var payload={ url:p.url, topic:p.topic, memo:p.memo, info:"", sns:!!p.outputs.sns, blog:!!p.outputs.blog, cafe:!!p.outputs.cafe, youtube:!!p.outputs.youtube, page:!!p.outputs.page, home:!!p.outputs.home, report:!!p.outputs.report };
   box.querySelector("#cyNlReserve").addEventListener("click", function(){
     cycleReserve(Object.assign({},payload,{repeat:p.repeat,time:p.time,days:p.days||[]}), box.querySelector("#cyNlReserve"), doStat);
   });
@@ -3204,6 +3212,67 @@ function pollCycle(id, stat){
     }).catch(function(){});
   }, 3500);
 }
+// 🎤 v223: 생성 전 인터뷰 — AI가 방향을 가르는 질문 3개를 던지고, 답을 '맥락'으로 넣어 생성
+function openCycleInterview(v, runBtn, stat){
+  if(!useBackend()){ cycleStart(v, runBtn, stat); return; }
+  runBtn.disabled=true; var ob=runBtn.textContent; runBtn.textContent="질문 만드는 중…";
+  if(stat) stat.innerHTML='<span style="color:#b57b1a">🎤 오세라가 물어볼 것을 고르는 중…</span>';
+  apiFetch("/api/cycle/interview",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({ topic:v.topic, info:v.info, memo:v.memo, outputs:{ sns:v.sns, blog:v.blog, cafe:v.cafe, youtube:v.youtube, page:v.page, home:v.home, report:v.report } })})
+  .then(function(r){ return r.json(); }).then(function(d){
+    runBtn.disabled=false; runBtn.textContent=ob;
+    if(!d.ok || !d.questions || !d.questions.length){
+      if(stat) stat.innerHTML='<span style="color:#8a94a6">질문 없이 바로 진행할게요.</span>';
+      cycleStart(v, runBtn, stat); return;
+    }
+    if(stat) stat.innerHTML="";
+    var qs=d.questions;
+    var m=document.createElement("div");
+    m.style.cssText="position:fixed;inset:0;background:rgba(20,30,45,.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center";
+    var body=qs.map(function(q,i){
+      var chips=(q.options||[]).map(function(o){ return '<button type="button" class="itvOpt" data-i="'+i+'" data-v="'+esc(o).replace(/"/g,"&quot;")+'" style="border:1px solid #d6deea;background:#fff;color:#4a5666;border-radius:14px;padding:5px 11px;font-size:11.5px;font-family:inherit;cursor:pointer">'+esc(o)+'</button>'; }).join("");
+      return '<div style="margin-bottom:14px">'
+        +'<div style="font-size:13px;font-weight:800;color:#1c2433;margin-bottom:3px">'+(i+1)+'. '+esc(q.q)+'</div>'
+        +(q.why?('<div style="font-size:10.5px;color:#8a94a6;margin-bottom:6px">\U0001F4A1 '+esc(q.why)+'</div>'):'')
+        +(chips?('<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">'+chips+'</div>'):'')
+        +'<input class="itvAns" data-i="'+i+'" placeholder="답변 (선택지를 눌러도 되고 직접 써도 돼요)" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:13px">'
+      +'</div>';
+    }).join("");
+    m.innerHTML='<div style="background:#fff;width:100%;max-width:640px;max-height:88vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column">'
+      +'<div style="display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid #eef1f6"><div style="flex:1;font-weight:800;font-size:14px;color:#15324f">\U0001F3A4 만들기 전에 3가지만</div>'
+      +'<button id="itvClose" style="border:none;background:#eef1f6;border-radius:9px;width:32px;height:32px;font-size:16px;cursor:pointer">\u2715</button></div>'
+      +'<div style="padding:14px 16px;overflow:auto;flex:1">'+body+'</div>'
+      +'<div style="border-top:1px solid #eef1f6;padding:12px 16px;background:#fafbfd;display:flex;gap:8px">'
+      +'<button id="itvSkip" class="cbtn" style="flex:1;justify-content:center;padding:11px">건너뛰고 실행</button>'
+      +'<button id="itvGo" class="cbtn conn" style="flex:2;justify-content:center;padding:11px">\u25B6 답변 반영해 실행</button>'
+      +'</div></div>';
+    document.body.appendChild(m);
+    m.querySelectorAll(".itvOpt").forEach(function(b){ b.addEventListener("click", function(){
+      var i=b.getAttribute("data-i"); var inp=m.querySelector('.itvAns[data-i="'+i+'"]');
+      if(inp) inp.value=b.getAttribute("data-v");
+      m.querySelectorAll('.itvOpt[data-i="'+i+'"]').forEach(function(x){ x.style.background="#fff"; x.style.borderColor="#d6deea"; x.style.color="#4a5666"; });
+      b.style.background="#5ed4e21a"; b.style.borderColor="#5ed4e2"; b.style.color="#0e8aa0";
+    }); });
+    function close(){ try{ m.remove(); }catch(_){} }
+    m.querySelector("#itvClose").addEventListener("click", close);
+    m.querySelector("#itvSkip").addEventListener("click", function(){ close(); cycleStart(v, runBtn, stat); });
+    m.querySelector("#itvGo").addEventListener("click", function(){
+      var lines=[];
+      qs.forEach(function(q,i){
+        var inp=m.querySelector('.itvAns[data-i="'+i+'"]');
+        var a=(inp&&inp.value||"").trim();
+        if(a) lines.push("Q. "+q.q+"\nA. "+a);
+      });
+      close();
+      if(!lines.length){ cycleStart(v, runBtn, stat); return; }
+      cycleStart(Object.assign({}, v, { interview: lines.join("\n\n") }), runBtn, stat);
+    });
+  }).catch(function(e){
+    runBtn.disabled=false; runBtn.textContent=ob;
+    if(stat) stat.innerHTML='<span style="color:#8a94a6">질문 생성 실패 — 바로 진행할게요.</span>';
+    cycleStart(v, runBtn, stat);
+  });
+}
 function loadCycleReservations(){
   var box=document.getElementById("cyResv"); if(!box) return;
   if(!useBackend()){ box.innerHTML=""; return; }
@@ -3214,7 +3283,7 @@ function loadCycleReservations(){
     box.innerHTML='<div style="font-size:13px;font-weight:800;color:#3a4658;margin-bottom:8px">⏰ 예약 목록</div>'
       + list.map(function(rv){
           var when=(rv.repeat==="once"?"1회":(rv.repeat==="daily"?"매일":"매주 "+(rv.days||[]).map(function(x){return DN[x];}).join("·")))+" "+rv.time;
-          var out=[]; if(rv.sns)out.push("SNS"); if(rv.blog)out.push("블로그"); if(rv.youtube)out.push("유튜브"); if(rv.page)out.push("페이지");
+          var out=[]; if(rv.sns)out.push("SNS"); if(rv.blog)out.push("블로그"); if(rv.cafe)out.push("카페글"); if(rv.youtube)out.push("유튜브"); if(rv.page)out.push("상품페이지"); if(rv.home)out.push("홈페이지"); if(rv.report)out.push("보고서");
           return '<div style="background:#fff;border:1px solid #e2e8f2;border-radius:10px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;gap:8px">'
             +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;color:#2b3543;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(rv.topic)+'</div>'
             +'<div style="font-size:11px;color:#8a94a6;margin-top:2px">'+esc(when)+' · '+out.join("+")+(rv.memo?(' · '+esc(rv.memo).slice(0,20)):'')+'</div></div>'
@@ -3234,12 +3303,19 @@ function loadCycleList(){
     if(!jobs.length){ box.innerHTML='<div class="note" style="color:#9aa4b2;font-size:12px">아직 결과가 없어요. 위에서 실행해 보세요.</div>'; return; }
     box.innerHTML=jobs.map(function(j){
       var st=j.status==="done"?'<span style="color:#0e7a52">완료</span>':(j.status==="running"||j.status==="queued")?'<span style="color:#b57b1a">⏳ '+esc(j.step||"진행 중")+'</span>':'<span style="color:#c0392b">실패</span>';
+      var _V=j.viral||{};
+      function _vb(k){ var v=_V[k]; if(!v||typeof v.score==="undefined") return "";
+        var c=(v.score>=80?"#0e7a52":(v.score>=65?"#b57b1a":"#c0392b"));
+        return ' <b style="color:'+c+'">🔥'+v.score+'</b>'; }
       var tags=[];
-      if(j.hasSns) tags.push('<span class="cyresbtn" data-cyres="sns" data-id="'+j.id+'">📱 SNS</span>');
-      if(j.hasBlog) tags.push('<span class="cyresbtn" data-cyres="blog" data-id="'+j.id+'">📝 블로그</span>');
-      if(j.hasYoutube) tags.push('<span class="cyresbtn" data-cyres="youtube" data-id="'+j.id+'">🎬 유튜브</span>');
-      if(j.hasPage) tags.push('<span class="cyresbtn" data-cyres="page" data-id="'+j.id+'">🛍️ 페이지</span>');
-      if(j.pageDropped) tags.push('<span style="color:#9aa4b2;font-size:11px">(오래된 페이지 정리됨)</span>');
+      if(j.hasSns) tags.push('<span class="cyresbtn" data-cyres="sns" data-id="'+j.id+'">📱 SNS'+_vb("sns")+'</span>');
+      if(j.hasBlog) tags.push('<span class="cyresbtn" data-cyres="blog" data-id="'+j.id+'">📝 블로그'+_vb("blog")+'</span>');
+      if(j.hasCafe) tags.push('<span class="cyresbtn" data-cyres="cafe" data-id="'+j.id+'">☕ 카페글'+_vb("cafe")+'</span>');
+      if(j.hasYoutube) tags.push('<span class="cyresbtn" data-cyres="youtube" data-id="'+j.id+'">🎬 유튜브'+_vb("youtube")+'</span>');
+      if(j.hasPage) tags.push('<span class="cyresbtn" data-cyres="page" data-id="'+j.id+'">🛍️ 상품페이지</span>');
+      if(j.hasHome) tags.push('<span class="cyresbtn" data-cyres="home" data-id="'+j.id+'">🏠 홈페이지</span>');
+      if(j.hasReport) tags.push('<span class="cyresbtn" data-cyres="report" data-id="'+j.id+'">📊 보고서</span>');
+      if(j.pageDropped||j.homeDropped) tags.push('<span style="color:#9aa4b2;font-size:11px">(오래된 페이지 정리됨)</span>');
       var src=j.source==="reserve"?'<span style="font-size:10.5px;color:#9aa4b2">⏰예약</span> ':'';
       return '<div style="background:#fff;border:1px solid #e2e8f2;border-radius:11px;padding:11px 12px;margin-bottom:8px">'
         +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="flex:1;font-weight:700;font-size:13px;color:#2b3543;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+src+esc(j.topic)+'</div>'+st+'</div>'
@@ -3257,17 +3333,25 @@ function loadCycleList(){
 function cyResultModal(id, kind){
   apiFetch("/api/cycle/result?id="+encodeURIComponent(id)).then(function(r){ return r.json(); }).then(function(d){
     if(!d.ok) return;
-    var content = (kind==="page") ? (d.page||"") : (d[kind]||"");
+    var isHtmlKind = !!CY_HTMLKINDS[kind];
+    var content = d[kind]||"";
     var m=document.createElement("div");
     m.style.cssText="position:fixed;inset:0;background:rgba(20,30,45,.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center";
-    var bodyHtml = (kind==="page")
-      ? ((content? '<button id="cyOpenPage" class="cbtn conn" style="width:100%;justify-content:center;padding:12px">🔍 상품페이지 새 창으로 열기</button>' : '<div class="note" style="color:#9aa4b2">페이지 내용이 없어요(오래돼 정리됨).</div>'))
+    var bodyHtml = isHtmlKind
+      ? ((content? '<button id="cyOpenPage" class="cbtn conn" style="width:100%;justify-content:center;padding:12px">🔍 '+esc(CY_LABEL[kind]||kind)+' 미리보기 열기</button>' : '<div class="note" style="color:#9aa4b2">페이지 내용이 없어요(오래돼 정리됨).</div>'))
       : ('<div style="white-space:pre-wrap;font-size:13.5px;line-height:1.65;color:#2b3543">'+esc(content)+'</div>');
+    var _v=(d.viral&&d.viral[kind])||null;
+    var _vhtml = _v ? ('<div style="background:'+(_v.score>=80?"#eafaf3":(_v.score>=65?"#fff8e8":"#fdeeee"))+';border-radius:10px;padding:9px 11px;margin-bottom:10px;font-size:11.5px;line-height:1.55;color:#3a4452">'
+      +'<b style="font-size:13px;color:'+(_v.score>=80?"#0e7a52":(_v.score>=65?"#b57b1a":"#c0392b"))+'">🔥 예상 반응 '+_v.score+'점</b>'
+      +(_v.boosted?(' <span style="font-size:10px;color:#8a94a6">(기준 미달 '+_v.before+'점 → 자동 개선)</span>'):'')
+      +(_v.why?('<div style="margin-top:3px">'+esc(_v.why)+'</div>'):'')
+      +(_v.fix?('<div style="margin-top:3px;color:#8a94a6">더 올리려면: '+esc(_v.fix)+'</div>'):'')
+      +'</div>') : '';
     m.innerHTML='<div style="background:#fff;width:100%;max-width:640px;max-height:86vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column">'
       +'<div style="display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid #eef1f6"><div style="flex:1;font-weight:800;font-size:14px;color:#15324f">'+esc(CY_LABEL[kind]||kind)+' · '+esc(d.topic||"")+'</div>'
-      + (kind!=="page"?'<button id="cyCopy" class="cbtn conn" style="padding:7px 12px">📋 복사</button>':'')
+      + (!isHtmlKind?'<button id="cyCopy" class="cbtn conn" style="padding:7px 12px">📋 복사</button>':'')
       +'<button id="cyClose" style="border:none;background:#eef1f6;border-radius:9px;width:32px;height:32px;font-size:16px;cursor:pointer">✕</button></div>'
-      +'<div id="cyBody" style="padding:14px 16px;overflow:auto;flex:1">'+bodyHtml+'</div>'
+      +'<div id="cyBody" style="padding:14px 16px;overflow:auto;flex:1">'+_vhtml+bodyHtml+'</div>'
       // 피드백 루프
       +'<div style="border-top:1px solid #eef1f6;padding:12px 16px;background:#fafbfd">'
         +'<div style="font-size:12px;font-weight:800;color:#3a4658;margin-bottom:6px">🔁 마음에 안 들면 고쳐줘</div>'
@@ -3286,7 +3370,7 @@ function cyResultModal(id, kind){
     var copyBtn=m.querySelector("#cyCopy");
     if(copyBtn) copyBtn.addEventListener("click", function(){ copyText(content, copyBtn); });
     var openBtn=m.querySelector("#cyOpenPage");
-    if(openBtn) openBtn.addEventListener("click", function(){ openHtml(content); });
+    if(openBtn) openBtn.addEventListener("click", function(){ openHtml(content, (CY_LABEL[kind]||"페이지")+" · "+(d.topic||"")); });
     function sendFb(remember){
       var fb=(m.querySelector("#cyFb")||{}).value||""; var fs=m.querySelector("#cyFbStat");
       if(!fb.trim()){ if(fs) fs.innerHTML='<span style="color:#c0392b">어떻게 고칠지 적어주세요.</span>'; return; }
@@ -3302,10 +3386,10 @@ function cyResultModal(id, kind){
               clearInterval(t);
               m.querySelector("#cyFbOnce").disabled=false; m.querySelector("#cyFbKeep").disabled=false;
               // 갱신된 결과 반영
-              var nc = s.results ? (kind==="page"?(s.results.page||""):(s.results[kind]||"")) : "";
+              var nc = s.results ? (s.results[kind]||"") : "";
               content = nc || content;
               var bodyEl=m.querySelector("#cyBody");
-              if(kind==="page"){ /* 페이지는 다시 열기 */ }
+              if(isHtmlKind){ /* 페이지는 '미리보기 열기'로 다시 확인 */ }
               else if(bodyEl){ bodyEl.innerHTML='<div style="white-space:pre-wrap;font-size:13.5px;line-height:1.65;color:#2b3543">'+esc(content)+'</div>'; }
               if(fs) fs.innerHTML='<span style="color:#0e7a52">✅ 수정 완료'+(remember?' · 앞으로도 기억합니다':'')+'</span>';
               (m.querySelector("#cyFb")||{}).value="";
@@ -3319,12 +3403,46 @@ function cyResultModal(id, kind){
   }).catch(function(){});
 }
 // 공통 유틸
-function openHtml(html){
+// v220: 미리보기 HTML 정리 — 문서 내부 링크가 앱(부모 창)을 덮어쓰지 않게 새 탭으로 강제
+function prepPreviewHtml(html){
+  var doc=String(html||"");
+  if(!/<base\b/i.test(doc)){
+    if(/<head[^>]*>/i.test(doc)) doc=doc.replace(/<head([^>]*)>/i, '<head$1><base target="_blank">');
+    else doc='<base target="_blank">'+doc;
+  }
+  return doc;
+}
+// v220: window.open("","_blank") + document.write 방식은 PWA(홈화면 앱)에서
+// 빈 창이 앱 스코프로 다시 로드되며 플랫폼 화면이 덮어써지고 링크가 깨진다.
+// → 팝업을 쓰지 않고 앱 안에서 전체화면 샌드박스 iframe으로 띄운다.
+function openHtml(html, title){
   if(!html){ alert("내용이 없어요."); return; }
-  try{ var blob=new Blob([html],{type:"text/html"}); var u=URL.createObjectURL(blob); var w=window.open(u,"_blank");
-    if(!w){ var nw=window.open("","_blank"); if(nw){ nw.document.open(); nw.document.write(html); nw.document.close(); } }
-    setTimeout(function(){ try{ URL.revokeObjectURL(u); }catch(_){} },60000);
-  }catch(e){ var nw2=window.open("","_blank"); if(nw2){ nw2.document.open(); nw2.document.write(html); nw2.document.close(); } }
+  var doc=prepPreviewHtml(html);
+  var nm=String(title||"미리보기");
+  var ov=document.createElement("div");
+  ov.style.cssText="position:fixed;inset:0;z-index:100000;background:#0f1218;display:flex;flex-direction:column";
+  ov.innerHTML=
+    '<div style="flex-shrink:0;display:flex;align-items:center;gap:7px;padding:9px 11px;background:#1b2330;color:#fff">'
+    +'<b style="font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">👁️ '+escapeHtml(nm)+'</b>'
+    +'<button id="ohNew" style="border:none;border-radius:8px;padding:7px 10px;font-size:11.5px;font-weight:700;background:#2b6ef0;color:#fff;cursor:pointer;font-family:inherit">🔗 새 창</button>'
+    +'<button id="ohSave" style="border:none;border-radius:8px;padding:7px 10px;font-size:11.5px;font-weight:700;background:#22b07a;color:#fff;cursor:pointer;font-family:inherit">📥 저장</button>'
+    +'<button id="ohClose" style="border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;background:#3a4557;color:#fff;cursor:pointer;font-family:inherit">✕</button>'
+    +'</div>'
+    +'<iframe id="ohFrame" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" style="flex:1;width:100%;border:none;background:#fff"></iframe>';
+  document.body.appendChild(ov);
+  var fr=ov.querySelector("#ohFrame");
+  try{ fr.srcdoc=doc; }catch(e){ ov.remove(); alert("미리보기를 열지 못했어요: "+(e.message||e)); return; }
+  var _u=null;
+  function blobUrl(){ if(!_u){ _u=URL.createObjectURL(new Blob([doc],{type:"text/html;charset=utf-8"})); } return _u; }
+  ov.querySelector("#ohNew").onclick=function(){
+    try{ var w=window.open(blobUrl(),"_blank"); if(!w) alert("새 창이 차단됐어요. 이 화면에서 보시거나 저장해 주세요."); }
+    catch(_){ alert("새 창을 열지 못했어요. 이 화면에서 보시거나 저장해 주세요."); }
+  };
+  ov.querySelector("#ohSave").onclick=function(){
+    try{ var a=document.createElement("a"); a.href=blobUrl(); a.download=nm.replace(/[^\w가-힣]+/g,"_")+".html";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); }catch(_){}
+  };
+  ov.querySelector("#ohClose").onclick=function(){ try{ if(_u) URL.revokeObjectURL(_u); }catch(_){} ov.remove(); };
 }
 function copyText(text, btn){
   try{ navigator.clipboard.writeText(text).then(function(){ if(btn){ var o=btn.textContent; btn.textContent="✓ 복사됨"; setTimeout(function(){ btn.textContent=o; },1500); } }); }
@@ -3501,9 +3619,11 @@ function renderLearn(){
     +'</div>'
 
     +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
-      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🧠 실수 규칙 <span style="font-weight:600;font-size:10.5px;color:#8a94a6">— 반복 금지: 실패·AI 오류·거짓말을 규칙으로</span></div>'
-      +'<div class="note" style="margin-bottom:6px">AI가 틀리거나 사고 친 걸 규칙으로 박아두면 <b>모든 생성에 자동 반영</b>돼 같은 실수를 반복하지 않아요. (예: "가짜 데이터로 테스트 통과라고 보고하지 마라", "고흥을 여수로 쓰지 마라")</div>'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🧠 품질 규칙 <span style="font-weight:600;font-size:10.5px;color:#8a94a6">— 실수를 &#39;하지 마라&#39;가 아닌 &#39;이렇게 하라&#39;로 바꿔 주입</span></div>'
+      +'<div class="note" style="margin-bottom:6px">AI가 틀리거나 사고 친 걸 적어두면 <b>같은 뜻의 지향문으로 바꿔서</b> 모든 생성에 자동 반영돼요. 금지 목록은 쌓일수록 AI 발상을 가두기 때문에, "~하지 마라"를 "~하라"로 뒤집어 저장합니다. (예: "고흥을 여수로 쓰지 마라" → "지역명은 반드시 고흥으로, 확실치 않으면 지역 언급을 빼라") · 비슷한 규칙은 자동 병합, 180일 지난 규칙은 주입에서 제외(📌 고정하면 유지)</div>'
       +'<div style="display:flex;gap:6px;margin-bottom:6px"><input id="lsnIn" placeholder="반복하면 안 되는 규칙 한 줄" style="flex:1;box-sizing:border-box;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12px"><button class="cbtn conn" id="lsnAdd">추가</button></div>'
+      +'<div style="display:flex;gap:6px;margin-bottom:8px"><button class="cbtn" id="lsnRewrite" style="flex:1;justify-content:center;font-size:11.5px">🔁 지향문으로 정리 (중복 병합)</button></div>'
+      +'<div id="lsnStat" class="note" style="font-size:11px;min-height:13px;margin-bottom:4px"></div>'
       +'<div id="lsnList" style="font-size:11.5px;line-height:1.6;color:#2a3648">불러오는 중…</div>'
     +'</div>'
 
@@ -3683,8 +3803,9 @@ function bindLearn(){
       try{ var r=await fetch(backendOrigin()+"/api/lessons"); var d=await r.json();
         var arr=(d.lessons||[]).slice().reverse();
         if(!arr.length){ listEl.innerHTML='<span style="color:#8a94a6">아직 등록된 규칙이 없어요.</span>'; return; }
-        listEl.innerHTML=arr.map(function(x){ return '<div style="display:flex;gap:6px;align-items:flex-start;padding:5px 0;border-bottom:1px solid #f0f3f8"><span style="flex:1">· '+esc(x.text)+'</span><button class="lsnDel" data-id="'+x.id+'" style="border:none;background:none;color:#c0392b;cursor:pointer;font-size:12px">🗑</button></div>'; }).join("");
+        listEl.innerHTML=arr.map(function(x){ var g=(x.guide||x.text||""); var showOrig=(x.guide&&x.guide!==x.text); return '<div style="display:flex;gap:6px;align-items:flex-start;padding:6px 0;border-bottom:1px solid #f0f3f8'+(x.stale?';opacity:.45':'')+'">' +'<span style="flex:1;min-width:0">'+(x.pinned?'<span style="color:#c98a2a">📌 </span>':'')+'<b style="font-weight:600">'+esc(g)+'</b>' +(showOrig?('<div style="font-size:10px;color:#9aa4b2;margin-top:2px">원문: '+esc(x.text)+'</div>'):'') +(x.stale?'<div style="font-size:10px;color:#c0392b;margin-top:2px">만료됨(180일) — 주입 안 됨'+'</div>':'')+'</span>' +'<button class="lsnPin" data-id="'+x.id+'" style="border:none;background:'+(x.pinned?'#fff4e0':'#f0f3f8')+';color:#8a6a2a;border-radius:7px;padding:4px 7px;font-size:11px;cursor:pointer">📌</button>' +'<button class="lsnDel" data-id="'+x.id+'" style="border:none;background:#fdecec;color:#c0392b;border-radius:7px;padding:4px 8px;font-size:11px;cursor:pointer">삭제</button></div>'; }).join("");
         listEl.querySelectorAll(".lsnDel").forEach(function(b){ b.addEventListener("click", async function(){ try{ await fetch(backendOrigin()+"/api/lessons/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:b.getAttribute("data-id")})}); load(); }catch(e){} }); });
+        listEl.querySelectorAll(".lsnPin").forEach(function(b){ b.addEventListener("click", async function(){ try{ await fetch(backendOrigin()+"/api/lessons/pin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:b.getAttribute("data-id")})}); load(); }catch(e){} }); });
       }catch(e){ listEl.innerHTML='<span style="color:#c0392b">불러오기 실패</span>'; }
     }
     if(addBtn) addBtn.addEventListener("click", async function(){
@@ -3693,6 +3814,18 @@ function bindLearn(){
       addBtn.disabled=true; try{ await wakeServer(40000); var r=await fetch(backendOrigin()+"/api/lessons",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:t})}); var d=await r.json(); if(d.error) throw new Error(d.error); if(inEl) inEl.value=""; load(); }catch(e){ alert("추가 실패: "+(e.message||e)); } addBtn.disabled=false;
     });
     if(inEl) inEl.addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); if(addBtn) addBtn.click(); } });
+    var rwBtn=document.getElementById("lsnRewrite"), rwStat=document.getElementById("lsnStat");
+    if(rwBtn) rwBtn.addEventListener("click", async function(){
+      if(!useBackend()){ alert("AI 백엔드 연결이 필요해요."); return; }
+      rwBtn.disabled=true; var ob=rwBtn.textContent; rwBtn.textContent="정리 중…";
+      if(rwStat) rwStat.innerHTML='<span style="color:#0e7a52">🔁 금지문을 지향문으로 바꾸고 중복을 병합하는 중… (규칙 수에 따라 1~2분)</span>';
+      try{ await wakeServer(50000);
+        var r=await fetch(backendOrigin()+"/api/lessons/rewrite",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+        var d=await r.json(); if(d.error) throw new Error(d.error);
+        setTimeout(function(){ load(); if(rwStat) rwStat.innerHTML='<span style="color:#0e7a52">✅ 정리 완료 — 목록을 갱신했어요.</span>'; }, 12000);
+      }catch(e){ if(rwStat) rwStat.innerHTML='<span style="color:#c0392b">실패: '+esc(e.message||String(e))+'</span>'; }
+      rwBtn.disabled=false; rwBtn.textContent=ob;
+    });
     load();
   })();
   (function(){
@@ -3923,7 +4056,7 @@ function deepResultHtml(rs){
     h+='<div style="font-size:11.5px;font-weight:800;color:#15324f;margin:8px 0 5px">📦 제작팀가 만든 예제</div>';
     if(isHtml){
       h+='<button class="ib-btn" id="lnExOpen" style="width:100%;justify-content:center;background:#eef7ff;color:#1668c7;margin-bottom:6px">👁️ 예제 전체 보기</button>'
-        +'<iframe id="lnExFrame" style="width:100%;height:320px;border:1px solid #e3e8ef;border-radius:9px;background:#fff" sandbox="allow-same-origin"></iframe>';
+        +'<iframe id="lnExFrame" style="width:100%;height:320px;border:1px solid #e3e8ef;border-radius:9px;background:#fff" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>';
     } else {
       h+='<div style="font-size:11.5px;color:#1c2838;line-height:1.65;white-space:pre-wrap;background:#fff;border:1px solid #eef1f6;border-radius:9px;padding:10px 12px;max-height:300px;overflow:auto">'+esc(ex)+'</div>';
     }
@@ -4445,9 +4578,9 @@ function pollLearnTab(jobId, btn, oldTxt, onDone){
           if(d.kind==="deep" && d.result){
             res.innerHTML=deepResultHtml(d.result);
             var ex=String(d.result.example||"");
-            var fr=document.getElementById("lnExFrame"); if(fr){ try{ fr.srcdoc=ex; }catch(_){} }
+            var fr=document.getElementById("lnExFrame"); if(fr){ try{ fr.srcdoc=prepPreviewHtml(ex); }catch(_){} }
             var op=document.getElementById("lnExOpen");
-            if(op) op.addEventListener("click", function(){ try{ var w=window.open("","_blank"); w.document.open(); w.document.write(ex); w.document.close(); }catch(_){ alert("팝업이 차단됐어요."); } });
+            if(op) op.addEventListener("click", function(){ openHtml(ex, "학습 예시"); });
           } else {
             res.innerHTML='<div style="background:#f7fbff;border:1px solid #d9e8fb;border-radius:10px;padding:11px 13px"><div style="font-size:11.5px;font-weight:800;color:#1668c7;margin-bottom:5px">🧠 새로 배운 품질 공식</div><div style="font-size:12px;color:#1c2838;line-height:1.65;white-space:pre-wrap;max-height:320px;overflow:auto">'+esc(d.knowledge||"")+'</div></div>';
           }
@@ -4704,14 +4837,14 @@ function productResultHtml(d){
     +'<button class="ib-btn" data-pdpreview="1" style="flex:1;min-width:0;justify-content:center;background:#eef7ff;color:#1668c7">👁️ 미리보기</button>'
     +'<button class="ib-btn" data-pddownload="1" style="flex:1;min-width:0;justify-content:center;background:#eafaf0;color:#0e7a52">📥 HTML 저장</button>'
     +'<button class="ib-btn copy" data-pdcopy="1" style="flex:none;min-width:0;padding:6px 10px">📋</button></div>'
-    +'<iframe id="pdFrame" style="width:100%;height:420px;border:1px solid #e3e8ef;border-radius:10px;background:#fff" sandbox="allow-same-origin"></iframe>';
+    +'<iframe id="pdFrame" style="width:100%;height:420px;border:1px solid #e3e8ef;border-radius:10px;background:#fff" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>';
 }
 function bindProductResult(ov, html, name){
   var frame=ov.querySelector("#pdFrame");
-  if(frame){ try{ frame.srcdoc=html; }catch(e){} }
+  if(frame){ try{ frame.srcdoc=prepPreviewHtml(html); }catch(e){} }
   ov.querySelector("#pdResult").addEventListener("click", function(e){
     if(e.target.closest("[data-pdpreview]")){
-      try{ var w=window.open("","_blank"); w.document.open(); w.document.write(html); w.document.close(); }catch(_){ alert("팝업이 차단됐어요. 아래 미리보기를 이용하세요."); }
+      openHtml(html, name||"상품페이지");
     }
     if(e.target.closest("[data-pddownload]")){
       try{ var blob=new Blob([html],{type:"text/html"}); var url=URL.createObjectURL(blob); var a=document.createElement("a");
@@ -5974,9 +6107,7 @@ function bindProject(){
     }
     window.showPMResult=function(m){
       if(useBackend() && m && m.id){ window.open(backendOrigin()+"/api/project-meetings/view?id="+encodeURIComponent(m.id)+(m.token?("&t="+encodeURIComponent(m.token)):""),"_blank"); return; }
-      var w=window.open("","_blank");
-      if(w){ w.document.write('<meta charset="utf-8"><title>'+esc(m.topic)+'</title><body style="font-family:sans-serif;max-width:720px;margin:20px auto;padding:0 14px;white-space:pre-wrap;line-height:1.7"><h3>🏢 '+esc(m.topic)+'</h3><div style="color:#666;font-size:13px">'+(m.passed?'✅ 검수 통과':'📝 초안')+'</div><hr><div>'+esc(m.deliverable||"")+'</div></body>'); w.document.close(); }
-      else alert(m.deliverable||"(결과물 없음)");
+      openHtml('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(m.topic)+'</title></head><body style="font-family:sans-serif;max-width:720px;margin:20px auto;padding:0 14px;white-space:pre-wrap;line-height:1.7"><h3>🏢 '+esc(m.topic)+'</h3><div style="color:#666;font-size:13px">'+(m.passed?'✅ 검수 통과':'📝 초안')+'</div><hr><div>'+esc(m.deliverable||"")+'</div></body></html>', m.topic||"회의 결과");
     };
     window.openCompare=function(id, d){
       var cs=(d.candidates||[]);
@@ -6973,6 +7104,20 @@ function renderSettings(){
     +'<div class="mengine"><div class="mengine-t">🔁 디자인 검수 루프 (목표 기반)</div>'
     +'<div class="note" style="margin-bottom:5px">디자인(상품페이지·홈페이지·티스토리 스킨)을 만든 뒤 <b>검수관이 비주얼 기준(색·레이아웃·시그니처·클리셰 회피)을 충족할 때까지 자동 수정</b>하는 최대 횟수. 많을수록 품질↑·비용/시간↑. (0=끔)</div>'
     +'<div class="mengine-opts">'+[0,1,2,3].map(function(n){ var cur=(STATE.designReviewLoops==null?1:+STATE.designReviewLoops); return '<span class="mchip'+(cur===n?" on":"")+'" data-drl="'+n+'">'+(n===0?"끔":n+"회")+'</span>'; }).join(" ")+'</div></div>'
+    // 🎨 브랜드 디자인 시스템 (design.md) — 모든 화면을 한 브랜드로
+    +'<div class="mengine"><div class="mengine-t">🎨 브랜드 디자인 규칙 (도면)</div>'
+    +'<div class="note" style="margin-bottom:6px">AI는 매번 기억이 없어서 <b>화면마다 색·여백·버튼이 제각각</b>이 돼요. 여기에 도면(색 3~4개·폰트·간격·<b>쓰지 않을 것</b>)을 적어두면 <b>홈페이지·상품페이지·배너가 전부 같은 브랜드</b>로 나옵니다.</div>'
+    +'<div class="brfset"><div class="brfset-row"><span class="brfset-sw'+(STATE.designSystem&&STATE.designSystem.on!==false&&(STATE.designSystem.text||"")?" on":"")+'" id="dsToggle"></span><b>도면 적용</b> <span class="brfset-d">모든 HTML 생성에 주입</span></div></div>'
+    +'<textarea id="dsText" rows="7" placeholder="[색]&#10;· 메인 #2E5D3B — 헤더·버튼&#10;· 포인트 #C8A24A — 강조&#10;[폰트]&#10;· 제목 Pretendard Bold&#10;[간격·모양]&#10;· 간격 8의 배수 / 모서리 12px&#10;[쓰지 않을 것]&#10;· 그라데이션 배경&#10;· 이모지" style="width:100%;box-sizing:border-box;margin-top:6px;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12px;line-height:1.6;resize:vertical">'+escapeHtml((STATE.designSystem&&STATE.designSystem.text)||"")+'</textarea>'
+    +'<div class="keyrow" style="margin-top:6px;gap:6px"><button class="cbtn conn" id="dsDraft" style="flex:1">🪄 AI가 초안 만들기</button><button class="cbtn conn" id="dsSave" style="flex:1">💾 저장</button></div>'
+    +'<div id="dsStat" class="note" style="min-height:13px;margin-top:4px"></div></div>'
+    // 🔥 바이럴 점수 게이트
+    +'<div class="mengine"><div class="mengine-t">🔥 바이럴 점수 게이트</div>'
+    +'<div class="note" style="margin-bottom:6px">발행 전에 <b>"이게 실제로 먹힐까"</b>를 채점해요(후킹·구체성·공유유발·차별성·행동유도). 기준 미달이면 <b>자동으로 한 번 더 강하게 고쳐 씁니다.</b> 켜면 콘텐츠 1종당 AI 호출이 1~2회 늘어요.</div>'
+    +'<div class="brfset"><div class="brfset-row"><span class="brfset-sw'+(STATE.viralGate?" on":"")+'" id="vgToggle"></span><b>점수 게이트</b> <span class="brfset-d">선순환 콘텐츠에 적용</span></div></div>'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-top:6px"><span style="font-size:12px;color:#5a6472;font-weight:700">합격 기준</span>'
+    +  '<div class="mengine-opts" style="flex:1">'+[60,70,80].map(function(n){ var cur=(STATE.viralMin==null?70:+STATE.viralMin); return '<span class="mchip'+(cur===n?" on":"")+'" data-vgmin="'+n+'">'+n+'점</span>'; }).join(" ")+'</div></div>'
+    +'<div class="note" style="margin-top:4px">기준이 높을수록 더 자주 다시 씁니다(품질↑ 비용↑). 평범한 글은 보통 50~60점대예요.</div></div>'
     +'<div class="s-sec">📋 팀장 브리핑 (오세라)</div>'
     +'<div class="note">오세라가 정해진 시각에 자동으로 브리핑해요(무료). 카톡 + 기록·분석 탭 카드로 와요.</div>'
     +'<div class="brfset">'
@@ -7368,6 +7513,49 @@ function bindSettings(){
       renderSettings(); bindSettings();
     });
   });
+  // 🎨 브랜드 디자인 규칙
+  (function(){
+    var ta=document.getElementById("dsText"), sv=document.getElementById("dsSave"), df=document.getElementById("dsDraft"),
+        tg=document.getElementById("dsToggle"), st=document.getElementById("dsStat");
+    if(!ta) return;
+    function cur(){ STATE.designSystem=STATE.designSystem||{on:true,text:""}; return STATE.designSystem; }
+    if(tg) tg.addEventListener("click", function(){
+      var d=cur(); d.on=!(d.on!==false); saveState(); try{ pushState(); }catch(e){}
+      tg.classList.toggle("on", d.on!==false);
+      if(st) st.innerHTML='<span style="color:#0e7a52">'+(d.on!==false?"✅ 도면 적용 켬":"⚪ 도면 적용 끔")+'</span>';
+    });
+    if(sv) sv.addEventListener("click", async function(){
+      var d=cur(); d.text=(ta.value||"").trim().slice(0,1800); if(d.on==null) d.on=true;
+      saveState();
+      if(st) st.innerHTML='<span style="color:#0e7a52">저장 중…</span>';
+      try{ await pushState(); if(st) st.innerHTML='<span style="color:#0e7a52">✅ 저장됨 — 다음 생성부터 모든 페이지에 적용돼요.</span>'; }
+      catch(e){ if(st) st.innerHTML='<span style="color:#c0392b">저장 실패(백엔드 연결 확인)</span>'; }
+    });
+    if(df) df.addEventListener("click", async function(){
+      if(!useBackend()){ alert("AI 백엔드 연결이 필요해요."); return; }
+      df.disabled=true; var ob=df.textContent; df.textContent="초안 만드는 중…";
+      if(st) st.innerHTML='<span style="color:#b57b1a">🪄 아트디렉터가 브랜드 도면을 잡는 중… (30초~1분)</span>';
+      try{ await wakeServer(50000);
+        var r=await fetch(backendOrigin()+"/api/design-system/draft",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+        var d2=await r.json(); if(d2.error) throw new Error(d2.error);
+        if(!d2.ok||!d2.text) throw new Error(d2.error||"초안 생성 실패");
+        ta.value=d2.text;
+        if(st) st.innerHTML='<span style="color:#0e7a52">✅ 초안 완성 — 내용을 다듬고 <b>💾 저장</b>을 누르세요.</span>';
+      }catch(e){ if(st) st.innerHTML='<span style="color:#c0392b">실패: '+escapeHtml(e.message||String(e))+'</span>'; }
+      df.disabled=false; df.textContent=ob;
+    });
+  })();
+  // 🔥 바이럴 점수 게이트
+  (function(){
+    var tg=document.getElementById("vgToggle");
+    if(tg) tg.addEventListener("click", function(){
+      STATE.viralGate=!(STATE.viralGate===true); saveState(); try{ pushState(); }catch(e){}
+      tg.classList.toggle("on", !!STATE.viralGate);
+    });
+    document.querySelectorAll('[data-vgmin]').forEach(function(c){
+      c.addEventListener("click", function(){ STATE.viralMin=+c.getAttribute("data-vgmin"); saveState(); try{ pushState(); }catch(e){} renderSettings(); bindSettings(); });
+    });
+  })();
   document.querySelectorAll('[data-drl]').forEach(function(c){
     c.addEventListener("click", function(){ STATE.designReviewLoops=+c.getAttribute("data-drl"); saveState(); try{ pushState(); }catch(e){} renderSettings(); bindSettings(); });
   });
@@ -7858,9 +8046,11 @@ function renderRecord(){
   var rlog=(STATE.activityLog||[]).slice().reverse();
   var rok=rlog.filter(function(x){return x.ok===true;}).length, rpend=rlog.filter(function(x){return x.ok==="pending";}).length, rfail=rlog.length-rok-rpend;
   var resOpen=(STATE.resultsOpen===true);
-  var resultsHtml='<div class="s-sec resacc-hd" id="resToggle" style="margin-top:16px;cursor:pointer;display:flex;align-items:center;gap:6px">🚀 실행 결과 <span style="font-size:11px;color:#8a93a6">성공 '+rok+' · 대기 '+rpend+' · 실패 '+rfail+'</span><span style="margin-left:auto;font-size:11px;color:#8a93a6">'+(resOpen?"접기 ▴":"펼치기 ▾")+'</span></div>';
+  var resultsHtml='<div class="s-sec resacc-hd" id="resToggle" style="margin-top:16px;cursor:pointer;display:flex;align-items:center;gap:6px">🚀 실행 결과 <span style="font-size:11px;color:#8a93a6">성공 '+rok+' · 대기 '+rpend+' · 실패 '+rfail+'</span><span style="margin-left:auto;font-size:11px;color:#8a93a6" id="resToggleCaret">'+(resOpen?"접기 ▴":"펼치기 ▾")+'</span></div>';
   resultsHtml+=approvalsPanelHtml(); // 승인 대기는 항상 표시(중요)
-  if(resOpen){
+  // v219: 본문을 항상 그려두고 display로만 접기 → 클릭 시 재렌더가 없어 스크롤이 튀지 않음
+  resultsHtml+='<div id="resBody" style="display:'+(resOpen?'block':'none')+'">';
+  {
     if(!rlog.length) resultsHtml+='<div class="note">아직 실행한 작업이 없어요. 콘텐츠 발행·이미지/영상 생성 결과가 여기 쌓여요.</div>';
     else {
       var shown=rlog.slice(0,8);
@@ -7877,6 +8067,7 @@ function renderRecord(){
       resultsHtml+='<button class="cbtn" id="saveResults" style="width:100%;margin-top:6px">💾 실행 기록 저장(.txt)</button>';
     }
   }
+  resultsHtml+='</div>';
   viewEl.innerHTML = '<div class="s-wrap">'
     +'<div class="s-sec">🧠 부서별 작업·수집 기록</div>'
     + learnHtml
@@ -8038,7 +8229,12 @@ function bindRecord(){
     });
   });
   var l=document.getElementById("saveLearn"); if(l) l.addEventListener("click", saveLearning);
-  var rtog=document.getElementById("resToggle"); if(rtog) rtog.addEventListener("click", function(){ STATE.resultsOpen=!(STATE.resultsOpen===true); render(); });
+  var rtog=document.getElementById("resToggle"); if(rtog) rtog.addEventListener("click", function(){
+    var open=!(STATE.resultsOpen===true);
+    STATE.resultsOpen=open; saveState();
+    var b=document.getElementById("resBody"); if(b) b.style.display=open?"block":"none";
+    var cr=document.getElementById("resToggleCaret"); if(cr) cr.textContent=open?"접기 ▴":"펼치기 ▾";
+  });
   var sres=document.getElementById("saveResults"); if(sres) sres.addEventListener("click", function(){
     var rows=(STATE.activityLog||[]).slice().reverse();
     var txt=rows.map(function(x){ return (x.at?dateTimeText(x.at):(x.time||""))+"  ["+(x.ok==="pending"?"대기":(x.ok?"성공":"실패"))+"] "+(x.label||"")+(x.inst?("\n  지시: "+x.inst):"")+(x.note?("\n  "+x.note):""); }).join("\n\n");
@@ -8061,10 +8257,17 @@ function bindRecord(){
     };
   });
   document.querySelectorAll('[data-reccol]').forEach(function(hd){
-    hd.onclick=function(){ var k=hd.getAttribute("data-reccol"); STATE.recOpenCol=STATE.recOpenCol||{}; STATE.recOpenCol[k]=!(STATE.recOpenCol[k]===true); saveState();
-      var sc=viewEl?viewEl.scrollTop:0;
-      renderRecord(); bindRecord();
-      if(viewEl){ try{ viewEl.scrollTop=sc; }catch(_){} }
+    hd.onclick=function(){
+      var k=hd.getAttribute("data-reccol");
+      STATE.recOpenCol=STATE.recOpenCol||{};
+      var willOpen=!(STATE.recOpenCol[k]===true);
+      STATE.recOpenCol[k]=willOpen; saveState();
+      var card=hd.closest(".recacc");
+      if(card){
+        var bodyEl=card.querySelector(".recacc-body");
+        if(bodyEl) bodyEl.style.display=willOpen?"block":"none";
+        card.classList.toggle("open", willOpen);
+      }
     };
   });
   bindResults(); loadApprovals();
