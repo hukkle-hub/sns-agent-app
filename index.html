@@ -354,6 +354,8 @@
   .ob-meta{margin-left:auto;font-size:10.5px;color:#8a94a6;white-space:nowrap}
   .ob-st{font-size:11px}
   .ob-mem{font-size:10.5px;color:#7a8699;margin-bottom:8px;min-height:14px}
+  .ob-teamhd{grid-column:1/-1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:8px 0 0;padding-bottom:5px;border-bottom:2px solid #e6eaf2;font-size:14px;font-weight:800;color:#2b3543}
+  .ob-teamroster{font-size:11px;font-weight:600;color:#8a94a6}
   .ob-in{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #d6deea;border-radius:8px;font-size:12.5px;font-family:inherit;outline:none;margin-bottom:7px}
   .ob-in:focus{border-color:#34e0a1}
   .ob-row{display:flex;gap:6px}
@@ -851,7 +853,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v209</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v210</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -924,6 +926,25 @@ function deptNames(id){
   var base=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[id])?[DEPT_MEMBERS[id]]:[];
   var crew=(typeof DEPT_CREW!=="undefined"&&DEPT_CREW[id])?DEPT_CREW[id]:[];
   return base.concat(crew).filter(function(v,i,a){return v&&a.indexOf(v)===i;});
+}
+// ===== 오피스 팀 구성(v210): 팀별 그룹 · 팀장→팀원 순서 · 크루 전원 이름 =====
+var OFFICE_TEAMS = [
+  { name:"🗂 총괄실", ids:["ops"],
+    roster:[{n:"오세라",r:"총괄 비서",lead:1}] },
+  { name:"📖 이야기팀", ids:["creation","strategy","advisory"],
+    roster:[{n:"이서연",r:"콘텐츠 디렉터·팀장",lead:1},{n:"한지우",r:"카피라이터"},{n:"정유진",r:"블로그 작가"}] },
+  { name:"🎬 필름팀", ids:["publishing","scout"],
+    roster:[{n:"임채원",r:"영상 PD·팀장",lead:1},{n:"서다은",r:"대본 작가"},{n:"노아라",r:"편집·썸네일"}] },
+  { name:"🎨 디자인팀", ids:["monetization","analytics"],
+    roster:[{n:"윤소희",r:"아트 디렉터·팀장",lead:1},{n:"강민서",r:"웹 디자이너"},{n:"오하늘",r:"그래픽 디자이너"}] }
+];
+function officeOrder(){ var o=[]; OFFICE_TEAMS.forEach(function(t){ t.ids.forEach(function(id){ o.push(id); }); }); return o; }
+function teamOf(id){ for(var i=0;i<OFFICE_TEAMS.length;i++){ if(OFFICE_TEAMS[i].ids.indexOf(id)>=0) return OFFICE_TEAMS[i]; } return null; }
+function isTeamLead(id){ var t=teamOf(id); return !!(t && t.ids[0]===id); }
+function teamRosterChips(t){
+  return (t.roster||[]).map(function(m){
+    return '<span class="o2-crewm">'+(m.lead?"👑 ":"")+esc(m.n)+' <i style="opacity:.7;font-weight:500">'+esc(m.r)+'</i></span>';
+  }).join("");
 }
 
 function directDept(instruction){
@@ -2670,7 +2691,7 @@ async function runDirectiveNow(id, directive){
   setTimeout(function(){ try{ syncBackend(true); }catch(e){} if(STATE.view==="record"||STATE.view==="office") render(); }, 12000);
 }
 function renderOffice(){
-  var keys=Object.keys(AGENTS);
+  var keys=officeOrder();
   if(window.matchMedia && window.matchMedia("(min-width:900px)").matches){ renderOfficeBoard(keys); return; }
   var idx=(typeof STATE.officeIdx==="number")?STATE.officeIdx:0;
   var slides=keys.map(function(id,i){
@@ -2712,13 +2733,9 @@ function renderOffice(){
         +'<div class="o2-todaydir-t">'+(lddTxt?esc(lddTxt):'<span style="opacity:.6;font-weight:500">아직 팀장이 내린 지시가 없어요. 오피스 상단의 팀장(오세라)에게 요청하거나, 매일 새벽 자동 배정됩니다.</span>')+'</div>'
         +(lddTxt&&ldd&&ldd.at?('<div style="font-size:10px;color:#9fb8de;margin-top:4px">'+agoText(ldd.at)+'</div>'):'')
         +'</div>'):'')
-      +((id==="publishing" && STATE.crew && STATE.crew.writer)?('<div class="o2-crew">🎬 <b>필름팀 크루</b>'
-        +'<div class="o2-crewrow">'
-        +'<span class="o2-crewm">🎬 PD '+esc((STATE.crew.pd||{}).name||"")+' <i>Lv'+(Math.floor(((STATE.crewExp||{}).pd||0)/5)+1)+'</i></span>'
-        +'<span class="o2-crewm">✍️ 대본 '+esc(STATE.crew.writer.name||"")+' <i>Lv'+(Math.floor(((STATE.crewExp||{}).writer||0)/5)+1)+'</i></span>'
-        +'<span class="o2-crewm">🎥 편집 '+esc((STATE.crew.director||{}).name||"")+' <i>Lv'+(Math.floor(((STATE.crewExp||{}).director||0)/5)+1)+'</i></span>'
-        +'</div>'
-        +'<div class="o2-crewnote">PD→대본→편집 파이프라인으로 영상을 함께 만들어요</div>'
+      +(isTeamLead(id)?('<div class="o2-crew">'+esc(teamOf(id).name)+' <b>팀 구성</b>'
+        +'<div class="o2-crewrow">'+teamRosterChips(teamOf(id))+'</div>'
+        +'<div class="o2-crewnote">팀장 아래 팀원까지 이름 그대로 함께 움직여요</div>'
         +'</div>'):'')
       +(lastTxt?('<div class="o2-row o2-acc o2-accup" data-acc="last_'+id+'">'
         +'<div class="o2-acchd">⏳ <b>최근</b><span class="o2-caret">▴</span></div>'
@@ -4476,7 +4493,7 @@ function openProductModal(){
   var ov=document.createElement("div"); ov.className="modal-ov"; ov.id="pdModal";
   ov.innerHTML='<div class="modal-bx" style="max-width:600px">'
     +'<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:16px;font-weight:800;flex:1">🛍️ 상품페이지 스튜디오 <span style="font-size:11px;font-weight:600;color:#8a94a6">— 실제 HTML 페이지</span></div><button id="pdClose" style="border:none;background:#eef1f6;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
-    +'<div class="note" style="margin-bottom:10px;background:#fff0f5;border:1px solid #ffd9e6;border-radius:9px;padding:8px 10px;font-size:11px;line-height:1.5">커머스·그로스(윤소희) 부서가 <b>축적한 품질 공식</b>을 적용해 <b>완성형 HTML 상품페이지</b>를 만들어요.<br>✅ 접수 후 <b>앱을 닫아도 계속 제작</b>되고, 완료되면 <b>카카오톡 알림</b> + <b>콘텐츠 탭</b>에 저장됩니다. 콘텐츠 탭에서 <b>수정·추가</b>도 가능해요.</div>'
+    +'<div class="note" style="margin-bottom:10px;background:#fff0f5;border:1px solid #ffd9e6;border-radius:9px;padding:8px 10px;font-size:11px;line-height:1.5">디자인팀(윤소희) 부서가 <b>축적한 품질 공식</b>을 적용해 <b>완성형 HTML 상품페이지</b>를 만들어요.<br>✅ 접수 후 <b>앱을 닫아도 계속 제작</b>되고, 완료되면 <b>카카오톡 알림</b> + <b>콘텐츠 탭</b>에 저장됩니다. 콘텐츠 탭에서 <b>수정·추가</b>도 가능해요.</div>'
     +'<div style="display:flex;gap:8px;margin-bottom:10px"><button class="cbtn" id="pdLearn" style="flex:1;justify-content:center">📚 명품페이지 학습시키기</button><span class="note" id="pdLearnStat" style="flex:1;font-size:10.5px;align-self:center"></span></div>'
     +'<input id="pdBrand" placeholder="브랜드명 (기본: 민앤팜)" style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12.5px;margin-bottom:6px">'
     +'<input id="pdName" placeholder="상품명 (예: 고흥 유기농 유자청)" style="width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12.5px;margin-bottom:6px">'
@@ -4720,7 +4737,7 @@ function openWebtoonModal(){
 function openAnalyticsModal(){
   var ov=document.createElement("div"); ov.className="modal-ov"; ov.id="anModal";
   ov.innerHTML='<div class="modal-bx" style="max-width:540px">'
-    +'<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:16px;font-weight:800;flex:1">📈 채널 성과 <span style="font-size:11px;font-weight:600;color:#8a94a6">— 04 데이터분석</span></div><button id="anClose" style="border:none;background:#eef1f6;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
+    +'<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:16px;font-weight:800;flex:1">📈 채널 성과 <span style="font-size:11px;font-weight:600;color:#8a94a6">— 데이터 분석</span></div><button id="anClose" style="border:none;background:#eef1f6;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
     +'<div id="anBody">'+analyticsPanelHtml()+'</div>'
     +'<button class="cbtn conn" id="anCollect" style="width:100%;justify-content:center;margin-top:10px">🔄 지금 수집</button>'
     +'<div class="note" id="anStat" style="margin-top:6px"></div>'
@@ -4848,7 +4865,7 @@ function renderOfficeBoard(keys){
     else noteHtml='비우면 기본(트렌드 학습) · 팀장 지시 대기 중';
     var face=(typeof DEPT_STANDING!=="undefined"&&DEPT_STANDING[id])?DEPT_STANDING[id]
             :((typeof DEPT_BG!=="undefined"&&DEPT_BG[id])?DEPT_BG[id]:"");
-    return '<div class="ob-card'+(id==="ops"?" lead":"")+'">'
+    return (isTeamLead(id)?('<div class="ob-teamhd">'+esc(teamOf(id).name)+'<span class="ob-teamroster">'+teamOf(id).roster.map(function(m){return (m.lead?"👑":"")+esc(m.n);}).join(" · ")+'</span></div>'):'')+'<div class="ob-card'+(id==="ops"?" lead":"")+'">'
       +(face?('<div class="ob-face" style="background-image:url('+face+')" data-dept="'+id+'" title="'+esc(a.kr)+'"></div>'):'')
       +'<div class="ob-hd"><span class="o2-id" data-dept="'+id+'"><span class="ob-no" style="background:'+a.c+'">'+a.no+'</span><b>'+(id==="ops"?"👑 ":"")+esc(a.kr)+'</b></span>'
         +'<span class="ob-meta">⭐'+exp+' · Lv'+lv+'</span>'
@@ -4877,7 +4894,7 @@ function renderOfficeBoard(keys){
     +'</div>';
 }
 function bindOffice(){
-  var keys=Object.keys(AGENTS);
+  var keys=officeOrder();
   var obs=document.getElementById("obSched"); if(obs) obs.addEventListener("click", openPubSchedModal);
   var obi=document.getElementById("obInbox"); if(obi) obi.addEventListener("click", openInboxModal);
   var oba=document.getElementById("obAnalytics"); if(oba) oba.addEventListener("click", openAnalyticsModal);
@@ -6899,7 +6916,7 @@ function renderSettings(){
     +'<div class="s-sec">⚡ 자동 발행</div>'
     +'<div class="toggle"><div><div style="font-size:12.5px;font-weight:700">발행까지 자동 실행</div><div class="note">ON이면 발행부 작업 완료 시 연결된 플랫폼에 자동으로 발행 요청을 보냅니다.</div></div><div class="switch'+(STATE.autoPublish?' on':'')+'" id="autosw"></div></div>'
     +'<div class="s-sec">🛡 안전장치 (발행 게이트)</div>'
-    +'<div class="toggle"><div style="flex:1"><div style="font-size:12.5px;font-weight:700">발행 전 08 감사·법무 점검</div><div class="note">ON이면 발행 전에 감사·법무 에이전트가 저작권·광고법·정책 위반을 점검하고, 통과해야만 발행합니다.</div></div><div class="switch'+(STATE.safety.audit?' on':'')+'" id="auditsw"></div></div>'
+    +'<div class="toggle"><div style="flex:1"><div style="font-size:12.5px;font-weight:700">발행 전 감사·법무 점검</div><div class="note">ON이면 발행 전에 총괄 비서(오세라)가 저작권·광고법·정책 위반을 점검하고, 통과해야만 발행합니다.</div></div><div class="switch'+(STATE.safety.audit?' on':'')+'" id="auditsw"></div></div>'
     +'<div class="keyrow"><span style="font-size:11px;color:#5a6677">일 발행 한도</span><input type="number" id="dailyLimit" value="'+(STATE.safety.dailyLimit||0)+'" min="0" max="500" style="width:80px"><span style="font-size:11px;color:#7c8696">건 (0=무제한)</span></div>'
     +'<div class="note">하루 발행 수가 한도에 닿으면 자동으로 발행을 멈추고 카톡으로 알립니다(백엔드 연결 시). 과도한 자동 활동으로 인한 계정 위험·비용을 막습니다.</div>'
     +'<div class="toggle" style="margin-top:10px"><div style="flex:1"><div style="font-size:12.5px;font-weight:700">새 콘텐츠 카톡 알림</div><div class="note">ON이면 콘텐츠 탭에 새 콘텐츠(부서 산출물·프로젝트 결과)가 올라올 때마다 카카오톡으로 알려줍니다.</div></div><div class="switch'+(STATE.contentNotify!==false?' on':'')+'" id="cnotifysw"></div></div>'
