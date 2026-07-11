@@ -865,7 +865,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v239</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v246</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -3210,17 +3210,7 @@ function cycleReserve(v, btn, stat){
 
 // ═══════════ 👑 v230: 오세라 최종 검수 표시 ═══════════
 // 원칙: 모든 완성본은 오세라의 검수를 통과해야 내보낼 수 있다. 평가는 언제나 100점 만점.
-var OSERA_AXES_DEFAULT = [
-  { k:"fact",     max:20, ko:"사실·근거",   q:"근거 없는 숫자·효능·순위를 지어내지 않았는가. 확실치 않은 건 정직하게 밝혔는가" },
-  { k:"brand",    max:20, ko:"우리다움",     q:"민앤팜(전남 고흥 특산물)의 목소리인가. 아무 브랜드나 써도 되는 글이면 감점" },
-  { k:"complete", max:20, ko:"완성도",       q:"손대지 않고 바로 쓸 수 있는가. 빈칸·placeholder·미완성 구조가 있으면 감점" },
-  { k:"impact",   max:20, ko:"성과 가능성",  q:"실제로 사람을 움직이는가. 평범하면 과감히 감점" },
-  { k:"risk",     max:20, ko:"규정·리스크",  q:"과대·허위광고, 의학적 효능 단정, 저작권·개인정보 문제가 없는가" }
-];
-function oseraAxesLocal(){
-  var a=STATE.oseraAxes;
-  return (Array.isArray(a) && a.length>=2) ? a : OSERA_AXES_DEFAULT;
-}
+// v241: 5축 배점 채점은 폐기됨(오세라는 명세 검증관). 요구 항목은 /api/specs로 관리.
 function oseraMinLocal(){ var v=+(STATE.oseraMin||80); return (v>=50&&v<=95)?v:80; }
 function oseraOK(o){ return !o || (o.score >= (o.min||oseraMinLocal())); }
 function oseraBadge(o){
@@ -3306,12 +3296,16 @@ function tickJobWatcher(){
     apiFetch(spec.status+"?id="+encodeURIComponent(j.id)).then(function(res){ return res.json(); }).then(function(d){
       if(!d || (!d.ok && !d.status)) return;
       if(d.status==="running"||d.status==="queued"){
-        j.step=d.step||""; j.status=d.status; saveState(); renderJobBar();
+        j.step=d.step||""; j.status=d.status;
+        j.steps=(d.steps||[]).slice(-40); j.startedAt=d.startedAt||j.at;
+        saveState(); renderJobBar();
       } else {
         // 끝났다 — 성공이든 실패든 등록에서 빼고, 실패면 상세를 남긴다
         delete r[type];
         if(d.status==="error"||d.status==="failed"){
           var f={ type:type, label:spec.label, title:j.title, id:j.id,
+                  steps:(d.steps||j.steps||[]).slice(-40),
+                  startedAt:d.startedAt||j.startedAt||0,
                   step:d.failStep||j.step||"(단계 기록 없음)",
                   error:d.error||"원인 미상", ko:d.errorKo||"", fix:d.errorFix||"", raw:d.errorRaw||"",
                   at:d.failedAt||Date.now() };
@@ -3333,10 +3327,17 @@ function renderJobBar(){
   var h="";
   running.forEach(function(x){
     var spec=JOB_TYPES[x.t]||{label:x.t};
-    h+='<div class="jb-row jb-run" data-jbview="'+esc(spec.view||"")+'">'
-      +'<span class="jb-spin">⏳</span><b>'+esc(spec.label)+'</b>'
-      +'<span class="jb-step">'+esc(x.j.step||"진행 중")+'</span>'
-      +'<span class="jb-note">앱을 나가도 계속 진행돼요</span></div>';
+    var n=(x.j.steps||[]).length;
+    h+='<div class="jb-row jb-run">'
+      +'<span class="jb-spin">⏳</span><b class="jb-go" data-jbview="'+esc(spec.view||"")+'" style="cursor:pointer">'+esc(spec.label)+'</b>'
+      +'<span class="jb-step">'+esc(x.j.step||"진행 중")+(function(){
+          var ss=(x.j.steps||[]); var L=ss[ss.length-1];
+          if(!L || L.done || !L.eta) return '';
+          var left=L.eta-(Date.now()-L.at);
+          return left>3000 ? ' <span style="font-weight:400;color:#5a8f7a">· 약 '+fmtDur(left)+' 남음</span>' : '';
+        })()+'</span>'
+      +(n?('<button class="jb-btn" style="background:#0e7a52" data-jbtl="'+esc(x.t)+'">📋 진행 내역 '+n+'</button>'):'')
+      +'</div>';
   });
   fl.forEach(function(f,i){
     h+='<div class="jb-row jb-fail">'
@@ -3349,8 +3350,94 @@ function renderJobBar(){
   bar.querySelectorAll("[data-jbdetail]").forEach(function(b){ b.addEventListener("click", function(){ showJobFailure(+b.getAttribute("data-jbdetail")); }); });
   bar.querySelectorAll("[data-jbdismiss]").forEach(function(b){ b.addEventListener("click", function(){ var fl2=failedJobs(); fl2.splice(+b.getAttribute("data-jbdismiss"),1); saveState(); renderJobBar(); }); });
   bar.querySelectorAll("[data-jbview]").forEach(function(b){ b.addEventListener("click", function(){ var v=b.getAttribute("data-jbview"); if(v){ STATE.view=v; saveState(); render(); } }); });
+  bar.querySelectorAll("[data-jbtl]").forEach(function(b){ b.addEventListener("click", function(e){ e.stopPropagation(); var t=b.getAttribute("data-jbtl"); var j=jobsReg()[t]; if(j) showTimeline((JOB_TYPES[t]||{}).label||t, j.title, j.steps||[], j.startedAt, false); }); });
 }
 
+// 📋 v243: 작업 진행 내역 — 무슨 일이 언제, 몇 초 걸려 일어났는지 전부 보여준다
+function fmtDur(ms){
+  if(!ms || ms<0) return "";
+  var sec=Math.round(ms/1000);
+  if(sec<60) return sec+"초";
+  var m=Math.floor(sec/60), s2=sec%60;
+  return m+"분"+(s2?(" "+s2+"초"):"");
+}
+function showTimeline(label, title, steps, startedAt, isFail){
+  steps = steps||[];
+  var m=document.createElement("div");
+  m.style.cssText="position:fixed;inset:0;background:rgba(20,30,45,.55);z-index:10000;display:flex;align-items:flex-end;justify-content:center";
+  var total = steps.length ? ((steps[steps.length-1].done || Date.now()) - (startedAt || steps[0].at)) : 0;
+  var rows = steps.map(function(x,i){
+    var last=(i===steps.length-1);
+    var dur = x.done ? (x.done - x.at) : (last && !isFail ? (Date.now()-x.at) : 0);
+    var running = last && !x.done && !isFail;
+    var failed = !!x.failed;
+    var dot = failed ? '<span style="color:#c0392b">✕</span>'
+            : running ? '<span class="jb-spin" style="color:#0e7a52">⏳</span>'
+            : '<span style="color:#0e7a52">✓</span>';
+    var etaTxt = "";
+    if(x.eta){
+      if(running){
+        var left = x.eta - dur;
+        etaTxt = (left > 3000)
+          ? (' · <b style="color:#0e7a52">약 '+fmtDur(left)+' 남음</b> <span style="color:#c0c6d0">(평소 '+fmtDur(x.eta)+')</span>')
+          : ' · <b style="color:#b57b1a">평소보다 오래 걸리는 중</b> <span style="color:#c0c6d0">(평소 '+fmtDur(x.eta)+')</span>';
+      } else if(x.done){
+        var diff = dur - x.eta;
+        var slow = (diff > x.eta*0.5) && (diff > 20000);
+        etaTxt = ' <span style="color:'+(slow?"#b57b1a":"#c0c6d0")+'">(평소 '+fmtDur(x.eta)+(slow?' · 이번엔 느림':'')+')</span>';
+      }
+    } else if(running){
+      etaTxt = ' · <span style="color:#c0c6d0">예상 시간 학습 중 (2회 이상 돌면 표시)</span>';
+    }
+    var bar = "";
+    if(running && x.eta){
+      var pct = Math.min(99, Math.round(dur / x.eta * 100));
+      bar = '<div style="height:4px;background:#e6ebf2;border-radius:2px;overflow:hidden;margin-top:4px">'
+          + '<div style="height:4px;width:'+pct+'%;background:'+(pct>=99?"#e0a92b":"#22b07a")+'"></div></div>';
+    }
+    return '<div style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid #f2f5f9">'
+      +'<span style="width:16px;text-align:center;font-size:12px">'+dot+'</span>'
+      +'<span style="flex:1;min-width:0">'
+        +'<div style="font-size:12px;line-height:1.5;color:'+(failed?"#a03028":(running?"#0e7a52":"#2b3543"))+';font-weight:'+(running||failed?700:500)+'">'+esc(x.text)+'</div>'
+        +'<div style="font-size:10px;color:#9aa4b2;margin-top:1px">'
+          + new Date(x.at).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})
+          + (dur? (' · '+fmtDur(dur)) : '')
+          + etaTxt
+          + (failed? ' · <b style="color:#c0392b">여기서 중단됨</b>' : '')
+        +'</div>'
+        + bar
+      +'</span></div>';
+  }).join("");
+  m.innerHTML='<div style="background:#fff;width:100%;max-width:640px;max-height:86vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column">'
+    +'<div style="display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid #eef1f6">'
+      +'<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:14px;color:#15324f">📋 진행 내역 — '+esc(label)+'</div>'
+      +(title?('<div style="font-size:11px;color:#8a94a6;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(title)+'</div>'):'')
+      +'</div>'
+      +'<button id="tlClose" style="border:none;background:#eef1f6;border-radius:9px;width:32px;height:32px;font-size:16px;cursor:pointer">✕</button></div>'
+    +'<div style="padding:6px 16px;background:#f7f9fc;font-size:11px;color:#5a6472;border-bottom:1px solid #eef1f6">'
+      +'단계 <b>'+steps.length+'개</b>'+(total?(' · 경과 <b>'+fmtDur(total)+'</b>'):'')
+      +(function(){
+         var lastS = steps[steps.length-1];
+         if(isFail || !lastS || lastS.done || !lastS.eta) return '';
+         var left = lastS.eta - (Date.now()-lastS.at);
+         return left>3000 ? ' · 이 단계 <b style="color:#0e7a52">약 '+fmtDur(left)+' 남음</b>' : '';
+       })()
+      +(isFail?' · <b style="color:#c0392b">실패로 종료</b>':'')+'</div>'
+    +'<div style="padding:8px 16px 16px;overflow:auto;flex:1">'+(rows||'<div class="note" style="color:#9aa4b2">아직 기록된 단계가 없어요.</div>')+'</div>'
+    +'<div style="border-top:1px solid #eef1f6;padding:12px 16px;background:#fafbfd">'
+      +'<button id="tlCopy" class="cbtn" style="width:100%;justify-content:center;padding:11px">📋 진행 내역 복사</button></div>'
+    +'</div>';
+  document.body.appendChild(m);
+  m.querySelector("#tlClose").addEventListener("click", function(){ try{ m.remove(); }catch(_){} });
+  m.querySelector("#tlCopy").addEventListener("click", function(){
+    var txt="["+label+"] "+(title||"")+"\n"
+      + steps.map(function(x,i){
+          var d = x.done ? fmtDur(x.done-x.at) : "";
+          return (i+1)+". "+new Date(x.at).toLocaleTimeString("ko-KR")+"  "+x.text+(d?("  ("+d+")"):"")+(x.failed?"  ← 여기서 중단":"");
+        }).join("\n");
+    copyText(txt, m.querySelector("#tlCopy"));
+  });
+}
 function showJobFailure(idx){
   var f=failedJobs()[idx]; if(!f) return;
   var spec=JOB_TYPES[f.type]||{};
@@ -3370,6 +3457,7 @@ function showJobFailure(idx){
     +'</div>'
     +'<div style="border-top:1px solid #eef1f6;padding:12px 16px;background:#fafbfd;display:flex;gap:8px">'
       +(spec.retry?'<button id="jfRetry" class="cbtn conn" style="flex:2;justify-content:center;padding:11px">🔄 다시 시도</button>':'')
+      +((f.steps&&f.steps.length)?'<button id="jfTl" class="cbtn" style="flex:1;justify-content:center;padding:11px">📋 진행 내역</button>':'')
       +'<button id="jfCopy" class="cbtn" style="flex:1;justify-content:center;padding:11px">📋 오류 복사</button>'
     +'</div></div>';
   document.body.appendChild(m);
@@ -3378,6 +3466,8 @@ function showJobFailure(idx){
   m.querySelector("#jfCopy").addEventListener("click", function(){
     copyText("["+f.label+" 실패]\n단계: "+f.step+"\n원인: "+(f.ko?f.ko+" — ":"")+f.error+"\n해결: "+(f.fix||"")+"\n\n원문:\n"+(f.raw||""), m.querySelector("#jfCopy"));
   });
+  var tb=m.querySelector("#jfTl");
+  if(tb) tb.addEventListener("click", function(){ showTimeline(f.label, f.title, f.steps||[], f.startedAt, true); });
   var rb=m.querySelector("#jfRetry");
   if(rb) rb.addEventListener("click", function(){
     rb.disabled=true; rb.textContent="⏳ 다시 시작하는 중…";
@@ -3517,6 +3607,8 @@ function loadCycleList(){
       if(j.hasHome) tags.push('<span class="cyresbtn" data-cyres="home" data-id="'+j.id+'">🏠 홈페이지'+_ob("home")+'</span>');
       if(j.hasReport) tags.push('<span class="cyresbtn" data-cyres="report" data-id="'+j.id+'">📊 보고서'+_ob("report")+'</span>');
       if(j.pageDropped||j.homeDropped) tags.push('<span style="color:#9aa4b2;font-size:11px">(오래된 페이지 정리됨)</span>');
+      tags.push('<span class="cyTl" data-id="'+j.id+'" style="cursor:pointer;color:#2f6fe0;background:#eef4ff;border-radius:7px;padding:4px 9px;font-size:11px;font-weight:700">📋 진행 내역</span>');
+      tags.push('<span class="cyDel" data-id="'+j.id+'" style="cursor:pointer;color:#c0392b;background:#fdecec;border-radius:7px;padding:4px 9px;font-size:11px;font-weight:700">🗑 삭제</span>');
       var src=j.source==="reserve"?'<span style="font-size:10.5px;color:#9aa4b2">⏰예약</span> ':'';
       return '<div style="background:#fff;border:1px solid #e2e8f2;border-radius:11px;padding:11px 12px;margin-bottom:8px">'
         +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="flex:1;font-weight:700;font-size:13px;color:#2b3543;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+src+esc(j.topic)+'</div>'+st+'</div>'
@@ -3539,6 +3631,20 @@ function loadCycleList(){
       if(_cyListTimer){ clearInterval(_cyListTimer); _cyListTimer=null; }
       if(_run && _run.disabled && /^⏳/.test(_run.textContent||"")){ _run.disabled=false; _run.textContent="▶ 지금 실행"; }
     }
+    box.querySelectorAll(".cyTl").forEach(function(el){ el.addEventListener("click", function(){
+      var id=el.getAttribute("data-id");
+      apiFetch("/api/cycle/status?id="+encodeURIComponent(id)).then(function(r){ return r.json(); }).then(function(d){
+        if(!d.ok){ alert("진행 내역을 불러오지 못했어요."); return; }
+        showTimeline("선순환", d.topic||"", d.steps||[], d.startedAt||0, (d.status==="error"||d.status==="failed"));
+      }).catch(function(){ alert("진행 내역을 불러오지 못했어요."); });
+    }); });
+    box.querySelectorAll(".cyDel").forEach(function(el){ el.addEventListener("click", function(){
+      if(!confirm("이 작업을 목록에서 지울까요?")) return;
+      var id=el.getAttribute("data-id");
+      try{ var r=jobsReg(); if(r.cycle && r.cycle.id===id) untrackJob("cycle"); }catch(_){}
+      apiFetch("/api/cycle/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:id})})
+        .then(function(){ loadCycleList(); }).catch(function(){ alert("삭제 실패"); });
+    }); });
     box.querySelectorAll(".cyresbtn").forEach(function(el){
       el.style.cssText="cursor:pointer;background:#eef4ff;color:#2f6fe0;border-radius:7px;padding:5px 10px;font-size:11.5px;font-weight:700";
       el.addEventListener("click", function(){ cyResultModal(el.getAttribute("data-id"), el.getAttribute("data-cyres")); });
@@ -3802,11 +3908,17 @@ function loadDesignList(){
       var retry = (j.status==="error"||j.status==="failed") ? '<button class="dsRetry" data-id="'+j.id+'" style="border:none;background:#eef4ff;color:#2f6fe0;border-radius:7px;padding:6px 11px;font-size:12px;cursor:pointer;font-family:inherit">🔄 다시 시도</button>' : '';
       var act = (j.status==="done" && !j.outputDropped) ? '<button class="dsView" data-id="'+j.id+'" style="border:none;background:#eef4ff;color:#2f6fe0;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">'+(j.isHtml?"🔍 열기·수정":"📄 보기·수정")+'</button>' : (j.outputDropped?'<span style="font-size:11px;color:#9aa4b2">정리됨</span>':'');
       return '<div style="background:#fff;border:1px solid #e2e8f2;border-radius:11px;padding:11px 12px;margin-bottom:8px">'
-        +'<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;color:#2b3543">'+esc(j.kindLabel)+'</div>'
-        +'<div style="font-size:11px;color:#8a94a6;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(j.brief)+'</div></div>'+st+'</div>'
+        +'<div style="min-width:0"><div style="font-weight:700;font-size:13px;color:#2b3543">'+esc(j.kindLabel)+'</div>'
+        +'<div style="font-size:11px;color:#8a94a6;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(j.brief)+'</div></div>'
+        +'<div style="margin-top:6px;font-size:11.5px;line-height:1.5">'+st+'</div>'
         +(j.error?('<div style="font-size:11.5px;color:#c0392b;margin-top:6px;background:#fdeeee;border-radius:7px;padding:6px 8px;line-height:1.5">'+esc(j.error)+'</div>'):((j.status==="error"||j.status==="failed")?'<div style="font-size:11.5px;color:#c0392b;margin-top:6px">실패 원인이 기록되지 않았어요. 다시 시도해 보세요.</div>':''))
-        +(retry?('<div style="margin-top:8px">'+retry+'</div>'):'')
-        +(act?('<div style="margin-top:8px;display:flex;gap:7px"><button class="dsDel" data-id="'+j.id+'" style="border:none;background:#fdecec;color:#c0392b;border-radius:7px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer">삭제</button>'+act+'</div>'):'')
+        +'<div style="margin-top:8px;display:flex;gap:7px;flex-wrap:wrap">'
+          + retry
+          + '<button class="dsTl" data-id="'+j.id+'" style="border:none;background:#eef4ff;color:#2f6fe0;border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit">📋 진행 내역</button>'
+          + '<button class="dsDel" data-id="'+j.id+'" style="border:none;background:#fdecec;color:#c0392b;border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit">🗑 삭제</button>'
+          + ((j.status==="running"||j.status==="queued") ? '<span style="font-size:10.5px;color:#8a94a6;align-self:center">진행 중인 작업을 지우면 서버 작업은 계속되지만 목록에서 사라져요</span>' : '')
+        +'</div>' 
+        +(act?('<div style="margin-top:6px">'+act+'</div>'):'')
         +'</div>';
     }).join("");
     // 🔁 v228: 진행 중 작업이 있으면 앱 재진입 후에도 자동으로 복구(버튼 잠금 + 폴링 + 목록 갱신)
@@ -3824,6 +3936,14 @@ function loadDesignList(){
       if(_dsListTimer){ clearInterval(_dsListTimer); _dsListTimer=null; }
       if(_run && _run.disabled && /^⏳/.test(_run.textContent||"")){ _run.disabled=false; _run.textContent="🎨 만들기"; }
     }
+    box.querySelectorAll(".dsTl").forEach(function(b){ b.addEventListener("click", function(){
+      var id=b.getAttribute("data-id");
+      apiFetch("/api/design/status?id="+encodeURIComponent(id)).then(function(r){ return r.json(); }).then(function(d){
+        if(!d.ok){ alert("진행 내역을 불러오지 못했어요."); return; }
+        var jb=jobs.filter(function(x){ return x.id===id; })[0]||{};
+        showTimeline(jb.kindLabel||"디자인", jb.brief||"", d.steps||[], d.startedAt||0, (d.status==="error"||d.status==="failed"));
+      }).catch(function(){ alert("진행 내역을 불러오지 못했어요."); });
+    }); });
     box.querySelectorAll(".dsRetry").forEach(function(b){ b.addEventListener("click", function(){
       b.disabled=true; b.textContent="⏳ 다시 시작하는 중…";
       apiFetch("/api/design/retry",{method:"POST",headers:{"Content-Type":"application/json"},
@@ -3834,7 +3954,10 @@ function loadDesignList(){
         }).catch(function(e){ b.disabled=false; b.textContent="🔄 다시 시도"; alert("다시 시도 실패: "+(e.message||e)); });
     }); });
     box.querySelectorAll(".dsView").forEach(function(b){ b.addEventListener("click", function(){ dsResultModal(b.getAttribute("data-id")); }); });
-    box.querySelectorAll(".dsDel").forEach(function(b){ b.addEventListener("click", function(){ b.disabled=true;
+    box.querySelectorAll(".dsDel").forEach(function(b){ b.addEventListener("click", function(){
+      if(!confirm("이 작업을 목록에서 지울까요?")) return;
+      try{ var r=jobsReg(); if(r.design && r.design.id===b.getAttribute("data-id")) untrackJob("design"); }catch(_){}
+      b.disabled=true;
       apiFetch("/api/design/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:b.getAttribute("data-id")})}).then(function(){ loadDesignList(); }).catch(function(){ b.disabled=false; }); }); });
   }).catch(function(){ box.innerHTML='<div class="note" style="color:#c0392b;font-size:12px">목록을 불러오지 못했어요.</div>'; });
 }
@@ -3930,26 +4053,29 @@ function renderLearn(){
     +'</div>'
     +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
       +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">📈 검수 추이 <span style="font-weight:600;font-size:10.5px;color:#8a94a6">— 학습이 정말 효과가 있는지 숫자로</span></div>'
-      +'<div class="note" style="margin-bottom:6px">최종 점수는 <b>보완이 올려주니까 착시</b>가 생겨요. 진짜 지표는 <b>첫판 점수</b>(보완 없이 처음 받은 점수)와 <b>재작성 확률</b>입니다. 이 둘이 좋아져야 실제로 학습된 거예요.</div>'
+      +'<div class="note" style="margin-bottom:6px">오세라 점수는 <b>요구 이행률(%)</b>이에요 — 취향이 아니라 사실이라 흔들리지 않아요.<br>'
+      +'최종 이행률은 <b>보완이 올려주니까 착시</b>가 생깁니다. 진짜 지표는 <b>첫판 이행률</b>(보완 없이 처음 받은 것)과 <b>재작성 확률</b>이에요.<br>'
+      +'<b>경험이 쌓일수록 첫판부터 요구를 다 채우게 되는 것</b> — 그게 우리가 보려는 것입니다.</div>'
       +'<div id="ostBox" style="font-size:11.5px">불러오는 중…</div>'
     +'</div>'
     +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
-      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🎯 품질 앵커 <span style="font-weight:600;font-size:10.5px;color:#8a94a6">— 채점 눈금이 움직이지 않게</span></div>'
-      +'<div class="note" style="margin-bottom:6px">만드는 것도 AI, 채점하는 것도 AI예요. 규칙·경험이 쌓이면 <b>채점 기준 자체가 후해질 수 있습니다.</b><br>'
-      +'과거 결과물 몇 개를 <b>눈금(앵커)으로 박아두고</b> 주기적으로 다시 채점해요. <b>같은 글의 점수가 오르면 그건 품질이 아니라 채점 인플레이션</b>이고, 그만큼을 빼서 <b>진짜 향상분</b>을 계산합니다.</div>'
-      +'<div id="anBox" style="font-size:11.5px">불러오는 중…</div>'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">📋 요구 명세 <span style="font-weight:600;font-size:10.5px;color:#8a94a6">— 오세라가 무엇을 검증할지</span></div>'
+      +'<div class="note" style="margin-bottom:6px">오세라는 <b>"잘 썼나"를 채점하지 않습니다.</b> <b>요구한 대로 만들었는지, 기능이 작동하는지</b>만 검증해요.<br>'
+      +'여기서 결과물 종류별 <b>요구 항목</b>을 정합니다. <b>필수</b>는 가중치 2배 — 하나만 어겨도 통과 못 해요.<br>'
+      +'<span style="color:#4a6da8;font-weight:700">기계</span> 표시는 <b>코드가 직접 검사</b>하는 항목이에요 (HTML 잘림·끊긴 링크·JS 오류·빠진 섹션). AI 판단이 아니라 <b>사실</b>이라 흔들리지 않습니다.</div>'
+      +'<div id="spBox" style="font-size:11.5px">불러오는 중…</div>'
     +'</div>'
     +'<div style="background:#fff;border:1px solid #e6ebf2;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
-      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🧠 품질 규칙 <span style="font-weight:600;font-size:10.5px;color:#8a94a6">— 실수를 &#39;하지 마라&#39;가 아닌 &#39;이렇게 하라&#39;로 바꿔 주입</span></div>'
-      +'<div class="note" style="margin-bottom:6px">AI가 틀리거나 사고 친 걸 적어두면 <b>같은 뜻의 지향문으로 바꿔서</b> 저장됩니다. <b style="color:#0e7a52">축적은 무제한</b> — 자료는 많을수록 좋아요. 다만 프롬프트에 100개를 다 넣으면 AI 주의가 흩어져 오히려 나빠지므로, <b>이번 작업과 관련 있는 규칙 + 실제로 점수가 잘 나온 규칙</b>만 골라 주입합니다. 규칙마다 <b>적용 횟수·평균 점수</b>가 기록돼, 통하는 규칙이 다음에 우선 뽑혀요.</div>'
-      +'<div style="display:flex;gap:6px;margin-bottom:6px"><input id="lsnIn" placeholder="반복하면 안 되는 규칙 한 줄" style="flex:1;box-sizing:border-box;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12px"><button class="cbtn conn" id="lsnAdd">추가</button></div>'
+      +'<div style="font-size:12.5px;font-weight:800;color:#15324f;margin-bottom:4px">🧠 품질 규칙 <span style="font-weight:600;font-size:10.5px;color:#8a94a6">— 이 프로젝트에만 적용되는 지시문</span></div>'
+      +'<div class="note" style="margin-bottom:6px"><b>규칙은 이 프로젝트의 것</b>입니다. 위 🧪 <b>경험에서 규칙 뽑기</b>로 만들어져요 — 쌓아두는 게 아니라 <b>경험에서 다시 뽑는</b> 지시문이에요. 다른 프로젝트를 하면 같은 경험 창고에서 <b>다른 규칙</b>이 나옵니다.<br>여기서 직접 추가하는 건 <b>증류해도 안 지워지는 규칙</b>을 박아둘 때 쓰세요 (📌 고정). 규칙마다 <b>적용 횟수·평균 이행률</b>이 기록돼, 실제로 통하는 규칙이 다음에 우선 뽑혀요.</div>'
+      +'<div style="display:flex;gap:6px;margin-bottom:6px"><input id="lsnIn" placeholder="이 프로젝트에서 꼭 지킬 것 (📌 고정 규칙)" style="flex:1;box-sizing:border-box;padding:9px 11px;border:1px solid #d6deea;border-radius:9px;font-family:inherit;font-size:12px"><button class="cbtn conn" id="lsnAdd">추가</button></div>'
       +'<div style="display:flex;gap:6px;margin-bottom:8px"><button class="cbtn" id="lsnRewrite" style="flex:1;justify-content:center;font-size:11.5px">🔁 지향문으로 정리</button><button class="cbtn conn" id="lsnExport" style="flex:1;justify-content:center;font-size:11.5px">📥 규칙 내보내기</button></div>'
       +'<div id="lsnCount" style="font-size:11.5px;color:#0e7a52;font-weight:700;margin-bottom:6px"></div>'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:8px 10px;background:#f4f6fb;border-radius:9px">'
         +'<span style="font-size:11.5px;color:#5a6472;font-weight:700">한 번에 주입할 규칙 수</span>'
         +'<div class="mengine-opts" style="flex:1">'+[10,14,20,30].map(function(n){ var cur=(STATE.lessonInject==null?14:+STATE.lessonInject); return '<span class="mchip'+(cur===n?" on":"")+'" data-lsni="'+n+'">'+n+'</span>'; }).join(" ")+'</div>'
       +'</div>'
-      +'<div class="note" style="font-size:10.5px;margin-bottom:6px">많이 넣을수록 규칙을 잘 지키지만, <b>너무 많으면 AI 발상이 갇혀 품질이 떨어집니다.</b> 14가 적당해요. 📈 검수 추이에서 첫판 점수가 떨어지면 줄이세요.</div>'
+      +'<div class="note" style="font-size:10.5px;margin-bottom:6px">많이 넣을수록 규칙을 잘 지키지만, <b>너무 많으면 AI 발상이 갇혀 품질이 떨어집니다.</b> 14가 적당해요. 📈 검수 추이에서 첫판 이행률이 떨어지면 줄이세요.</div>'
       +'<div id="lsnStat" class="note" style="font-size:11px;min-height:13px;margin-bottom:4px"></div>'
       +'<div id="lsnList" style="font-size:11.5px;line-height:1.6;color:#2a3648">불러오는 중…</div>'
     +'</div>'
@@ -4130,7 +4256,8 @@ function bindLearn(){
       try{ var r=await fetch(backendOrigin()+"/api/lessons?limit=300"); var d=await r.json();
         var arr=(d.lessons||[]);          // 서버가 최신순으로 준다 (다시 뒤집지 않는다)
         var cntEl=document.getElementById("lsnCount");
-        if(cntEl) cntEl.innerHTML = '축적 <b>'+(d.total||arr.length)+'개</b> · 이번 생성에 <b>'+(d.injectMax||14)+'개</b> 주입';
+        var _t=(d.total||arr.length), _im=Math.min(_t, d.injectMax||14);
+        if(cntEl) cntEl.innerHTML = (_t? ('이 프로젝트 규칙 <b>'+_t+'개</b> · 생성 때 <b>'+_im+'개</b> 주입'+(_t>_im?' (관련도·실효성 상위)':'')) : '<span style="color:#8a94a6">아직 규칙이 없어요 — 위 🧪 <b>경험에서 규칙 뽑기</b>를 누르세요</span>');
         if(!arr.length){ listEl.innerHTML='<span style="color:#8a94a6">아직 등록된 규칙이 없어요.</span>'; return; }
         listEl.innerHTML=arr.map(function(x){ var g=(x.guide||x.text||""); var showOrig=(x.guide&&x.guide!==x.text);
         var eff = (x.applied>0) ? ('<span style="font-size:10px;color:'+((x.avg>=80)?"#0e7a52":((x.avg>=65)?"#b57b1a":"#c0392b"))+';font-weight:700">적용 '+x.applied+'회 · 평균 '+x.avg+'점</span>') : '<span style="font-size:10px;color:#b0b6c0">아직 미적용</span>'; return '<div style="display:flex;gap:6px;align-items:flex-start;padding:6px 0;border-bottom:1px solid #f0f3f8">' +'<span style="flex:1;min-width:0">'+(x.pinned?'<span style="color:#c98a2a">📌 </span>':'')+'<b style="font-weight:600">'+esc(g)+'</b>' +(showOrig?('<div style="font-size:10px;color:#9aa4b2;margin-top:2px">원문: '+esc(x.text)+'</div>'):'') +'<div style="margin-top:2px">'+eff+'</div>'+'</span>' +'<button class="lsnPin" data-id="'+x.id+'" style="border:none;background:'+(x.pinned?'#fff4e0':'#f0f3f8')+';color:#8a6a2a;border-radius:7px;padding:4px 7px;font-size:11px;cursor:pointer">📌</button>' +'<button class="lsnDel" data-id="'+x.id+'" style="border:none;background:#fdecec;color:#c0392b;border-radius:7px;padding:4px 8px;font-size:11px;cursor:pointer">삭제</button></div>'; }).join("");
@@ -4253,86 +4380,81 @@ function bindLearn(){
       }
       load();
     })();
-    // 🎯 v238: 품질 앵커 — 채점 눈금 검증
+    // 📋 v241: 요구 명세 편집 — 오세라가 무엇을 검증할지 직접 정한다
     (function(){
-      var box=document.getElementById("anBox"); if(!box) return;
+      var box=document.getElementById("spBox"); if(!box) return;
       if(!useBackend()){ box.innerHTML='<span style="color:#9aa4b2">백엔드 연결이 필요해요.</span>'; return; }
-      function load(){
-        fetch(backendOrigin()+"/api/anchors").then(function(r){return r.json();}).then(function(d){
-          if(!d.ok){ box.innerHTML='<span style="color:#c0392b">불러오지 못했어요.</span>'; return; }
-          var dr=d.drift;
-          var hd="";
-          if(dr){
-            var abs=Math.abs(dr.drift);
-            var bad=(abs>=3);
-            hd='<div style="background:'+(bad?"#fdeeee":"#eafaf3")+';border-radius:9px;padding:9px 11px;margin-bottom:8px;line-height:1.6">'
-              +'<b style="font-size:12.5px;color:'+(bad?"#a03028":"#0e7a52")+'">'
-                +(dr.drift>=3 ? "⚠️ 채점 인플레이션 — 같은 글에 +"+dr.drift+"점" :
-                  (dr.drift<=-3 ? "⚠️ 채점이 각박해짐 — 같은 글에 "+dr.drift+"점" :
-                   "✅ 채점 눈금 안정 (드리프트 "+dr.drift+"점)"))+'</b>'
-              +'<div style="font-size:11px;color:#4a5666;margin-top:3px">'
-                +(dr.drift>=3 ? "최근 점수 상승분에서 <b>"+dr.drift+"점을 빼야</b> 진짜 향상분이에요."
-                 : (dr.drift<=-3 ? "기준이 엄해졌어요. 점수가 낮게 나오는 건 품질 하락이 아닐 수 있어요."
-                 : "점수 상승은 <b>진짜 품질 향상</b>입니다. 신뢰할 수 있어요."))
-              +'</div>'
-              +'<div style="margin-top:6px">'
-              + dr.detail.slice(0,6).map(function(x){
-                  var c=(Math.abs(x.delta)>=5)?"#c0392b":((Math.abs(x.delta)>=3)?"#b57b1a":"#0e7a52");
-                  return '<div style="display:flex;gap:6px;font-size:10.5px;color:#5a6472;margin-top:2px">'
-                    +'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(x.kind)+' · '+esc(x.topic||"")+'</span>'
-                    +'<span>'+x.base+'점 → <b style="color:'+c+'">'+x.now+'점</b> ('+(x.delta>=0?"+":"")+x.delta+')</span></div>';
-                }).join("")
-              +'</div></div>';
-          } else if(d.total>=2){
-            hd='<div style="background:#fff4e5;border-radius:9px;padding:9px 11px;margin-bottom:8px;font-size:11.5px;color:#a06a1a;line-height:1.55">'
-              +'앵커 '+d.total+'개가 박혀 있어요. <b>🔬 재채점</b>을 눌러야 드리프트를 알 수 있습니다.</div>';
-          } else {
-            hd='<div style="background:#f4f6fb;border-radius:9px;padding:9px 11px;margin-bottom:8px;font-size:11.5px;color:#5a6472;line-height:1.55">'
-              +'아직 앵커가 없어요. <b>🎯 자동 구성</b>을 누르면 지금까지 만든 결과물 중 <b>점수가 골고루 퍼진 6개</b>를 눈금으로 박습니다.<br>'
-              +'<span style="color:#8a94a6">결과물 경험이 4건 이상 필요해요.</span></div>';
-          }
-          box.innerHTML = hd
-            +'<div class="keyrow" style="gap:6px">'
-              +'<button class="cbtn conn" id="anAuto" style="flex:1">🎯 자동 구성</button>'
-              +'<button class="cbtn" id="anCheck" style="flex:1"'+(d.total<2?' disabled':'')+'>🔬 재채점</button>'
-            +'</div>'
-            +'<div id="anStat" class="note" style="min-height:13px;margin-top:4px"></div>';
+      var DATA=null, curKind=null, work=null;
+      function paint(){
+        if(!DATA) return;
+        var kinds=DATA.kinds||[];
+        if(!curKind) curKind=kinds[0];
+        var tabs=kinds.map(function(k){
+          var on=(k===curKind);
+          return '<span class="spK" data-k="'+esc(k)+'" style="cursor:pointer;display:inline-block;border:1px solid '+(on?"#5ed4e2":"#d6deea")+';background:'+(on?"#5ed4e21a":"#fff")+';color:'+(on?"#0e8aa0":"#5a6472")+';border-radius:13px;padding:5px 11px;font-size:11.5px;font-weight:700;margin:0 4px 4px 0">'+esc(k==="_기본"?"공통(모든 결과물)":k)+'</span>';
+        }).join("");
+        var rows=(work||[]).map(function(x,i){
+          return '<div style="display:flex;gap:6px;align-items:center;background:#f7f9fc;border:1px solid #e6ebf2;border-radius:9px;padding:7px 9px;margin-top:5px">'
+            +'<label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" class="spMust" data-i="'+i+'" '+(x.must?'checked':'')+' style="width:15px;height:15px"><span style="font-size:10.5px;color:'+(x.must?"#c0392b":"#8a94a6")+';font-weight:700">필수</span></label>'
+            +'<input class="spLb" data-i="'+i+'" value="'+escapeHtml(x.label||"")+'" style="flex:1;min-width:0;box-sizing:border-box;padding:7px 9px;border:1px solid #d6deea;border-radius:8px;font-family:inherit;font-size:11.5px">'
+            +(x.auto?'<span style="font-size:9px;background:#e8eef7;color:#4a6da8;border-radius:4px;padding:2px 5px;font-weight:700;white-space:nowrap">기계</span>':'')
+            +'<button class="spDel" data-i="'+i+'" style="border:none;background:#fdecec;color:#c0392b;border-radius:7px;padding:5px 8px;font-size:11px;cursor:pointer;font-family:inherit">✕</button>'
+          +'</div>';
+        }).join("");
+        var mustN=(work||[]).filter(function(x){return x.must;}).length;
+        var autoN=(work||[]).filter(function(x){return x.auto;}).length;
+        box.innerHTML = '<div style="margin-bottom:6px">'+tabs+'</div>'
+          +'<div style="font-size:10.5px;color:#5a6472;margin-bottom:2px">요구 <b>'+(work||[]).length+'개</b> · 필수 <b style="color:#c0392b">'+mustN+'개</b> · 기계 검증 <b style="color:#4a6da8">'+autoN+'개</b></div>'
+          + rows
+          +'<div class="keyrow" style="margin-top:7px;gap:6px">'
+            +'<button class="cbtn" id="spAdd" style="flex:1">＋ 항목 추가</button>'
+            +'<button class="cbtn" id="spReset" style="flex:1">↩ 기본값</button>'
+            +'<button class="cbtn conn" id="spSave" style="flex:1">💾 저장</button>'
+          +'</div>'
+          +'<div id="spStat" class="note" style="min-height:13px;margin-top:4px"></div>';
 
-          var st=document.getElementById("anStat");
-          var au=document.getElementById("anAuto");
-          if(au) au.addEventListener("click", async function(){
-            au.disabled=true; var o=au.textContent; au.textContent="구성 중…";
-            try{ await wakeServer(40000);
-              var r=await fetch(backendOrigin()+"/api/anchors/auto",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
-              var x=await r.json();
-              if(x.error) throw new Error(x.error);
-              if(st) st.innerHTML='<span style="color:#0e7a52">✅ '+esc(x.note||"앵커를 박았어요.")+'</span>';
-              load();
-            }catch(e){ if(st) st.innerHTML='<span style="color:#c0392b">'+esc(e.message||String(e))+'</span>'; }
-            au.disabled=false; au.textContent=o;
-          });
-          var ck=document.getElementById("anCheck");
-          if(ck) ck.addEventListener("click", async function(){
-            ck.disabled=true; ck.textContent="재채점 중…";
-            if(st) st.innerHTML='<span style="color:#b57b1a">🔬 앵커를 지금 기준으로 다시 채점하는 중… (앵커 수만큼 시간이 걸려요)</span>';
-            try{ await wakeServer(50000);
-              var r=await fetch(backendOrigin()+"/api/anchors/recheck",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
-              var x=await r.json(); if(x.error) throw new Error(x.error);
-              var t=setInterval(function(){
-                if(!document.getElementById("anBox")){ clearInterval(t); return; }
-                fetch(backendOrigin()+"/api/anchors/status").then(function(r2){return r2.json();}).then(function(y){
-                  if(!y.ok) return;
-                  var c=y.check||{};
-                  if(c.running){ if(st) st.innerHTML='<span style="color:#b57b1a">🔬 재채점 중 <b>'+(c.done||0)+'/'+(c.total||0)+'</b>…</span>'; }
-                  else { clearInterval(t); ck.disabled=false; ck.textContent="🔬 재채점"; load();
-                    if(st) st.innerHTML='<span style="color:#0e7a52">✅ 재채점 완료 — 위 결과를 확인하세요.</span>'; }
-                }).catch(function(){});
-              }, 4000);
-            }catch(e){ ck.disabled=false; ck.textContent="🔬 재채점"; if(st) st.innerHTML='<span style="color:#c0392b">'+esc(e.message||String(e))+'</span>'; }
-          });
-        }).catch(function(){ box.innerHTML='<span style="color:#c0392b">불러오지 못했어요.</span>'; });
+        box.querySelectorAll(".spK").forEach(function(b){ b.addEventListener("click", function(){
+          curKind=b.getAttribute("data-k");
+          work=JSON.parse(JSON.stringify(DATA.specs[curKind]||[]));
+          paint();
+        }); });
+        box.querySelectorAll(".spLb").forEach(function(el){ el.addEventListener("input", function(){ work[+el.getAttribute("data-i")].label=el.value; }); });
+        box.querySelectorAll(".spMust").forEach(function(el){ el.addEventListener("change", function(){ work[+el.getAttribute("data-i")].must=el.checked; paint(); }); });
+        box.querySelectorAll(".spDel").forEach(function(el){ el.addEventListener("click", function(){ work.splice(+el.getAttribute("data-i"),1); paint(); }); });
+
+        var ad=document.getElementById("spAdd");
+        if(ad) ad.addEventListener("click", function(){
+          if(work.length>=20){ alert("항목은 최대 20개예요."); return; }
+          work.push({ id:"c"+Date.now().toString(36).slice(-4), label:"", must:false, auto:false }); paint();
+        });
+        var rs=document.getElementById("spReset");
+        if(rs) rs.addEventListener("click", async function(){
+          if(!confirm("'"+(curKind==="_기본"?"공통":curKind)+"' 요구 항목을 기본값으로 되돌릴까요?")) return;
+          try{ var r=await fetch(backendOrigin()+"/api/specs/reset",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind:curKind})});
+            var d=await r.json(); if(d.ok){ DATA.specs[curKind]=d.items; work=JSON.parse(JSON.stringify(d.items)); paint(); }
+          }catch(e){ alert("실패: "+e); }
+        });
+        var sv=document.getElementById("spSave"), st0=document.getElementById("spStat");
+        if(sv) sv.addEventListener("click", async function(){
+          var empty=work.filter(function(x){ return !String(x.label||"").trim(); });
+          if(empty.length){ if(st0) st0.innerHTML='<span style="color:#c0392b">빈 항목이 있어요.</span>'; return; }
+          if(!work.length){ if(st0) st0.innerHTML='<span style="color:#c0392b">항목이 최소 1개는 있어야 해요.</span>'; return; }
+          sv.disabled=true;
+          try{
+            var r=await fetch(backendOrigin()+"/api/specs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind:curKind, items:work})});
+            var d=await r.json(); if(d.error) throw new Error(d.error);
+            DATA.specs[curKind]=JSON.parse(JSON.stringify(work));
+            if(st0) st0.innerHTML='<span style="color:#0e7a52">✅ 저장됨 — 다음 검증부터 이 요구로 확인해요.</span>';
+          }catch(e){ if(st0) st0.innerHTML='<span style="color:#c0392b">저장 실패: '+esc(e.message||String(e))+'</span>'; }
+          sv.disabled=false;
+        });
       }
-      load();
+      fetch(backendOrigin()+"/api/specs").then(function(r){return r.json();}).then(function(d){
+        if(!d.ok){ box.innerHTML='<span style="color:#c0392b">불러오지 못했어요.</span>'; return; }
+        DATA=d; curKind=(d.kinds||[])[0];
+        work=JSON.parse(JSON.stringify(d.specs[curKind]||[]));
+        paint();
+      }).catch(function(){ box.innerHTML='<span style="color:#c0392b">불러오지 못했어요.</span>'; });
     })();
     // 📈 v233: 검수 추이 — 학습 효과를 '첫판 점수'와 '재작성 확률'로 측정
     (function(){
@@ -4350,7 +4472,7 @@ function bindLearn(){
             +'<div style="display:flex;align-items:center;gap:6px;font-size:10.5px;color:#5a6472">'
               +'<span style="width:42px">'+b.idx+'구간</span>'
               +'<span style="flex:1;height:7px;background:#e6ebf2;border-radius:4px;overflow:hidden"><span style="display:block;height:7px;width:'+fw+'%;background:'+(b.avgFirst>=80?"#22b07a":(b.avgFirst>=65?"#e0a92b":"#d8564a"))+'"></span></span>'
-              +'<b style="width:34px;text-align:right;color:#2b3543">'+b.avgFirst+'점</b>'
+              +'<b style="width:34px;text-align:right;color:#2b3543">'+b.avgFirst+'%</b>'
               +'<span style="width:70px;text-align:right;color:'+(b.rewriteRate<=30?"#0e7a52":"#c0392b")+'">재작성 '+b.rewriteRate+'%</span>'
               +'<span style="width:52px;text-align:right;color:#9aa4b2">규칙'+b.rules+'</span>'
             +'</div></div>';
@@ -4358,19 +4480,14 @@ function bindLearn(){
         var v=d.verdict, hd="";
         if(v){
           var fUp = v.firstDelta, rDown = -v.rewriteDelta;
-          var hasDrift = (v.drift !== null && v.drift !== undefined);
-          var real = hasDrift ? v.trueDelta : null;          // ★ 채점 인플레이션을 뺀 진짜 향상분
-          var judgeBy = hasDrift ? real : fUp;
+          var judgeBy = fUp;
           var good = (judgeBy > 2) || (rDown > 10);
           var flat = (Math.abs(judgeBy) <= 2) && (Math.abs(rDown) <= 10);
           hd = '<div style="background:'+(good?"#eafaf3":(flat?"#f4f6fb":"#fff4e5"))+';border-radius:9px;padding:9px 11px;margin-bottom:8px;line-height:1.6">'
             +'<b style="font-size:12.5px;color:'+(good?"#0e7a52":(flat?"#5a6472":"#a06a1a"))+'">'
               +(good ? "📈 품질 향상 확인됨" : (flat ? "➖ 아직 뚜렷한 변화 없음" : "📉 오히려 나빠지는 중"))+'</b>'
             +'<div style="font-size:11px;color:#4a5666;margin-top:3px">'
-              +'첫판 점수 '+v.early.avgFirst+' → <b>'+v.late.avgFirst+'</b> (겉보기 '+(fUp>=0?"+":"")+fUp+')<br>'
-              + (hasDrift
-                  ? ('<span style="color:'+(Math.abs(v.drift)>=3?"#c0392b":"#8a94a6")+'">채점 인플레이션 보정 '+(v.drift>=0?"−":"+")+Math.abs(v.drift)+'</span> → <b style="color:'+(real>2?"#0e7a52":"#a06a1a")+';font-size:12px">진짜 향상 '+(real>=0?"+":"")+real+'점</b><br>')
-                  : '<span style="color:#b57b1a">⚠️ 채점 눈금 검증 안 됨 — 이 상승분이 진짜인지 알 수 없어요. 아래 🎯 품질 앵커를 설정하세요.</span><br>')
+              +'첫판 이행률 '+v.early.avgFirst+'% → <b>'+v.late.avgFirst+'%</b> ('+(fUp>=0?"+":"")+fUp+'%p)<br>'
               +'재작성 확률 '+v.early.rewriteRate+'% → <b>'+v.late.rewriteRate+'%</b> ('+(v.rewriteDelta>=0?"+":"")+v.rewriteDelta+'%p)'
               +' <span style="color:#8a94a6">(이건 눈금과 무관한 지표)</span>'
             +'</div>'
@@ -7704,8 +7821,8 @@ function renderSettings(){
     +'<div class="keyrow" style="margin-top:6px"><input type="text" id="nvModelIn" placeholder="모델 ID (예: meta/llama-3.1-70b-instruct)" value="'+escapeHtml(STATE.nvidiaModel||"")+'"><button class="cbtn conn" id="nvModelSave">저장</button></div>'
     +'<div class="keyrow" style="margin-top:5px;gap:6px"><button class="cbtn conn" id="nvModelsBtn" style="flex:1">📋 사용가능 모델</button><button class="cbtn conn" id="nvTestBtn" style="flex:1">🧪 연결 테스트</button></div>'
     +'<div class="note" style="margin-top:5px">먼저 Render 환경변수 <b>NVIDIA_API_KEY</b>(build.nvidia.com의 nvapi- 키)를 등록하세요. 무료 모델은 품질이 낮을 수 있어 <b>기본은 꺼둠</b> — 켜면 Claude 비용을 크게 아껴요. 약 40 RPM·무료 크레딧 한도가 있어요. 모델 ID는 위 \'사용가능 모델\'로 확인해 넣으세요(비우면 기본값).</div></div>'
-    +'<div class="mengine"><div class="mengine-t">🔁 결과물 검수 루프 (목표 기반)</div>'
-    +'<div class="note" style="margin-bottom:5px">만들고 끝내지 않고 <b>검수관이 기준을 충족할 때까지 자동으로 다시 고칩니다.</b><br>· <b>디자인</b>(상품페이지·홈페이지·티스토리 스킨) → 색·레이아웃·시그니처·클리셰 회피를 점검<br>· <b>📊 리서치 보고서</b> → <b>지어낸 숫자·일반론</b>을 감사관(정유진)이 잡아냄 (근거 검수)<br>횟수가 많을수록 품질↑ 비용↑. 0이면 만들고 바로 끝.</div>'
+    +'<div class="mengine"><div class="mengine-t">🔁 부서 내부 QA 루프</div>'
+    +'<div class="note" style="margin-bottom:5px"><b>부서 내부 QA</b>입니다 — 결과물을 오세라에게 넘기기 <b>전에</b> 부서가 스스로 점검해요.<br>· <b>📊 리서치 보고서</b> → <b>정유진(글3)</b>이 지어낸 숫자·일반론을 잡아냄<br>· <b>텍스트 4종</b> → 규정·과대광고 검수<br><span style="color:#8a94a6">※ 디자인 검수는 <b>총괄 오세라</b>에게 통합됐습니다 — 비주얼 디렉션 준수도 오세라가 검증해요.</span><br>횟수가 많을수록 품질↑ 비용↑. 0이면 부서 QA 없이 바로 오세라에게 넘깁니다.</div>'
     +'<div class="mengine-opts">'+[0,1,2,3].map(function(n){ var cur=(STATE.designReviewLoops==null?1:+STATE.designReviewLoops); return '<span class="mchip'+(cur===n?" on":"")+'" data-drl="'+n+'">'+(n===0?"끔":n+"회")+'</span>'; }).join(" ")+'</div></div>'
     // 🎨 브랜드 디자인 시스템 (design.md) — 모든 화면을 한 브랜드로
     +'<div class="mengine"><div class="mengine-t">🎨 브랜드 디자인 규칙 (도면)</div>'
@@ -7737,12 +7854,7 @@ function renderSettings(){
     +  '<div class="mengine-opts" style="flex:1">'+[70,80,90,100].map(function(n){ var cur=(STATE.oseraMin==null?80:+STATE.oseraMin); return '<span class="mchip'+(cur===n?" on":"")+'" data-ogmin="'+n+'">'+n+'%</span>'; }).join(" ")+'</div></div>'
     +'<div class="note" style="margin-top:4px"><b>필수 항목은 가중치 2배</b>입니다. 필수를 어기면 이행률이 크게 떨어져요.<br>기준 <b>100%</b>는 요구를 하나도 못 빠뜨리게 합니다(보완이 자주 돌아 비용↑). <b>80%가 적당</b>합니다.</div>'
     +'<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #dbe2ec">'
-    +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><b style="font-size:12px;color:#15324f">📐 평가 기준</b><span id="oaSum" style="margin-left:auto;font-size:11px;font-weight:800"></span></div>'
-    +'<div class="note" style="margin-bottom:6px">무엇을 몇 점으로 볼지 직접 정하세요. <b>배점 합계는 항상 100</b>이 됩니다(달라도 서버가 100으로 환산). 항목명·배점·심사 내용을 바꾸면 다음 검수부터 적용돼요.</div>'
-    +'<div id="oaRows"></div>'
-    +'<div class="keyrow" style="margin-top:6px;gap:6px"><button class="cbtn" id="oaAdd" style="flex:1">＋ 항목 추가</button><button class="cbtn" id="oaEven" style="flex:1">⚖️ 100으로 맞추기</button><button class="cbtn" id="oaReset" style="flex:1">↩ 기본값</button></div>'
-    +'<button class="cbtn conn" id="oaSave" style="width:100%;justify-content:center;margin-top:6px">💾 기준 저장</button>'
-    +'<div id="oaStat" class="note" style="min-height:13px;margin-top:4px"></div>'
+    +'<div style="font-size:11.5px;color:#5a6472;line-height:1.6">📋 <b>무엇을 검증할지</b>(요구 항목·필수 여부)는 <b>학습 탭 → 요구 명세</b>에서 결과물 종류별로 정합니다.</div>'
     +'</div></div>'
     // 🔥 바이럴 점수 게이트
     +'<div class="mengine"><div class="mengine-t">🔥 바이럴 점수 게이트</div>' 
@@ -8176,66 +8288,6 @@ function bindSettings(){
         if(st) st.innerHTML='<span style="color:#0e7a52">✅ 초안 완성 — 내용을 다듬고 <b>💾 저장</b>을 누르세요.</span>';
       }catch(e){ if(st) st.innerHTML='<span style="color:#c0392b">실패: '+escapeHtml(e.message||String(e))+'</span>'; }
       df.disabled=false; df.textContent=ob;
-    });
-  })();
-  // 📐 평가 기준(축) 편집기
-  (function(){
-    var rows=document.getElementById("oaRows"); if(!rows) return;
-    var work = JSON.parse(JSON.stringify(oseraAxesLocal()));
-    function sum(){ return work.reduce(function(a,x){ return a + (parseInt(x.max,10)||0); }, 0); }
-    function paint(){
-      rows.innerHTML = work.map(function(x,i){
-        return '<div style="background:#f7f9fc;border:1px solid #e6ebf2;border-radius:9px;padding:8px 9px;margin-bottom:6px">'
-          +'<div style="display:flex;gap:6px;align-items:center">'
-            +'<input class="oaKo" data-i="'+i+'" value="'+escapeHtml(x.ko||"")+'" placeholder="항목명" style="flex:1;min-width:0;box-sizing:border-box;padding:7px 9px;border:1px solid #d6deea;border-radius:8px;font-family:inherit;font-size:12px;font-weight:700">'
-            +'<input class="oaMax" data-i="'+i+'" type="number" min="1" max="100" value="'+(parseInt(x.max,10)||0)+'" style="width:62px;box-sizing:border-box;padding:7px 6px;border:1px solid #d6deea;border-radius:8px;font-family:inherit;font-size:12px;text-align:center">'
-            +'<span style="font-size:11px;color:#8a94a6">점</span>'
-            +(work.length>2?('<button class="oaDel" data-i="'+i+'" style="border:none;background:#fdecec;color:#c0392b;border-radius:7px;padding:6px 9px;font-size:11px;cursor:pointer;font-family:inherit">✕</button>'):'')
-          +'</div>'
-          +'<input class="oaQ" data-i="'+i+'" value="'+escapeHtml(x.q||"")+'" placeholder="무엇을 보고 감점할지 (심사 기준)" style="width:100%;box-sizing:border-box;margin-top:5px;padding:7px 9px;border:1px solid #d6deea;border-radius:8px;font-family:inherit;font-size:11.5px">'
-        +'</div>';
-      }).join("");
-      var st=document.getElementById("oaSum"); var t=sum();
-      if(st){ st.textContent="합계 "+t+" / 100"; st.style.color = (t===100 ? "#0e7a52" : "#c0392b"); }
-      rows.querySelectorAll(".oaKo").forEach(function(el){ el.addEventListener("input", function(){ work[+el.getAttribute("data-i")].ko=el.value; }); });
-      rows.querySelectorAll(".oaQ").forEach(function(el){ el.addEventListener("input", function(){ work[+el.getAttribute("data-i")].q=el.value; }); });
-      rows.querySelectorAll(".oaMax").forEach(function(el){ el.addEventListener("input", function(){ work[+el.getAttribute("data-i")].max=parseInt(el.value,10)||0; var st2=document.getElementById("oaSum"); var t2=sum(); if(st2){ st2.textContent="합계 "+t2+" / 100"; st2.style.color=(t2===100?"#0e7a52":"#c0392b"); } }); });
-      rows.querySelectorAll(".oaDel").forEach(function(el){ el.addEventListener("click", function(){ work.splice(+el.getAttribute("data-i"),1); paint(); }); });
-    }
-    paint();
-    var add=document.getElementById("oaAdd");
-    if(add) add.addEventListener("click", function(){
-      if(work.length>=8){ alert("항목은 최대 8개까지예요."); return; }
-      work.push({ k:"ax"+Date.now().toString(36).slice(-4), ko:"", q:"", max:10 }); paint();
-    });
-    var even=document.getElementById("oaEven");
-    if(even) even.addEventListener("click", function(){
-      var t=sum(), acc=0;
-      work.forEach(function(x,i){
-        if(i===work.length-1) x.max = 100-acc;                          // 마지막 항목이 나머지를 전부 흡수 → 합계 항상 100
-        else { x.max = (t>0) ? Math.max(1, Math.round(x.max/t*100)) : Math.floor(100/work.length); acc += x.max; }
-      });
-      if(work[work.length-1].max < 1){                                   // 마지막이 1점 미만이면 앞에서 빌려온다
-        var need = 1 - work[work.length-1].max;
-        work[work.length-1].max = 1;
-        for(var i=0;i<work.length-1 && need>0;i++){ var take=Math.min(need, work[i].max-1); work[i].max-=take; need-=take; }
-      }
-      paint();
-    });
-    var rst=document.getElementById("oaReset");
-    if(rst) rst.addEventListener("click", function(){ if(!confirm("기본 5개 항목으로 되돌릴까요?")) return; work=JSON.parse(JSON.stringify(OSERA_AXES_DEFAULT)); paint(); });
-    var sv=document.getElementById("oaSave"), st=document.getElementById("oaStat");
-    if(sv) sv.addEventListener("click", async function(){
-      var bad = work.filter(function(x){ return !String(x.ko||"").trim(); });
-      if(bad.length){ if(st) st.innerHTML='<span style="color:#c0392b">항목명이 빈 칸이 있어요.</span>'; return; }
-      if(work.length<2){ if(st) st.innerHTML='<span style="color:#c0392b">항목은 2개 이상이어야 해요.</span>'; return; }
-      work.forEach(function(x,i){ if(!x.k) x.k="ax"+i; x.max=Math.max(1,parseInt(x.max,10)||1); });
-      STATE.oseraAxes = work; saveState();
-      if(st) st.innerHTML='<span style="color:#0e7a52">저장 중…</span>';
-      try{ await pushState();
-        var t=sum();
-        if(st) st.innerHTML='<span style="color:#0e7a52">✅ 저장됨 — '+work.length+'개 항목'+(t===100?'':(' (합계 '+t+' → 서버가 100으로 환산)'))+'. 다음 검수부터 적용돼요.</span>';
-      }catch(e){ if(st) st.innerHTML='<span style="color:#c0392b">저장 실패(백엔드 연결 확인)</span>'; }
     });
   })();
   // 📚 작업 전 경험 훑기
