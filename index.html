@@ -853,7 +853,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v210</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v214</span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
   </div>
@@ -929,18 +929,49 @@ function deptNames(id){
 }
 // ===== 오피스 팀 구성(v210): 팀별 그룹 · 팀장→팀원 순서 · 크루 전원 이름 =====
 var OFFICE_TEAMS = [
-  { name:"🗂 총괄실", ids:["ops"],
-    roster:[{n:"오세라",r:"총괄 비서",lead:1}] },
-  { name:"📖 이야기팀", ids:["creation","strategy","advisory"],
-    roster:[{n:"이서연",r:"콘텐츠 디렉터·팀장",lead:1},{n:"한지우",r:"카피라이터"},{n:"정유진",r:"블로그 작가"}] },
-  { name:"🎬 필름팀", ids:["publishing","scout"],
-    roster:[{n:"임채원",r:"영상 PD·팀장",lead:1},{n:"서다은",r:"대본 작가"},{n:"노아라",r:"편집·썸네일"}] },
-  { name:"🎨 디자인팀", ids:["monetization","analytics"],
-    roster:[{n:"윤소희",r:"아트 디렉터·팀장",lead:1},{n:"강민서",r:"웹 디자이너"},{n:"오하늘",r:"그래픽 디자이너"}] }
+  { name:"🗂 총괄실", color:"#e8c14a",
+    roster:[{n:"오세라",r:"총괄 비서",lead:1,key:"ops",no:"총괄",c:"#e8c14a"}] },
+  { name:"📖 이야기팀", color:"#f5a623",
+    roster:[{n:"이서연",r:"콘텐츠 디렉터·팀장",lead:1,key:"creation",no:"글1",c:"#f5a623"},{n:"한지우",r:"카피라이터",key:"strategy",no:"글2",c:"#ffb454"},{n:"정유진",r:"블로그 작가",key:"advisory",no:"글3",c:"#ff9e5c"}] },
+  { name:"🎬 필름팀", color:"#ff5c7a",
+    roster:[{n:"임채원",r:"영상 PD·팀장",lead:1,key:"publishing",no:"필1",c:"#ff5c7a"},{n:"서다은",r:"대본 작가",key:"scout",no:"필2",c:"#ff8299"},{n:"노아라",r:"편집·썸네일",key:"publishing",crew:1,no:"필3",c:"#ff9db0"}] },
+  { name:"🎨 디자인팀", color:"#7c6cf0",
+    roster:[{n:"윤소희",r:"아트 디렉터·팀장",lead:1,key:"monetization",no:"디1",c:"#7c6cf0"},{n:"강민서",r:"웹 디자이너",key:"analytics",no:"디2",c:"#5ec8e2"},{n:"오하늘",r:"그래픽 디자이너",key:"monetization",crew:1,no:"디3",c:"#9f8cf5"}] }
 ];
-function officeOrder(){ var o=[]; OFFICE_TEAMS.forEach(function(t){ t.ids.forEach(function(id){ o.push(id); }); }); return o; }
-function teamOf(id){ for(var i=0;i<OFFICE_TEAMS.length;i++){ if(OFFICE_TEAMS[i].ids.indexOf(id)>=0) return OFFICE_TEAMS[i]; } return null; }
-function isTeamLead(id){ var t=teamOf(id); return !!(t && t.ids[0]===id); }
+// 엔진 키 8개(크루 제외) — 지식·라우팅·정체계산용
+function officeOrder(){ var o=[]; OFFICE_TEAMS.forEach(function(t){ (t.roster||[]).forEach(function(m){ if(!m.crew) o.push(m.key); }); }); return o; }
+// 오피스 표시용 10명 전체(팀장→팀원, 크루 포함)
+function officePeople(){ var o=[]; OFFICE_TEAMS.forEach(function(t){ (t.roster||[]).forEach(function(m){ o.push({n:m.n,r:m.r,key:m.key,lead:!!m.lead,crew:!!m.crew,no:m.no,c:m.c,team:t}); }); }); return o; }
+function teamOf(id){ for(var i=0;i<OFFICE_TEAMS.length;i++){ var t=OFFICE_TEAMS[i]; for(var j=0;j<t.roster.length;j++){ if(t.roster[j].key===id && !t.roster[j].crew) return t; } } return null; }
+function isTeamLead(id){ var t=teamOf(id); return !!(t && t.roster[0] && t.roster[0].key===id); }
+function _teamShort(t){ return t&&t.name?t.name.replace(/^\S+\s*/,""):""; }
+function _teamLead(t){ return t&&t.roster&&t.roster[0]?t.roster[0].n:""; }
+// 크루 전용 모바일 슬라이드 (얼굴 사진 없음 → 팀 컬러 배경)
+function crewSlideHtml(p,i){
+  var col=p.c||"#888", tl=_teamShort(p.team), lead=_teamLead(p.team);
+  var exp=(STATE.deptExp&&STATE.deptExp[p.key])||0;
+  return '<div class="o2-slide" data-i="'+i+'">'
+    +'<div class="o2-bg" style="background:linear-gradient(160deg,'+col+'cc,'+col+'55 50%,rgba(16,12,8,.94))"></div>'
+    +'<div class="o2-scrim"></div><div class="o2-inner">'
+    +'<div class="o2-top"><div class="o2-id" data-dept="'+p.key+'"><div class="o2-line1"><span class="o2-no" style="background:'+col+'">'+esc(p.no||"·")+'</span> '+esc(tl+"·"+p.r)+'</div>'
+    +'<div class="o2-sub">'+esc(p.n)+' · ⭐ '+exp+'</div></div>'
+    +'<div class="o2-actions"><span class="o2-st off">🤝 크루</span></div></div>'
+    +'<div class="o2-spacer"></div><div class="o2-card">'
+    +'<div style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.32);border-radius:11px;padding:12px 14px;font-size:12.5px;line-height:1.65;color:#5a4a2a">'
+    +'🤝 <b>'+esc(p.team?p.team.name:"")+'</b> 크루예요.<br>팀장 <b>'+esc(lead)+'</b>님과 지식·경험치를 공유하며 함께 움직입니다.<br><span style="opacity:.7">개별 자율지시는 팀장 카드에서 내려요.</span>'
+    +'</div></div></div></div>';
+}
+// 크루 전용 보드 카드
+function crewCardHtml(p){
+  var col=p.c||"#888", tl=_teamShort(p.team), lead=_teamLead(p.team);
+  var exp=(STATE.deptExp&&STATE.deptExp[p.key])||0;
+  return '<div class="ob-card" style="border-left:4px solid '+col+'">'
+    +'<div class="ob-hd"><span class="o2-id"><span class="ob-no" style="background:'+col+'">'+esc(p.no||"·")+'</span><b>'+esc(p.n)+'</b>'
+    +'<span class="ob-meta">⭐'+exp+'</span><span class="ob-st off">🤝</span></div>'
+    +'<div class="ob-mem">'+esc(tl+" · "+p.r)+'</div>'
+    +'<div class="o2-dirnote ob-note">🤝 '+esc(lead)+' 팀장과 지식·작업 공유 · 개별 지시는 팀장 카드에서</div>'
+    +'</div>';
+}
 function teamRosterChips(t){
   return (t.roster||[]).map(function(m){
     return '<span class="o2-crewm">'+(m.lead?"👑 ":"")+esc(m.n)+' <i style="opacity:.7;font-weight:500">'+esc(m.r)+'</i></span>';
@@ -1068,12 +1099,12 @@ if("speechSynthesis" in window){ loadVoices(); try{ window.speechSynthesis.onvoi
 var VOICE_PROFILE = {
   strategy:[0.98,0.95],    // 한지우 — 침착한 리더, 조금 낮고 느긋
   creation:[1.15,1.04],    // 이서연 — 발랄, 밝고 경쾌
-  publishing:[1.06,1.07],  // 박하늘 — 시원시원, 빠른 추진
+  publishing:[1.06,1.07],  // 임채원 — 필름팀 영상 PD, 시원시원
   analytics:[0.91,0.98],   // 강민서 — 냉철, 낮고 균일
   monetization:[1.02,1.0], // 윤소희 — 야무진 협상가
   ops:[0.87,0.93],         // 오세라 — 팀장, 깊고 단호하게
-  advisory:[1.04,0.97],    // 서다은 — 단정한 서기
-  scout:[1.17,1.03]        // 노아라 — 톡톡 튀는 발상, 높고 통통
+  advisory:[1.04,0.97],    // 정유진 — 이야기팀 블로그 작가·검수
+  scout:[1.17,1.03]        // 서다은 — 필름팀 대본 작가, 톡톡 튀는 발상
 };
 // 공용 음성 헬퍼: 부서별 보이스 매핑 + 문장 단위 부드러운 발화
 function voiceFor(deptId){
@@ -1335,7 +1366,7 @@ async function loadState(){
   var parsed=null; if(raw){ try{ parsed=JSON.parse(raw); }catch(e){ try{ parsed=JSON.parse(localStorage.getItem(STORE_KEY_BAK)); }catch(e2){} } }
   if(parsed){ applyLoadedState(parsed, false); STATE.savedAt=Date.now(); }
 }
-// 구(舊) 부서 → 새 부서 이관: 커뮤니티·CS(engagement)→제작부, 그로스(growth)→커머스·그로스
+// 구(舊) 부서 → 새 부서 이관: 커뮤니티·CS(engagement)→제작팀, 그로스(growth)→커머스·그로스
 function migrateLegacyDepts(d){
   if(!d||typeof d!=="object") return d;
   var MAP={engagement:"creation",growth:"monetization"};
@@ -1964,18 +1995,18 @@ async function submit(text, via){
 async function doPublish(platformNames, content, auto, mediaUrl, inst){
   var pubInst = inst || "";
   var tag = auto ? "자동 발행" : "발행";
-  // 발행 전 08 감사 — 미리보기(로컬)에서만. 백엔드 모드는 서버가 점검.
+  // 발행 전 감사·법무 — 미리보기(로컬)에서만. 백엔드 모드는 서버가 점검.
   if(STATE.safety && STATE.safety.audit && !useBackend()){
     var atext = (typeof content==="string") ? content : ((content&&content.description)||"");
     if(atext){
       try{
         var verdict = await work("ops", "다음 콘텐츠가 저작권·광고법·플랫폼 정책·명예훼손·개인정보 위반 소지가 있는지 점검하라. 첫 줄에 PASS 또는 BLOCK, 둘째 줄에 한 줄 이유. 명백·심각한 위반만 BLOCK:\n\n"+atext.slice(0,1500));
         if(/^\s*BLOCK/i.test(verdict)){
-          STATE.messages.push({ role:"publish", warn:true, text:"⛔ 08 감사 차단 — "+verdict.replace(/^\s*BLOCK\s*/i,"").slice(0,140) });
-          logAct("audit", "08 감사 차단", false, verdict.replace(/^\s*BLOCK\s*/i,"").slice(0,140), inst||"");
+          STATE.messages.push({ role:"publish", warn:true, text:"⛔ 감사·법무 차단 — "+verdict.replace(/^\s*BLOCK\s*/i,"").slice(0,140) });
+          logAct("audit", "감사·법무 차단", false, verdict.replace(/^\s*BLOCK\s*/i,"").slice(0,140), inst||"");
           return;
         }
-        STATE.messages.push({ role:"publish", text:"✔ 08 감사 통과 — 발행 진행" });
+        STATE.messages.push({ role:"publish", text:"✔ 감사·법무 통과 — 발행 진행" });
       }catch(e){ /* 감사 오류 시 통과로 진행 */ }
     }
   }
@@ -2041,7 +2072,7 @@ function contentCommentsHtml(m, mi){
   h+='<div class="ccom-body" style="display:'+(open?'block':'none')+'">';
   cs.forEach(function(c){
     if(c.role==="op") h+='<div class="ccom-op"><b>나</b> '+escapeHtml(c.text)+'</div>';
-    else h+='<div class="ccom-ag"><b>'+escapeHtml(c.name||"제작부")+'</b> '+escapeHtml(c.text)+'</div>';
+    else h+='<div class="ccom-ag"><b>'+escapeHtml(c.name||"제작팀")+'</b> '+escapeHtml(c.text)+'</div>';
   });
   h+='<div class="ccom-row"><input data-ccinp="'+mi+'" placeholder="이 콘텐츠에 의견을 적으면 담당 부서가 답해요"><button class="cbtn conn" data-ccsend="'+mi+'">보내기</button></div>';
   h+='</div></div>';
@@ -2060,9 +2091,9 @@ function videoPlanHtml(m, mi){
     h+='<div class="vplan-sec">📋 영상 기획안</div><div class="vplan-text">'+escapeHtml(vp.plan||"")+'</div>';
     // 기획 의견·소통(플랫폼에서 합의)
     var th=vp.thread||[];
-    h+='<div class="vplan-sec">💬 기획 의견·소통 — 의견을 주면 제작부가 기획안을 수정해요</div>';
+    h+='<div class="vplan-sec">💬 기획 의견·소통 — 의견을 주면 제작팀가 기획안을 수정해요</div>';
     h+='<div class="ccom-body" style="display:flex">';
-    th.forEach(function(c){ if(c.role==="op") h+='<div class="ccom-op"><b>나</b> '+escapeHtml(c.text)+'</div>'; else h+='<div class="ccom-ag"><b>제작부</b> '+escapeHtml(c.text)+'</div>'; });
+    th.forEach(function(c){ if(c.role==="op") h+='<div class="ccom-op"><b>나</b> '+escapeHtml(c.text)+'</div>'; else h+='<div class="ccom-ag"><b>제작팀</b> '+escapeHtml(c.text)+'</div>'; });
     h+='<div class="ccom-row"><input data-vpfbinp="'+mi+'" placeholder="예: 더 따뜻한 톤, 첫 컷에 아이 등장"><button class="cbtn conn" data-vpfb="'+mi+'">의견 반영</button></div>';
     h+='</div>';
     // 합의된 기획안 → Veo 프롬프트 다시 생성
@@ -2414,7 +2445,7 @@ function bindContent(){
       var o=b.textContent; b.textContent="↗ 여는 중…"; setTimeout(function(){ b.textContent=o; },1500);
     });
   });
-  // 기획 의견 반영(소통) → 제작부가 기획안 수정
+  // 기획 의견 반영(소통) → 제작팀가 기획안 수정
   document.querySelectorAll('[data-vpfb]').forEach(function(b){
     b.addEventListener("click", async function(){ var mi=+b.getAttribute("data-vpfb"); var m=STATE.messages[mi]; if(!m||!m._videoPlan) return;
       var inp=document.querySelector('[data-vpfbinp="'+mi+'"]'); var txt=inp?String(inp.value||"").trim():""; if(!txt) return;
@@ -2459,7 +2490,7 @@ function bindContent(){
       if(!useBackend()){ alert("의견 소통에는 AI 백엔드 연결이 필요해요 (설정 › AI 백엔드)."); return; }
       m._comments=m._comments||[]; m._comOpen=true;
       m._comments.push({ role:"op", text:txt, at:Date.now() });
-      m._comments.push({ role:"agent", text:"…답변 작성 중", at:Date.now(), _pending:true, name:(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[m.deptId])?DEPT_MEMBERS[m.deptId]:(AGENTS[m.deptId]?AGENTS[m.deptId].kr:"제작부") });
+      m._comments.push({ role:"agent", text:"…답변 작성 중", at:Date.now(), _pending:true, name:(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[m.deptId])?DEPT_MEMBERS[m.deptId]:(AGENTS[m.deptId]?AGENTS[m.deptId].kr:"제작팀") });
       saveState(); render();
       try{ await wakeServer(50000);
         var r=await fetch(backendOrigin()+"/api/content/reply",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ content:m.text||"", comment:txt, dept:m.deptId })});
@@ -2692,10 +2723,12 @@ async function runDirectiveNow(id, directive){
 }
 function renderOffice(){
   var keys=officeOrder();
-  if(window.matchMedia && window.matchMedia("(min-width:900px)").matches){ renderOfficeBoard(keys); return; }
+  var people=officePeople();
+  if(window.matchMedia && window.matchMedia("(min-width:900px)").matches){ renderOfficeBoard(); return; }
   var idx=(typeof STATE.officeIdx==="number")?STATE.officeIdx:0;
-  var slides=keys.map(function(id,i){
-    var a=AGENTS[id], mem=(DEPT_MEMBERS&&DEPT_MEMBERS[id])||"";
+  var slides=people.map(function(p,i){
+    var id=p.key; if(p.crew){ return crewSlideHtml(p,i); }
+    var a=AGENTS[id]||{}, mem=p.n;
     var ava=(typeof DEPT_PHOTOS!=="undefined"&&DEPT_PHOTOS[id])?DEPT_PHOTOS[id]:"";
     var exp=(STATE.deptExp&&STATE.deptExp[id])||0;
     var busy=deptBusy(id);
@@ -2733,11 +2766,7 @@ function renderOffice(){
         +'<div class="o2-todaydir-t">'+(lddTxt?esc(lddTxt):'<span style="opacity:.6;font-weight:500">아직 팀장이 내린 지시가 없어요. 오피스 상단의 팀장(오세라)에게 요청하거나, 매일 새벽 자동 배정됩니다.</span>')+'</div>'
         +(lddTxt&&ldd&&ldd.at?('<div style="font-size:10px;color:#9fb8de;margin-top:4px">'+agoText(ldd.at)+'</div>'):'')
         +'</div>'):'')
-      +(isTeamLead(id)?('<div class="o2-crew">'+esc(teamOf(id).name)+' <b>팀 구성</b>'
-        +'<div class="o2-crewrow">'+teamRosterChips(teamOf(id))+'</div>'
-        +'<div class="o2-crewnote">팀장 아래 팀원까지 이름 그대로 함께 움직여요</div>'
-        +'</div>'):'')
-      +(lastTxt?('<div class="o2-row o2-acc o2-accup" data-acc="last_'+id+'">'
+            +(lastTxt?('<div class="o2-row o2-acc o2-accup" data-acc="last_'+id+'">'
         +'<div class="o2-acchd">⏳ <b>최근</b><span class="o2-caret">▴</span></div>'
         +'<div class="o2-accbody" style="display:none">'+esc(lastTxt)+'…</div>'
         +'</div>'):'')
@@ -2757,7 +2786,7 @@ function renderOffice(){
     +'<div class="o2-stage">'
     +'<div class="o2-vp" id="o2vp">'+slides+'</div>'
     +'<button class="o2-arrow l" id="o2prev">‹</button><button class="o2-arrow r" id="o2next">›</button>'
-    +'<div class="o2-count" id="o2count">'+(idx+1)+' / '+keys.length+'</div>'
+    +'<div class="o2-count" id="o2count">'+(idx+1)+' / '+people.length+'</div>'
     +'</div>'
     +'</div>';
   var vp=document.getElementById("o2vp"); if(vp){ vp.scrollLeft=idx*vp.clientWidth; }
@@ -3534,7 +3563,7 @@ function renderLearn(){
 
     +'<div style="background:#fffaf3;border:1px solid #ffe0b8;border-radius:12px;padding:12px 13px;margin-bottom:12px">'
       +'<div style="font-size:12.5px;font-weight:800;color:#b9651a;margin-bottom:4px">🏢 전 부서 협업 심화 학습 <span style="font-size:10.5px;font-weight:600;color:#a8814f">— 예제 만들고 채점까지</span></div>'
-      +'<div class="note" style="margin-bottom:6px">URL을 주면 <b>팀장이 부서를 배정</b> → 각 부서가 가이드라인 → <b>제작부가 예제 제작</b> → <b>검수부가 채점</b> → 점수 낮으면 <b>자동 재제작</b> → 전 부서 지식 갱신.<br>유튜브·웹페이지 모두 가능 (최대 4개). 5~10분 걸려요.</div>'
+      +'<div class="note" style="margin-bottom:6px">URL을 주면 <b>팀장이 부서를 배정</b> → 각 부서가 가이드라인 → <b>제작팀가 예제 제작</b> → <b>검수부가 채점</b> → 점수 낮으면 <b>자동 재제작</b> → 전 부서 지식 갱신.<br>유튜브·웹페이지 모두 가능 (최대 4개). 5~10분 걸려요.</div>'
       +'<textarea id="lnDeepUrls" placeholder="https://www.chanel.com/kr/high-jewelry/&#10;https://youtu.be/영상ID" style="width:100%;box-sizing:border-box;min-height:66px;padding:10px 12px;border:1px solid #f0d6ae;border-radius:9px;font-family:inherit;font-size:12px;margin-bottom:7px"></textarea>'
       +'<button class="cbtn conn" id="lnDeepBtn" style="width:100%;justify-content:center;background:#fff3e0;color:#b9651a;border-color:#f0d6ae">🏢 전 부서 협업 심화 학습 시작</button>'
     +'</div>'
@@ -3851,7 +3880,7 @@ function deepResultHtml(rs){
   if(rv.strengths && rv.strengths.length) h+='<div style="font-size:11.5px;color:#0e7a52;margin-bottom:6px"><b>👍 강점</b><br>'+rv.strengths.map(function(s){return '· '+esc(s);}).join("<br>")+'</div>';
   if(rv.gaps && rv.gaps.length) h+='<div style="font-size:11.5px;color:#c0392b;margin-bottom:8px"><b>🔧 부족분 → 다음 학습 과제로 반영됨</b><br>'+rv.gaps.map(function(s){return '· '+esc(s);}).join("<br>")+'</div>';
   if(ex){
-    h+='<div style="font-size:11.5px;font-weight:800;color:#15324f;margin:8px 0 5px">📦 제작부가 만든 예제</div>';
+    h+='<div style="font-size:11.5px;font-weight:800;color:#15324f;margin:8px 0 5px">📦 제작팀가 만든 예제</div>';
     if(isHtml){
       h+='<button class="ib-btn" id="lnExOpen" style="width:100%;justify-content:center;background:#eef7ff;color:#1668c7;margin-bottom:6px">👁️ 예제 전체 보기</button>'
         +'<iframe id="lnExFrame" style="width:100%;height:320px;border:1px solid #e3e8ef;border-radius:9px;background:#fff" sandbox="allow-same-origin"></iframe>';
@@ -4699,7 +4728,7 @@ function openWebtoonModal(){
     var fmt=(ov.querySelector('input[name="wtfmt"]:checked')||{}).value||"scroll";
     var cuts=+((ov.querySelector("#wtCuts")||{}).value)||24;
     var chars=Array.prototype.map.call(ov.querySelectorAll(".wt-char:checked"), function(c){ return c.value; });
-    btn.disabled=true; btn.textContent=(fmt==="long"?"장편 콘티 그리는 중… (2~4분)":"제작부가 콘티 그리는 중… (1~2분)");
+    btn.disabled=true; btn.textContent=(fmt==="long"?"장편 콘티 그리는 중… (2~4분)":"제작팀가 콘티 그리는 중… (1~2분)");
     try{ await wakeServer(fmt==="long"?120000:60000);
       var r=await fetch(backendOrigin()+"/api/webtoon/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ topic:topic, source:(ov.querySelector("#wtSource").value||"").trim(), format:fmt, cuts:cuts, characters:chars })});
       var d=await r.json(); if(d.error) throw new Error(d.error);
@@ -4847,10 +4876,12 @@ function openPubSchedModal(){
   });
   pubSchedRefresh();
 }
-function renderOfficeBoard(keys){
+function renderOfficeBoard(){
+  var keys=officeOrder();
   var _now=Date.now();
-  var cards=keys.map(function(id){
-    var a=AGENTS[id], mem=(DEPT_MEMBERS&&DEPT_MEMBERS[id])||"";
+  var cards=officePeople().map(function(p){
+    var id=p.key; if(p.crew){ return crewCardHtml(p); }
+    var a=AGENTS[id]||{}, mem=p.n;
     var exp=(STATE.deptExp&&STATE.deptExp[id])||0, lv=Math.floor(exp/5)+1;
     var dir=(STATE.deptDirective&&STATE.deptDirective[id])?String(STATE.deptDirective[id]).trim():"";
     var ldd=(STATE.leaderDailyDirective&&STATE.leaderDailyDirective[id])?STATE.leaderDailyDirective[id]:null;
@@ -4894,7 +4925,7 @@ function renderOfficeBoard(keys){
     +'</div>';
 }
 function bindOffice(){
-  var keys=officeOrder();
+  var keys=officePeople();
   var obs=document.getElementById("obSched"); if(obs) obs.addEventListener("click", openPubSchedModal);
   var obi=document.getElementById("obInbox"); if(obi) obi.addEventListener("click", openInboxModal);
   var oba=document.getElementById("obAnalytics"); if(oba) oba.addEventListener("click", openAnalyticsModal);
@@ -6527,7 +6558,7 @@ function bindMeeting(){
       })();
     };
   });
-  // 회의 발언·결론을 콘텐츠로 만들기 → 제작부에 지시(결과는 콘텐츠 탭에도 모임)
+  // 회의 발언·결론을 콘텐츠로 만들기 → 제작팀에 지시(결과는 콘텐츠 탭에도 모임)
   viewEl.querySelectorAll('[data-mkcont]').forEach(function(b){
     b.onclick=function(e){ e.stopPropagation();
       var parts=b.getAttribute("data-mkcont").split(":"); var mid=+parts[0], key=parts[1];
@@ -6544,7 +6575,7 @@ function bindMeeting(){
           await wakeServer(50000);
           var r=await fetch(backendOrigin()+"/api/content/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ source:src, label:label, topic:(mt.topic||""), needApproval:true, engine:(STATE.workEngine==="gemini"?"gemini":"claude") })});
           var d=await r.json(); if(d.error) throw new Error(d.error);
-          // 콘텐츠 탭에 바로 뜨도록 제작부 콘텐츠 메시지를 직접 추가
+          // 콘텐츠 탭에 바로 뜨도록 제작팀 콘텐츠 메시지를 직접 추가
           var _cid="c"+Date.now();
           STATE.messages.push({ role:"agent", deptId:(d.dept||"creation"), text:(d.content||""), time:nowTime(), _jid:("mk"+Date.now()), _cid:_cid, _inst:"회의 → 콘텐츠: "+label+" ("+(mt.topic||"")+")", _forceContent:true });
           try{ logAct((d.dept||"creation"),"회의→콘텐츠 생성: "+label, true, "콘텐츠 탭에 추가됨", (mt.topic||""), _cid); }catch(e){}
@@ -6963,9 +6994,9 @@ function renderSettings(){
     +'<div class="note" style="background:#f0f7f2;border:1px solid #cfe8d8;border-radius:10px;padding:9px 11px">영상은 <b>제미나이(구글 AI 울트라)에서 직접 제작</b>해요 — 추가 토큰·비용 없음. 콘텐츠의 <b>🎬 제미나이로</b> 버튼을 누르면 영상용 프롬프트가 복사되고 제미나이가 열려요. 만든 mp4는 팀에이전트 채팅 📎로 올리면 보관·재생됩니다.</div>'
     +'<div class="s-sec">🔌 외부 도구(플랫폼) 연결</div>'
     + plats
-    +'<div class="s-sec">➕ 플랫폼 추가 <span class="perm">제작부(02) 권한</span></div>'
+    +'<div class="s-sec">➕ 플랫폼 추가 <span class="perm">제작팀 권한</span></div>'
     +'<div class="addrow"><input id="newplat" placeholder="예: 틱톡, 스레드, 네이버 블로그…"><button class="addbtn" id="addplat">추가</button></div>'
-    +'<div class="note">제작부(02)는 필요에 따라 새 발행 플랫폼을 추가할 수 있습니다. 추가 후 API 키를 넣어 연결하세요.</div>'
+    +'<div class="note">제작팀는 필요에 따라 새 발행 플랫폼을 추가할 수 있습니다. 추가 후 API 키를 넣어 연결하세요.</div>'
     +'<div class="s-sec">🕐 에이전트 근무 스케줄</div>'
     +'<div class="toggle"><div style="flex:1"><div style="font-size:12.5px;font-weight:700">현재 상태 · '+ws.icon+' '+ws.label+'</div><div class="note">'+ws.detail+' · 자율/자동 작업(자동 발행·자료수집)은 근무 시간에만 실행됩니다. 운영자의 수동 지시는 언제든 처리됩니다.</div></div></div>'
     +'<div style="display:flex;gap:7px;margin-bottom:10px">'
