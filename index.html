@@ -865,7 +865,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v248</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v249</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -1080,7 +1080,7 @@ function avatar(id, size){
 var STATE = {
   view:"console", messages:[], busy:false, busyDept:null,
   autoPublish:false,
-  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], leaderDailyDirective:{}, dailyReview:{}, nightResearch:{}, leaderReport:{}, leaderAutoOn:false, capHistory:[], contentApprovals:[], nightSearchOn:true, briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0}, dailyGrowthOn:true, capability:{}, pubSchedules:[], usdKrw:0, monthLimitKrw:0, geminiMonthLimitKrw:100000, freeLLMFirst:false, nvidiaModel:"", designReviewLoops:1, meetingVariants:1, meetingJudge:"pick", paidGeminiOn:false, contentNotify:true, crew:{}, crewExp:{},
+  deptMemory:{}, deptKnowledge:{}, clientProfile:{text:"",at:0}, meetings:[], meetingRooms:[], deptExp:{}, meetingAlways:["ops"], meetingEngine:"gemini", workEngine:"gemini", briefings:[], leadDirectives:[], leaderDailyDirective:{}, dailyReview:{}, nightResearch:{}, leaderReport:{}, leaderAutoOn:false, dailyLearnOn:true, capHistory:[], contentApprovals:[], nightSearchOn:true, briefHour:21, morningHour:9, weeklyDow:0, morningBrief:true, eveningBrief:true, weeklyBrief:true, semanticSearch:true, kShareOn:true, kShareEveryH:48, trainOn:true, trainEveryH:12, lastTrainAt:{}, lastTrainRoundAt:0, growBurst:{active:false,total:0,done:0}, dailyGrowthOn:true, capability:{}, pubSchedules:[], usdKrw:0, monthLimitKrw:0, geminiMonthLimitKrw:100000, freeLLMFirst:false, nvidiaModel:"", designReviewLoops:1, meetingVariants:1, meetingJudge:"pick", paidGeminiOn:false, contentNotify:true, crew:{}, crewExp:{},
   autoBackup:0, savedAt:null, lastSync:null,
   schedule:{ mode:"hours", start:"09:00", end:"18:00", workMin:40, restMin:20 },
   safety:{ audit:false, dailyLimit:0, requireApproval:false },
@@ -1459,7 +1459,7 @@ function applyLoadedState(d, isMerge){
     if(d.collect) STATE.collect=Object.assign({ everyMin:0, topic:"" }, d.collect);
     if(typeof d.deliberate==="boolean") STATE.deliberate=d.deliberate;
     if(typeof d.voiceAuto==="boolean") STATE.voiceAuto=d.voiceAuto;
-    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge; if(d.clientProfile&&typeof d.clientProfile==="object") STATE.clientProfile=d.clientProfile; if(Array.isArray(d.briefings)) STATE.briefings=d.briefings; if(Array.isArray(d.leadDirectives)) STATE.leadDirectives=d.leadDirectives; if(d.leaderDailyDirective&&typeof d.leaderDailyDirective==="object") STATE.leaderDailyDirective=d.leaderDailyDirective; if(d.dailyReview&&typeof d.dailyReview==="object") STATE.dailyReview=d.dailyReview; if(d.nightResearch&&typeof d.nightResearch==="object") STATE.nightResearch=d.nightResearch; if(d.leaderReport&&typeof d.leaderReport==="object"){ STATE.leaderReport=d.leaderReport; if(typeof d.leaderReport.leaderAutoOn==="boolean") STATE.leaderAutoOn=d.leaderReport.leaderAutoOn; } if(Array.isArray(d.capHistory)) STATE.capHistory=d.capHistory; if(Array.isArray(d.contentApprovals)) STATE.contentApprovals=d.contentApprovals; if(d.lastTrainAt&&typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt; if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst; if(d.capability&&typeof d.capability==="object") STATE.capability=d.capability; if(Array.isArray(d.pubSchedules)) STATE.pubSchedules=d.pubSchedules; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst;
+    if(typeof d.typeFx==="boolean") STATE.typeFx=d.typeFx; if(d.deptKnowledge&&typeof d.deptKnowledge==="object") STATE.deptKnowledge=d.deptKnowledge; if(d.clientProfile&&typeof d.clientProfile==="object") STATE.clientProfile=d.clientProfile; if(Array.isArray(d.briefings)) STATE.briefings=d.briefings; if(Array.isArray(d.leadDirectives)) STATE.leadDirectives=d.leadDirectives; if(d.leaderDailyDirective&&typeof d.leaderDailyDirective==="object") STATE.leaderDailyDirective=d.leaderDailyDirective; if(d.dailyReview&&typeof d.dailyReview==="object") STATE.dailyReview=d.dailyReview; if(d.nightResearch&&typeof d.nightResearch==="object") STATE.nightResearch=d.nightResearch; if(d.leaderReport&&typeof d.leaderReport==="object"){ STATE.leaderReport=d.leaderReport; if(typeof d.leaderReport.leaderAutoOn==="boolean") STATE.leaderAutoOn=d.leaderReport.leaderAutoOn; if(typeof d.leaderReport.dailyLearnOn==="boolean") STATE.dailyLearnOn=d.leaderReport.dailyLearnOn; } if(Array.isArray(d.capHistory)) STATE.capHistory=d.capHistory; if(Array.isArray(d.contentApprovals)) STATE.contentApprovals=d.contentApprovals; if(d.lastTrainAt&&typeof d.lastTrainAt==="object") STATE.lastTrainAt=d.lastTrainAt; if(typeof d.lastTrainRoundAt==="number") STATE.lastTrainRoundAt=d.lastTrainRoundAt; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst; if(d.capability&&typeof d.capability==="object") STATE.capability=d.capability; if(Array.isArray(d.pubSchedules)) STATE.pubSchedules=d.pubSchedules; if(d.growBurst&&typeof d.growBurst==="object") STATE.growBurst=d.growBurst;
     if(d.deptClips && typeof d.deptClips==="object") STATE.deptClips=Object.assign({},STATE.deptClips,d.deptClips);
     if(d.blog && typeof d.blog==="object") STATE.blog=Object.assign({naverId:"",tistory:"",wp:""},d.blog);
     if(Array.isArray(d.customTargets)) STATE.customTargets=d.customTargets;
@@ -1851,7 +1851,7 @@ async function syncBackend(full){
 }
 async function pushState(){
   if(!useBackend()) return;
-  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn, usdKrw:STATE.usdKrw, monthLimitKrw:STATE.monthLimitKrw, geminiMonthLimitKrw:STATE.geminiMonthLimitKrw, paidGeminiOn:STATE.paidGeminiOn, freeLLMFirst:STATE.freeLLMFirst, nvidiaModel:STATE.nvidiaModel, designReviewLoops:STATE.designReviewLoops, designSystem:STATE.designSystem, viralGate:STATE.viralGate, viralMin:STATE.viralMin, oseraGate:STATE.oseraGate, oseraMin:STATE.oseraMin, oseraAxes:STATE.oseraAxes, lessonInject:STATE.lessonInject, expSweep:STATE.expSweep, nightSearchOn:STATE.nightSearchOn, leaderAutoOn:STATE.leaderAutoOn, contentNotify:STATE.contentNotify, researchMode:STATE.researchMode, appBase:location.href.split("#")[0] }) }); }catch(e){}
+  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn, usdKrw:STATE.usdKrw, monthLimitKrw:STATE.monthLimitKrw, geminiMonthLimitKrw:STATE.geminiMonthLimitKrw, paidGeminiOn:STATE.paidGeminiOn, freeLLMFirst:STATE.freeLLMFirst, nvidiaModel:STATE.nvidiaModel, designReviewLoops:STATE.designReviewLoops, designSystem:STATE.designSystem, viralGate:STATE.viralGate, viralMin:STATE.viralMin, oseraGate:STATE.oseraGate, oseraMin:STATE.oseraMin, oseraAxes:STATE.oseraAxes, lessonInject:STATE.lessonInject, expSweep:STATE.expSweep, nightSearchOn:STATE.nightSearchOn, leaderAutoOn:STATE.leaderAutoOn, dailyLearnOn:STATE.dailyLearnOn, contentNotify:STATE.contentNotify, researchMode:STATE.researchMode, appBase:location.href.split("#")[0] }) }); }catch(e){}
 }
 // 총괄: 1개 이상 부서 배정 (다중 분배)
 async function route(instruction){
@@ -8131,6 +8131,17 @@ function capBar(label, v, color){
   v=Math.max(0,Math.min(100,v||0));
   return '<div class="capb"><span class="capb-l">'+label+'</span><span class="capb-track"><span class="capb-fill" style="width:'+v+'%;background:'+color+'"></span></span><span class="capb-v">'+v+'</span></div>';
 }
+function dailyLearnStatusHtml(){
+  try{
+    var lr=STATE.leaderReport||{}, al=lr.autoLearn||{};
+    var names={research:"\uc5f0\uad6c", directives:"\ud300\uc7a5 \uc9c0\uc2dc", benchmark:"\ubca4\uce58\ub9c8\ud06c \ud559\uc2b5", train:"\uc9c0\uc2dd \ud6c8\ub828"};
+    var st=al.steps||{}, ks=Object.keys(names);
+    var parts=ks.map(function(k){ var v=st[k]; return names[k]+(v==="ok"?" \u2705":(v==="fail"?" \u274c":" \u2014")); });
+    var when=al.lastAt?new Date(al.lastAt):null;
+    var wh=when?((when.getMonth()+1)+"/"+when.getDate()+" "+("0"+when.getHours()).slice(-2)+":"+("0"+when.getMinutes()).slice(-2)):"\uae30\ub85d \uc5c6\uc74c";
+    return '<div class="note" style="margin-top:6px;font-size:11px">\ud83d\udd01 <b>\uc624\ub298 \uc790\ub3d9\ud559\uc2b5</b> ('+escapeHtml(al.day||"-")+') \u2014 '+escapeHtml(parts.join(" \u00b7 "))+'<br>\ub9c8\uc9c0\ub9c9 \uc2e4\ud589: '+escapeHtml(wh)+(al.lastErr?('<br>\u26a0\ufe0f '+escapeHtml(String(al.lastErr))):"")+'</div>';
+  }catch(e){ return ""; }
+}
 function leaderReportHtml(){
   var r=STATE.leaderReport||{};
   var today=(function(){ try{ return new Date().toLocaleDateString("sv-SE",{timeZone:"Asia/Seoul"}); }catch(e){ return ""; } })();
@@ -9299,6 +9310,11 @@ function renderRecord(){
         +'<div class="lrauto-t"><b>🧑\u200d💼 자동 백그라운드 학습</b><div class="lrauto-s">'+(STATE.leaderAutoOn===true?'⚠️ ON — 매일 자동으로 연구·학습·지시가 돌아갑니다 (앱 안 열어도 <b>토큰이 계속 소모</b>돼요)':'✅ OFF — 자동 실행 꺼짐. <b>내가 URL로 학습시킬 때만</b> 토큰을 씁니다 (비용 절약)')+'</div></div>'
         +'<div class="lrauto-sw" id="leaderAutoSw"><span class="lrauto-knob"></span></div>'
       +'</div>'
+      +'<div class="lrauto'+(STATE.dailyLearnOn!==false?' on':'')+'" id="dailyLearnRow" style="margin-top:6px">'
+        +'<div class="lrauto-t"><b>\ud83d\udcda \ub9e4\uc77c \uc790\ub3d9\ud559\uc2b5 (\ud558\ub8e8 1\ud68c)</b><div class="lrauto-s">'+(STATE.dailyLearnOn!==false?'\u2705 ON \u2014 \ub9e4\uc77c \uc5f0\uad6c \u2192 \ud300\uc7a5 \uc9c0\uc2dc \u2192 \ubd80\uc11c \ud559\uc2b5\uc774 \ud558\ub8e8 \ud55c \ubc88\ub9cc \ub3cc\uc544\uc694 (\uc800\ube44\uc6a9)':'\u26d4 OFF \u2014 \uc790\ub3d9\ud559\uc2b5\uc774 \uba48\ucdc0\uc788\uc5b4\uc694. \ubd80\uc11c\ub294 \uc2a4\uc2a4\ub85c \uc131\uc7a5\ud558\uc9c0 \uc54a\uc544\uc694')+'</div></div>'
+        +'<div class="lrauto-sw" id="dailyLearnSw"><span class="lrauto-knob"></span></div>'
+      +'</div>'
+      + dailyLearnStatusHtml()
       +'<button class="cbtn conn" id="leaderRunAll" style="margin-top:8px;width:100%;justify-content:center;background:linear-gradient(135deg,#1f5fa8,#6a5acd);color:#fff;border:none;font-weight:700;padding:11px">▶ 지금 즉시 1회 실행 (회고·연구·지시·평가)</button>'
       +'<div class="advtog" id="advTog">⚙️ 고급 수동 실행 ▾</div>'
       +'<div id="advBox" style="display:none">'
@@ -9466,6 +9482,14 @@ function bindRecord(){
   }
   if(leaderAutoSw) leaderAutoSw.addEventListener("click", function(e){ e.stopPropagation(); toggleLeaderAuto(); });
   if(leaderAutoRow) leaderAutoRow.addEventListener("click", toggleLeaderAuto);
+  var dailyLearnSw=document.getElementById("dailyLearnSw"), dailyLearnRow=document.getElementById("dailyLearnRow");
+  function toggleDailyLearn(){
+    STATE.dailyLearnOn = (STATE.dailyLearnOn===false);
+    saveState(); if(useBackend()) pushState();
+    render();
+  }
+  if(dailyLearnSw) dailyLearnSw.addEventListener("click", function(e){ e.stopPropagation(); toggleDailyLearn(); });
+  if(dailyLearnRow) dailyLearnRow.addEventListener("click", toggleDailyLearn);
   var runAll=document.getElementById("leaderRunAll");
   if(runAll) runAll.addEventListener("click", async function(){
     if(!useBackend()){ alert("팀장 실행에는 AI 백엔드 연결이 필요해요."); return; }
