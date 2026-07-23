@@ -2730,6 +2730,95 @@ var OFFICE_BG="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAkGBwgHBg
 function deptBusy(id){ return !!(STATE.deptDirective && STATE.deptDirective[id] && String(STATE.deptDirective[id]).trim()); }
 // 무료 서버가 잠들어 있으면 /api/ping으로 깨운다(콜드스타트 대기, 최대 maxWaitMs). 깨어나면 true.
 // 잠든 무료 서버 때문에 'Failed to fetch'가 사용자에게 뜨지 않도록: 깨우기 + 네트워크 실패 시 자동 재시도(백오프)
+/* ===== v254 통합 인증 =====
+   비밀번호는 백엔드 환경변수 한 곳에만 둔다. 이 앱은 백엔드에 물어보고 토큰만 보관한다.
+   관제탑 iframe 안에서는 URL 해시로 토큰을 받아 다시 묻지 않는다. */
+var AUTH = {
+  key: "hukkle_auth_token",
+  getToken: function(){ try{ return localStorage.getItem(this.key) || ""; }catch(_){ return ""; } },
+  setToken: function(v){ try{ v ? localStorage.setItem(this.key, v) : localStorage.removeItem(this.key); }catch(_){ } },
+
+  absorbFromHash: function(){
+    try{
+      var m = /(?:^|[#&])token=([^&]+)/.exec(location.hash || "");
+      if(m && m[1]){
+        this.setToken(decodeURIComponent(m[1]));
+        history.replaceState(null, "", location.pathname + location.search);
+        return true;
+      }
+    }catch(_){ }
+    return false;
+  },
+
+  headers: function(){
+    var t = this.getToken();
+    return t ? { "Authorization": "Bearer " + t } : {};
+  },
+
+  login: async function(pw){
+    var r = await fetch(backendOrigin() + "/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pw })
+    });
+    var d = await r.json().catch(function(){ return {}; });
+    if(d && d.ok && d.token){ this.setToken(d.token); return { ok:true, warning:d.warning }; }
+    return { ok:false, error:(d && d.error) || "로그인 실패" };
+  },
+
+  check: async function(){
+    try{
+      var r = await fetch(backendOrigin() + "/api/auth-check", { headers: this.headers() });
+      return await r.json();
+    }catch(_){ return { ok:true, required:false, offline:true }; }
+  },
+
+  logout: function(){ this.setToken(""); location.reload(); }
+};
+
+function showLoginGate(){
+  if(document.getElementById("authGate")) return;
+  var d = document.createElement("div");
+  d.id = "authGate";
+  d.style.cssText = "position:fixed;inset:0;z-index:999999;background:#fff;display:flex;"
+    + "align-items:center;justify-content:center;padding:20px;font-family:inherit";
+  d.innerHTML = '<div style="max-width:360px;width:100%;text-align:center">'
+    + '<div style="font-size:40px;margin-bottom:8px">&#128274;</div>'
+    + '<h2 style="margin:0 0 6px">보안 로그인</h2>'
+    + '<p style="color:#666;font-size:14px;margin:0 0 18px">관리자 비밀번호를 입력하세요.</p>'
+    + '<input id="authPw" type="password" placeholder="비밀번호" '
+    + 'style="width:100%;padding:14px;font-size:16px;border:1px solid #ddd;border-radius:10px;box-sizing:border-box">'
+    + '<div id="authMsg" style="color:#d33;font-size:13px;min-height:18px;margin:8px 0"></div>'
+    + '<button id="authGo" style="width:100%;padding:14px;font-size:16px;font-weight:700;'
+    + 'border:0;border-radius:10px;background:#111;color:#fff;cursor:pointer">접속</button></div>';
+  document.body.appendChild(d);
+
+  var go = async function(){
+    var pw = document.getElementById("authPw").value;
+    var msg = document.getElementById("authMsg");
+    msg.textContent = "확인 중...";
+    var r = await AUTH.login(pw);
+    if(r.ok){ d.remove(); if(r.warning) console.warn(r.warning); }
+    else { msg.textContent = r.error; }
+  };
+  document.getElementById("authGo").onclick = go;
+  document.getElementById("authPw").addEventListener("keydown", function(e){
+    if(e.key === "Enter") go();
+  });
+}
+
+(function initAuth(){
+  AUTH.absorbFromHash();
+  var run = async function(){
+    if(!(typeof useBackend === "function" && useBackend())) return;
+    var st = await AUTH.check();
+    if(st && st.required && !st.ok) showLoginGate();
+  };
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", function(){ setTimeout(run, 300); });
+  } else { setTimeout(run, 300); }
+})();
+
 async function apiFetch(path, opts, onWait){
   if(!useBackend()) throw new Error("백엔드 연결이 설정되지 않았어요");
   var url = (String(path).charAt(0)==="/") ? (backendOrigin()+path) : path;
@@ -2741,7 +2830,10 @@ async function apiFetch(path, opts, onWait){
       await wakeServer(70000);
     }
     try{
-      var r = await fetch(url, opts||{});
+      var _o = Object.assign({}, opts||{});
+      _o.headers = Object.assign({}, _o.headers||{}, AUTH.headers());
+      var r = await fetch(url, _o);
+      if(r.status === 401){ AUTH.setToken(""); showLoginGate(); }
       STATE._srv = { awake:true, keepAlive:(STATE._srv&&STATE._srv.keepAlive), at:Date.now() };
       return r;
     }catch(e){
