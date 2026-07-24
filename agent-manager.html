@@ -39,6 +39,8 @@ body{margin:0;padding:0 0 40px;
 .ph{border-radius:8px;overflow:hidden;flex:0 0 auto;display:block;
   border:1.5px solid rgba(255,255,255,.7);background:#2A3A35}
 .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .ini{display:flex;width:100%;height:100%;align-items:center;justify-content:center;
+  font-weight:700;color:#CFE3DA;font-size:.8em;letter-spacing:0}
 .s26{width:26px;height:26px;border-radius:6px}.s32{width:32px;height:32px;border-radius:6px}
 .s36{width:36px;height:36px}.s44{width:44px;height:44px}.s56{width:56px;height:56px}
 .s60{width:60px;height:72px}
@@ -197,14 +199,16 @@ const API = (location.hostname.endsWith("github.io"))
   : (localStorage.getItem("backendUrl") || "https://sns-agent-backend.onrender.com");
 
 const TEAM = {
-  ops:        { nm:"오세라", rl:"총괄실 · 비서",        tags:["조율","일정"] },
-  creation:   { nm:"윤소희", rl:"디1 디자인팀 · 아트",   tags:["시안","레이아웃"] },
-  strategy:   { nm:"한지우", rl:"글2 이야기팀 · 카피",   tags:["후킹","카피"] },
-  publishing: { nm:"정유진", rl:"글3 · 블로그",          tags:["SEO","장문"] },
-  analytics:  { nm:"최은지", rl:"디2 · 그래픽",          tags:["카드뉴스","도표"] },
-  scout:      { nm:"강민아", rl:"필름팀 · 영상 PD",      tags:["쇼츠","스토리보드"] },
-  monetization:{nm:"박하늘", rl:"커머스 · 그로스",       tags:["전환","가격"] },
-  advisory:   { nm:"서다은", rl:"자문 · 서기",           tags:["법무","기록"] }
+  ops:         { nm:"오세라", rl:"총괄실 · 비서",            tags:["조율","일정","발행"] },
+  creation:    { nm:"이서연", rl:"글1 이야기팀 · 콘텐츠 디렉터", tags:["주제","톤","총괄"] },
+  strategy:    { nm:"한지우", rl:"글2 이야기팀 · 카피라이터",   tags:["후킹","캡션","해시태그"] },
+  advisory:    { nm:"정유진", rl:"글3 이야기팀 · 블로그 작가",   tags:["SEO","장문","검수"] },
+  publishing:  { nm:"임채원", rl:"필1 필름팀 · 영상 PD",       tags:["영상기획","연출"] },
+  scout:       { nm:"서다은", rl:"필2 필름팀 · 대본 작가",      tags:["대본","트렌드"] },
+  editing:     { nm:"노아라", rl:"필3 필름팀 · 편집·썸네일",     tags:["편집","썸네일"] },
+  monetization:{ nm:"윤소희", rl:"디1 디자인팀 · 아트 디렉터",   tags:["비주얼","컨셉"] },
+  analytics:   { nm:"강민서", rl:"디2 디자인팀 · 웹 디자이너",   tags:["상세페이지","레이아웃"] },
+  graphic:     { nm:"오하늘", rl:"디3 디자인팀 · 그래픽 디자이너", tags:["카드뉴스","배너"] }
 };
 const KEYS = Object.keys(TEAM);
 
@@ -234,17 +238,20 @@ function ago(iso){
 /* 담당자 배정 — 채널/주제로 그럴듯하게 고정 매핑 */
 function whoOf(row){
   const t = (row.target_channel||"") + " " + (row.topic||"");
-  if(/홈페이지|랜딩|웹/.test(t)) return "creation";
-  if(/스레드|threads/i.test(t))  return "strategy";
-  if(/블로그|카페|네이버/.test(t)) return "publishing";
-  if(/유튜브|영상|쇼츠|릴스/.test(t)) return "scout";
-  if(/상세|상품|가격/.test(t))   return "monetization";
-  if(/인스타/.test(t))           return "analytics";
+  if(/홈페이지|랜딩|웹|상세|상품/.test(t))      return "analytics";
+  if(/스레드|threads/i.test(t))                return "strategy";
+  if(/블로그|카페|네이버|티스토리/.test(t))      return "advisory";
+  if(/유튜브|영상|쇼츠|릴스/.test(t))           return "publishing";
+  if(/인스타|카드뉴스|썸네일|배너/.test(t))      return "monetization";
   return "ops";
 }
+
 function faceOf(key, cls){
-  const src = (window.PHOTOS && PHOTOS[key]) || "";
-  return `<span class="ph ${cls}">${src?`<img src="${src}" alt="">`:""}</span>`;
+  const P = (typeof PHOTOS!=="undefined" && PHOTOS) || window.PHOTOS || {};
+  const src = P[key] || "";
+  const nm  = (TEAM[key] && TEAM[key].nm) || "";
+  return `<span class="ph ${cls}">${src?`<img src="${src}" alt="">`
+    :`<b class="ini">${esc(nm.slice(1,2)||nm.slice(0,1)||"·")}</b>`}</span>`;
 }
 const STAGE_KR = { queued:"대기", research:"자료 읽는 중", director:"기준 세우는 중",
   write:"원고 쓰는 중", critic:"검수 중", crossjudge:"판단 검증 중", adapt:"채널별 재가공",
@@ -252,8 +259,19 @@ const STAGE_KR = { queued:"대기", research:"자료 읽는 중", director:"기�
   threads:"스레드 체인", done:"마무리" };
 
 async function api(path, opts){
-  const r = await fetch(API+path, Object.assign({headers:{"Content-Type":"application/json"}}, opts||{}));
-  return await r.json();
+  let r;
+  try{ r = await fetch(API+path, Object.assign({headers:{"Content-Type":"application/json"}}, opts||{})); }
+  catch(e){ return { ok:false, error:"서버에 닿지 못했습니다 — "+(e.message||"연결 실패") }; }
+  let d=null; try{ d = await r.json(); }catch(e){ d=null; }
+  if(!r.ok) return { ok:false, status:r.status, error:(d&&d.error)||("서버 오류 "+r.status) };
+  if(!d) return { ok:false, error:"빈 응답" };
+  if(d.ok===undefined) d.ok = true;
+  return d;
+}
+function replyOf(j){
+  if(Array.isArray(j.results) && j.results.length)
+    return j.results.map(r=>String(r.text||"").trim()).filter(Boolean).join("\n\n");
+  return j.reply || j.plan || j.note || "";
 }
 async function load(){
   try{
@@ -471,15 +489,25 @@ document.addEventListener("click", async (e)=>{
   if(t.dataset.say){
     const inp=$("#talkin"); const v=(inp&&inp.value||"").trim();
     if(!v) return;
-    TALK.msgs.push({me:true, t:v}); inp.value=""; render();
-    try{
-      const d = await api("/api/instruct",{method:"POST",body:JSON.stringify({
-        instruction: v, depts:[TALK.key], via:"manager" })});
-      TALK.msgs.push({ t: d && d.status==="running"
-        ? "알겠습니다. 바로 시작할게요 — 진행 상황은 위에 표시됩니다."
-        : "받았습니다." });
-    }catch(err){ TALK.msgs.push({ t:"연결이 잠시 끊겼어요. 다시 말씀해 주세요." }); }
-    render(); load();
+    const p = TEAM[TALK.key] || { nm:"", rl:"" };
+    TALK.msgs.push({me:true, t:v}); inp.value="";
+    TALK.msgs.push({ t:"…", pending:true }); render();
+    const say = (txt)=>{ const i=TALK.msgs.findIndex(m=>m.pending);
+      if(i>=0) TALK.msgs[i]={t:txt}; else TALK.msgs.push({t:txt}); render(); };
+    /* 서버는 지시문 안의 이름으로 담당을 고른다 — 이름을 앞에 붙인다 */
+    const d = await api("/api/instruct",{method:"POST",body:JSON.stringify({
+      instruction: p.nm ? (p.nm+" "+v) : v, source:"manager" })});
+    if(!d.ok || !d.id){ say(d.error||"전달하지 못했습니다."); return; }
+    let out="";
+    for(let n=0; n<60; n++){
+      await new Promise(r=>setTimeout(r, 2000));
+      const j = await api("/api/instruct/"+d.id);
+      if(!j.ok) continue;
+      if(j.status==="error"){ out = "하다가 막혔어요 — "+(j.error||"원인 불명"); break; }
+      if(j.status==="done"){ out = replyOf(j) || "마쳤습니다."; break; }
+    }
+    say(out || "생각이 길어지네요. 끝나면 위 목록에 올라옵니다.");
+    load();
     return;
   }
   if(t.dataset.retry){ toast("다시 시작하려면 아래 '새 일 시작'을 이용해 주세요"); return; }
