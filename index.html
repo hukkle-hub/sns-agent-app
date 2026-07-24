@@ -855,8 +855,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
 <body>
 <div id="root">
   <div class="vtabs" id="vtabs">
-    <button class="vtab on" data-group="home">🏠 홈</button>
-    <button class="vtab" data-group="make">✍️ 만들기</button>
+    <button class="vtab on" data-group="make">✍️ 만들기</button>
     <button class="vtab" data-group="grow">📚 학습</button>
     <button class="vtab" data-group="dept">🏢 부서</button>
     <button class="vtab vtab-gear" data-group="settings" title="설정">⚙️</button>
@@ -865,7 +864,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v249</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v255</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -2867,6 +2866,101 @@ async function runDirectiveNow(id, directive){
   try{ await fetch(backendOrigin()+"/api/autorun",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ dept:id, directive:directive })}); }catch(e){}
   setTimeout(function(){ try{ syncBackend(true); }catch(e){} if(STATE.view==="record"||STATE.view==="office") render(); }, 12000);
 }
+
+/* ===== v255 부서 탭 간소화 =====
+   기존 renderOffice(슬라이드/보드)는 남겨두고 쓰지 않는다.
+   여기서는 "지금 무엇을 하고 있는지"만 한 줄로 보여주고, 누르면 펼쳐진다. */
+function _offAgo(ms){
+  if(!ms) return "";
+  var d=Date.now()-ms;
+  if(d<60000) return "방금";
+  if(d<3600000) return Math.floor(d/60000)+"분 전";
+  if(d<86400000) return Math.floor(d/3600000)+"시간 전";
+  return Math.floor(d/86400000)+"일 전";
+}
+function renderOfficeSimple(){
+  var people = officePeople().filter(function(p){ return !p.crew; });
+  if(!STATE.deptOpen) STATE.deptOpen = {};
+
+  var busyCnt = 0;
+  people.forEach(function(p){ if(deptBusy(p.key)) busyCnt++; });
+
+  var h = '<div class="s-wrap" style="padding:10px 8px 24px">';
+  h += '<div style="display:flex;align-items:center;gap:8px;margin:2px 4px 12px">'
+     + '<b style="font-size:15px">진행 중인 작업</b>'
+     + '<span style="font-size:12px;color:#7a8494">'+busyCnt+' / '+people.length+' 부서 가동</span>'
+     + '<button id="offRefresh" style="margin-left:auto;font-size:12px;padding:6px 10px;'
+     + 'border:1px solid #dfe4ec;background:#fff;border-radius:8px;cursor:pointer">새로고침</button></div>';
+
+  people.forEach(function(p){
+    var id = p.key;
+    var a = AGENTS[id] || {};
+    var name = p.n || a.kr || id;
+    var color = p.c || a.c || "#9aa3b3";
+    var busy = deptBusy(id);
+    var dir = (STATE.deptDirective && STATE.deptDirective[id]) ? String(STATE.deptDirective[id]).trim() : "";
+    var mem = (STATE.deptMemory && STATE.deptMemory[id]) || [];
+    var last = mem.length ? mem[mem.length-1] : null;
+    var lastNote = last ? String(last.note||"") : "";
+    var lastAt = last ? (last.at||0) : 0;
+
+    var head = dir || lastNote || "대기 중";
+    var open = !!STATE.deptOpen[id];
+    var dot = busy ? "#0f9d6c" : (dir ? "#f5a623" : "#c8cedb");
+
+    h += '<div class="offrow" data-id="'+id+'" style="border:1px solid #e6eaf1;border-radius:12px;'
+       + 'margin-bottom:8px;background:#fff;overflow:hidden">';
+    h += '<div class="offhead" data-id="'+id+'" style="display:flex;align-items:center;gap:9px;'
+       + 'padding:12px 12px;cursor:pointer">'
+       + '<span style="width:9px;height:9px;border-radius:50%;background:'+dot+';flex-shrink:0"></span>'
+       + '<span style="font-size:13px;font-weight:700;color:'+color+';flex-shrink:0">'+esc(name)+'</span>'
+       + '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'
+       + 'font-size:13px;color:'+(dir?"#1c2433":"#8b93a3")+'">'+esc(head)+'</span>'
+       + '<span style="font-size:11px;color:#a7aebc;flex-shrink:0">'+_offAgo(lastAt)+'</span>'
+       + '<span style="font-size:11px;color:#a7aebc;flex-shrink:0">'+(open?"▲":"▼")+'</span>'
+       + '</div>';
+
+    if(open){
+      h += '<div style="padding:0 14px 14px;border-top:1px solid #f0f2f6">';
+      if(dir){
+        h += '<div style="margin-top:11px"><div style="font-size:11px;color:#8b93a3;margin-bottom:3px">현재 지시</div>'
+           + '<div style="font-size:13px;line-height:1.6;white-space:pre-wrap">'+esc(dir)+'</div></div>';
+      }
+      if(mem.length){
+        h += '<div style="margin-top:13px"><div style="font-size:11px;color:#8b93a3;margin-bottom:5px">최근 기록</div>';
+        mem.slice(-5).reverse().forEach(function(m){
+          h += '<div style="font-size:12px;line-height:1.6;color:#4a5361;padding:7px 0;'
+             + 'border-bottom:1px solid #f4f6f9">'
+             + '<span style="color:#a7aebc;font-size:11px">'+_offAgo(m.at||0)+'</span>  '
+             + esc(String(m.note||"").slice(0,400)) + '</div>';
+        });
+        h += '</div>';
+      }
+      if(!dir && !mem.length){
+        h += '<div style="margin-top:11px;font-size:13px;color:#8b93a3">아직 기록이 없습니다.</div>';
+      }
+      h += '</div>';
+    }
+    h += '</div>';
+  });
+
+  h += '</div>';
+  viewEl.innerHTML = h;
+}
+
+function bindOfficeSimple(){
+  viewEl.querySelectorAll(".offhead").forEach(function(el){
+    el.addEventListener("click", function(){
+      var id = el.getAttribute("data-id");
+      if(!STATE.deptOpen) STATE.deptOpen = {};
+      STATE.deptOpen[id] = !STATE.deptOpen[id];
+      render();
+    });
+  });
+  var rf = document.getElementById("offRefresh");
+  if(rf) rf.addEventListener("click", function(){ render(); });
+}
+
 function renderOffice(){
   var keys=officeOrder();
   var people=officePeople();
@@ -6519,11 +6613,14 @@ function bindOffice(){
   }); });
   window.addEventListener("resize", function(){ if(STATE.view==="office"){ vp.scrollLeft=cur()*vp.clientWidth; } });
 }
-var VIEW_GROUP={console:"home",mobile:"home",content:"make",design:"make",learn:"grow",record:"grow",cycle:"grow",results:"grow",analytics:"grow",office:"dept",project:"dept",meeting:"dept",settings:"settings"};
-var GROUP_VIEWS={home:["console"],make:["content","design","shorts"],grow:["cycle","learn","record"],dept:["office","project"],settings:["settings"]};
-var GROUP_DEFAULT={home:"console",make:"content",grow:"cycle",dept:"office",settings:"settings"};
+/* v255: 홈·디자인·쇼츠 제거, 부서는 작업 현황만.
+   제거한 뷰(console/design/shorts/project/meeting)의 코드는 지우지 않고 남겨둔다.
+   되돌리려면 아래 두 줄만 원복하면 된다. */
+var VIEW_GROUP={content:"make",learn:"grow",record:"grow",cycle:"grow",results:"grow",analytics:"grow",office:"dept",project:"dept",meeting:"dept",settings:"settings"};
+var GROUP_VIEWS={make:["content"],grow:["cycle","learn","record"],dept:["office"],settings:["settings"]};
+var GROUP_DEFAULT={make:"content",grow:"cycle",dept:"office",settings:"settings"};
 var SUBVIEW_LABEL={console:"홈",content:"콘텐츠",design:"🎨 디자인",shorts:"🎬 쇼츠",cycle:"🔄 선순환",learn:"학습",record:"기록·분석",office:"오피스",project:"프로젝트",settings:"설정"};
-function curGroup(){ return VIEW_GROUP[STATE.view]||"home"; }
+function curGroup(){ return VIEW_GROUP[STATE.view]||"make"; }
 function syncNav(){
   var g=curGroup();
   if(!STATE._lastInGroup) STATE._lastInGroup={};
@@ -6727,7 +6824,9 @@ function render(){
     var _clsc = _cl ? _cl.scrollTop : 0;
     var _vsc = viewEl ? viewEl.scrollTop : 0;
     var _same = render._v === STATE.view;
-    if(STATE.view==="mobile") STATE.view="console";
+    // v255: 없어진 탭이 저장돼 있으면 콘텐츠로 보낸다
+    if(STATE.view==="mobile"||STATE.view==="console"||STATE.view==="design"||STATE.view==="shorts") STATE.view="content";
+    if(STATE.view==="project"||STATE.view==="meeting") STATE.view="office";
     if(STATE.view==="analytics") STATE.view="record";
     if(STATE.view==="console") renderConsole();
     else if(STATE.view==="content") renderContent();
@@ -6738,7 +6837,7 @@ function render(){
     else if(STATE.view==="results") renderResults();
     else if(STATE.view==="mobile") renderMobile();
     else if(STATE.view==="record") renderRecord();
-    else if(STATE.view==="office") renderOffice();
+    else if(STATE.view==="office") renderOfficeSimple();
     else if(STATE.view==="meeting") renderMeeting();
     else if(STATE.view==="project") renderProject();
     else renderSettings();
@@ -6749,7 +6848,7 @@ function render(){
     else if(STATE.view==="learn") bindLearn();
     else if(STATE.view==="results"){ bindResults(); loadApprovals(); }
     else if(STATE.view==="record") bindRecord();
-    else if(STATE.view==="office") bindOffice();
+    else if(STATE.view==="office") bindOfficeSimple();
     else if(STATE.view==="meeting") bindMeeting();
     else if(STATE.view==="project") bindProject();
     else bindComposer();
