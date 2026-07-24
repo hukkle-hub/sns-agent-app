@@ -864,7 +864,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v259</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v268</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -6906,7 +6906,7 @@ function render(){
     else if(STATE.view==="office") bindOfficeSimple();
     else if(STATE.view==="meeting") bindMeeting();
     else if(STATE.view==="project") bindProject();
-    else bindComposer();
+    else { bindComposer(); bindMsgFold(); }
     try{ syncNav(); }catch(_nv){}
     // 콘솔 입력창 복원: 작성 중이던 내용·커서·포커스 그대로 (키보드도 안 닫힘)
     if(STATE.view==="console" && _draft && _draft.v){
@@ -7016,10 +7016,92 @@ function pubControls(m){
     + '<button class="pubbtn all" data-pub="__all__" data-mi="'+m._i+'">'+mIcon("up",11)+' 전체 발행</button>'
     +'</div></div>';
 }
+/* v264: 날짜별 접기·삭제.
+   기존 메시지에는 날짜가 없고 "오전 3:45" 같은 시각만 있었다.
+   한 번만 마이그레이션해서 이전 것은 '이전 대화'로 묶고, 이후 것부터 날짜를 기록한다. */
+var CONSOLE_RECENT = 12;
+
+function stampMessages(){
+  var changed = false;
+  if(!STATE._tsMigrated){
+    // 최초 1회: 기존 메시지는 날짜를 알 수 없으므로 null 로 표시
+    STATE.messages.forEach(function(m){ if(m.ts===undefined){ m.ts=null; changed=true; } });
+    STATE._tsMigrated = true; changed = true;
+  } else {
+    // 이후 새로 들어온 메시지에만 날짜를 찍는다
+    STATE.messages.forEach(function(m){ if(m.ts===undefined){ m.ts=Date.now(); changed=true; } });
+  }
+  if(changed) saveState();
+}
+
+function dayKey(ts){
+  if(!ts) return "old";
+  var d=new Date(ts);
+  return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);
+}
+function dayLabel(key){
+  if(key==="old") return "이전 대화";
+  var t=new Date(), y=new Date(Date.now()-86400000);
+  if(key===dayKey(t.getTime())) return "오늘";
+  if(key===dayKey(y.getTime())) return "어제";
+  var p=key.split("-");
+  return p[0].slice(2)+"."+p[1]+"."+p[2];
+}
+
+function groupByDay(list){
+  var order=[], map={};
+  list.forEach(function(m){
+    var k=dayKey(m.ts);
+    if(!map[k]){ map[k]=[]; order.push(k); }
+    map[k].push(m);
+  });
+  // '이전 대화'는 항상 맨 위
+  order.sort(function(a,b){ return a==="old"?-1:(b==="old"?1:(a<b?-1:1)); });
+  return order.map(function(k){ return { key:k, label:dayLabel(k), items:map[k] }; });
+}
+
+function dayHeader(g, open, n){
+  return '<div style="display:flex;align-items:center;gap:8px;margin:16px 2px 8px">'
+    + '<button class="dayfold" data-day="'+g.key+'" style="font-size:11.5px;padding:5px 12px;'
+    + 'border:1px solid #dfe4ec;background:#fff;border-radius:20px;color:#5a6677;cursor:pointer">'
+    + (open?"▾":"▸")+' '+g.label+' · '+n+'개</button>'
+    + '<span style="flex:1;height:1px;background:#eef1f5"></span>'
+    + '<button class="daydel" data-day="'+g.key+'" title="이 날짜 대화 삭제" '
+    + 'style="font-size:11px;padding:5px 9px;border:1px solid #f3dede;background:#fff;'
+    + 'border-radius:8px;color:#c0392b;cursor:pointer">삭제</button></div>';
+}
+
 function consoleMessages(){
   if(STATE.messages.length===0) return emptyMsg();
+  stampMessages();
   STATE.messages.forEach((m,i)=>m._i=i);
-  var html = STATE.messages.map(function(m){
+
+  if(!STATE.dayOpen) STATE.dayOpen = {};
+  var groups = groupByDay(STATE.messages);
+  var newest = groups.length ? groups[groups.length-1].key : null;
+
+  var head = "", shown = [];
+  groups.forEach(function(g){
+    // 최신 날짜는 기본 펼침, 나머지는 기본 접힘
+    var open = (g.key in STATE.dayOpen) ? STATE.dayOpen[g.key] : (g.key===newest);
+    head += dayHeader(g, open, g.items.length);
+    if(!open) return;
+    var part = g.items;
+    if(g.key===newest && !STATE.showAllMsgs && part.length>CONSOLE_RECENT){
+      var hid = part.length-CONSOLE_RECENT;
+      head += '<div style="text-align:center;padding:4px 0 10px">'
+        + '<button id="showAllMsgs" style="font-size:12px;padding:7px 15px;border:1px solid #dfe4ec;'
+        + 'background:#fff;border-radius:20px;color:#5a6677;cursor:pointer">'
+        + '↑ 이 날짜 이전 '+hid+'개 더 보기</button></div>';
+      part = part.slice(hid);
+    }
+    head += renderMsgs(part);
+  });
+  return head;
+}
+
+function renderMsgs(list){
+  var html = list.map(function(m){
     if(m.role==="op") return '<div class="msg op">'+(m._replyTo&&AGENTS[m._replyTo]?'<div class="op-replyto">↪ '+escapeHtml((typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[m._replyTo])?DEPT_MEMBERS[m._replyTo]:AGENTS[m._replyTo].kr)+'에게 이어서</div>':'')+'<div class="opb">'+(m.atts&&m.atts.length?'<div class="opatts">'+m.atts.map(function(a){var inner='<img src="'+a.dataUrl+'">'+(a.kind==="video"?'<span class="vbadge">🎬</span>':''); return a.url?('<a class="opatt" href="'+a.url+'" target="_blank" rel="noopener" title="'+(a.name||"영상")+' 재생">'+inner+'<span class="playov">▶</span></a>'):('<span class="opatt">'+inner+'</span>');}).join("")+'</div>':'')+escapeHtml(m.text)+(m.via&&m.via!=="console"?' <span style="opacity:.5;font-size:9px">· '+(m.via==="kakao"?"카톡":"모바일")+'</span>':'')+'</div></div>';
     if(m.role==="route"){ var head=m.phase==="opinion"?'💭 의견 수렴 → ':(m.direct?'🎯 직접 지목 → ':'👑 총괄 → '); var tail=m.phase==="opinion"?' 의견 요청':(m.direct?(m.depts.length>1?' 협업':' 담당 응답'):(m.depts.length>1?' 동시 분배·협업':' 배정')); return '<div class="msg"><div class="route">'+head+m.depts.map(function(d){ var mn=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[d])?' '+DEPT_MEMBERS[d]:''; return '<span style="color:'+AGENTS[d].c+';font-weight:700">'+AGENTS[d].no+' '+AGENTS[d].kr+mn+'</span>'; }).join(' + ')+tail+'</div></div>'; }
     if(m.role==="opinion"){ var ao=AGENTS[m.deptId]; var mno=(typeof DEPT_MEMBERS!=="undefined"&&DEPT_MEMBERS[m.deptId])?' '+DEPT_MEMBERS[m.deptId]:''; return '<div class="msg"><div class="opinionmsg">'+avatar(m.deptId,26)+'<div><div style="font-size:11px;font-weight:700;color:'+ao.c+'">'+ao.no+' '+ao.kr+mno+' 의견</div><div style="font-size:12px;color:#4a5562;line-height:1.6;white-space:pre-wrap">'+escapeHtml(m.text)+'</div></div></div></div>'; }
@@ -8748,6 +8830,32 @@ function renderSettings(){
     +'</div>';
 }
 function scrollLog(){ var l=document.getElementById("logScroll"); if(l) l.scrollTop=l.scrollHeight; }
+
+function bindMsgFold(){
+  var a=document.getElementById("showAllMsgs");
+  if(a) a.addEventListener("click", function(){ STATE.showAllMsgs=true; render(); });
+
+  viewEl.querySelectorAll(".dayfold").forEach(function(b){
+    b.addEventListener("click", function(){
+      var k=b.getAttribute("data-day");
+      if(!STATE.dayOpen) STATE.dayOpen={};
+      var groups=groupByDay(STATE.messages);
+      var newest=groups.length?groups[groups.length-1].key:null;
+      var cur=(k in STATE.dayOpen)?STATE.dayOpen[k]:(k===newest);
+      STATE.dayOpen[k]=!cur; saveState(); render();
+    });
+  });
+
+  viewEl.querySelectorAll(".daydel").forEach(function(b){
+    b.addEventListener("click", function(){
+      var k=b.getAttribute("data-day");
+      var n=STATE.messages.filter(function(m){ return dayKey(m.ts)===k; }).length;
+      if(!confirm(dayLabel(k)+" 화면 기록 "+n+"개를 지울까요?\n\n지시·응답 원문은 서버에 따로 보관되어 있어 사라지지 않습니다.\n화면에서만 치우는 것입니다.")) return;
+      STATE.messages=STATE.messages.filter(function(m){ return dayKey(m.ts)!==k; });
+      saveState(); render();
+    });
+  });
+}
 
 function bindComposer(){
   document.querySelectorAll("[data-dept]").forEach(function(b){
