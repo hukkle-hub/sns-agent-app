@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12211E">
+<title>에이전트 매니저</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#12211E; --paper:#EDE9DF; --paper3:#F4EFE2;
+  --ink:#1C2B27; --ink3:#6B7A74;
+  --seal:#B23A32; --done:#2E7D5B; --wait:#C9A227; --idle:#5B93B4;
+  --line:rgba(255,255,255,.13);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;padding:0 0 40px;
+  background:radial-gradient(1100px 460px at 50% -8%,#1A2E29 0%,transparent 62%),var(--desk);
+  color:var(--paper);font-family:'IBM Plex Sans KR',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:0 13px}
+
+/* 머리 */
+.hd{padding:20px 0 13px;display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.hd .eb{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:#7E9A90}
+.hd h1{font-family:'Gowun Batang',serif;font-size:23px;margin:5px 0 0}
+.hd .now{margin-left:auto;text-align:right;font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;color:#A9C0B7;line-height:1.5}
+.summary{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 15px}
+.chip{font-size:10.5px;padding:5px 11px;border-radius:20px}
+.c-seal{background:rgba(178,58,50,.18);color:#E39189}
+.c-wait{background:rgba(201,162,39,.16);color:#E0CB7A}
+.c-run{background:rgba(255,255,255,.07);color:#A9C0B7}
+.c-done{background:rgba(46,125,91,.18);color:#7FC7A5}
+.c-idle{background:rgba(91,147,180,.16);color:#9FCBE4}
+
+.ph{border-radius:8px;overflow:hidden;flex:0 0 auto;display:block;
+  border:1.5px solid rgba(255,255,255,.7);background:#2A3A35}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.s26{width:26px;height:26px;border-radius:6px}.s32{width:32px;height:32px;border-radius:6px}
+.s36{width:36px;height:36px}.s44{width:44px;height:44px}.s56{width:56px;height:56px}
+.s60{width:60px;height:72px}
+
+.press{font-family:inherit;font-weight:600;cursor:pointer;border:0;
+  transition:transform .06s ease, box-shadow .06s ease}
+.p-ink{position:relative;background:transparent;color:#B23A32;border-radius:5px;
+  padding:10px 18px;font-size:12.5px;border:1.6px solid rgba(178,58,50,.6);overflow:hidden}
+.p-ink:before{content:"";position:absolute;inset:0;background:var(--seal);
+  transform:scale(.2);opacity:0;border-radius:50%;transition:transform .2s ease,opacity .2s ease}
+.p-ink:active{color:#fff;border-color:var(--seal)}
+.p-ink:active:before{transform:scale(1.7);opacity:1}
+.p-ink.sm{padding:6px 12px;font-size:11px;border-width:1.3px}
+.p-ink span{position:relative}
+.p-blue{background:#3E7A9B;color:#fff;border-radius:5px;padding:8px 14px;font-size:11.5px;
+  box-shadow:0 3px 0 #27536B,0 5px 10px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.25)}
+.p-blue:active{transform:translateY(3px);box-shadow:0 0 0 #27536B}
+.p-plain{background:transparent;color:#5B6C66;border:1px solid rgba(28,43,39,.2);
+  border-radius:5px;padding:9px 14px;font-size:11.5px}
+
+.sect{font-size:10px;color:#6F8B82;letter-spacing:.1em;margin:20px 0 9px;
+  display:flex;align-items:center;gap:9px}
+.sect b{color:#A9C0B7;font-weight:500}
+.sect:after{content:"";flex:1;height:1px;background:var(--line)}
+
+.big-seal{background:var(--paper);color:var(--ink);border-radius:9px;padding:13px;
+  box-shadow:0 11px 24px rgba(0,0,0,.38),0 0 0 2px var(--seal),inset 0 1px 0 #fff}
+.row{display:flex;align-items:center;gap:10px}
+.nm{font-size:12.5px;font-weight:600;line-height:1.25}
+.rl{font-size:9.5px;color:var(--ink3);margin-top:2px}
+.tt{font-family:'Gowun Batang',serif;font-size:18px;font-weight:700;line-height:1.35;margin:12px 0 0}
+.meta{font-size:10.5px;color:var(--ink3);margin-top:7px}
+.waitfor{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--seal)}
+
+.fold{display:flex;align-items:center;gap:10px;background:rgba(237,233,223,.92);color:var(--ink);
+  border-radius:6px;padding:8px 10px;margin-top:7px;cursor:pointer;
+  box-shadow:0 3px 9px rgba(0,0,0,.24);transition:transform .07s,box-shadow .07s}
+.fold:active{transform:translateY(2px);box-shadow:0 1px 4px rgba(0,0,0,.22)}
+.fold .t{flex:1;font-size:12px;font-weight:600;line-height:1.3;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fold .w{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink3);white-space:nowrap}
+
+.ask{background:var(--paper3);color:var(--ink);border-radius:9px;padding:13px;
+  box-shadow:0 8px 18px rgba(0,0,0,.3),0 0 0 1.5px rgba(201,162,39,.55)}
+.say{background:#fff;border-radius:4px 13px 13px 13px;padding:10px 12px;font-size:12.5px;
+  line-height:1.65;margin-top:11px;box-shadow:0 2px 5px rgba(0,0,0,.06)}
+.quick{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.qb{font-size:10.5px;padding:6px 11px;border-radius:20px;border:1px solid rgba(28,43,39,.2);
+  background:#fff;color:#3E504A;cursor:pointer;font-family:inherit;font-weight:500;
+  box-shadow:0 2px 0 rgba(28,43,39,.1);transition:transform .06s,box-shadow .06s}
+.qb:active{transform:translateY(2px);box-shadow:0 0 0}
+.rest{font-size:9.5px;color:var(--ink3);margin-top:8px}
+.ansin{display:flex;gap:8px;margin-top:10px;align-items:center;
+  border-top:1px solid rgba(28,43,39,.12);padding-top:10px}
+.ansin input{flex:1;border:0;background:transparent;font-size:12.5px;font-family:inherit;
+  color:var(--ink);padding:5px 2px}
+.ansin input:focus{outline:0}
+
+.run{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;
+  padding:10px;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));
+  margin-top:7px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--wait);
+  animation:pl 1.6s ease-in-out infinite;flex:0 0 6px}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.3}}
+.pips{display:flex;gap:3px;width:64px;flex:0 0 64px}
+.pip{height:3px;flex:1;border-radius:2px;background:rgba(255,255,255,.15)}
+.pip.d{background:var(--done)}.pip.c{background:var(--wait)}
+
+.donebig{border:1px solid rgba(46,125,91,.32);background:rgba(46,125,91,.09);
+  border-radius:8px;padding:11px;position:relative}
+.stmp{position:absolute;right:11px;top:11px;width:36px;height:36px;border-radius:50%;
+  border:1.6px solid var(--done);color:var(--done);display:grid;place-items:center;
+  font-size:10px;font-weight:700;transform:rotate(-13deg);opacity:.92}
+.donestrip{display:flex;align-items:center;gap:7px;margin-top:7px;padding:8px 10px;
+  border:1px solid rgba(46,125,91,.22);border-radius:8px;background:rgba(46,125,91,.05);
+  cursor:pointer;overflow-x:auto}
+.donestrip .lbl{font-size:9.5px;color:#7FC7A5;white-space:nowrap;flex:0 0 auto}
+.dfaces{display:flex;flex:1}
+.dfaces .ph{margin-left:-7px;border-color:#17302A}
+.dfaces .ph:first-child{margin-left:0}
+.morec{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7FC7A5;flex:0 0 auto}
+
+.bench{border:1px dashed rgba(91,147,180,.4);background:rgba(91,147,180,.06);
+  border-radius:9px;padding:12px}
+.hscroll{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 5px}
+.pcard{flex:0 0 160px;border-radius:9px;padding:10px;cursor:pointer;
+  background:linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.04));
+  border:1px solid var(--line);box-shadow:0 5px 13px rgba(0,0,0,.28);
+  transition:transform .1s,box-shadow .1s}
+.pcard:active{transform:translateY(3px);box-shadow:0 1px 4px rgba(0,0,0,.26)}
+.tag{display:inline-block;font-size:9px;padding:2px 7px;border-radius:20px;
+  background:rgba(255,255,255,.09);color:#9FB5AC;margin:4px 3px 0 0}
+
+.talk{background:var(--paper);color:var(--ink);border-radius:9px;padding:13px;
+  box-shadow:0 12px 26px rgba(0,0,0,.4),inset 0 1px 0 #fff}
+.th{display:flex;align-items:center;gap:11px;padding-bottom:11px;
+  border-bottom:1px solid rgba(28,43,39,.13)}
+.live{display:flex;align-items:center;gap:5px;margin-left:auto;font-size:9.5px;color:var(--done)}
+.live i{width:6px;height:6px;border-radius:50%;background:var(--done);display:block;animation:pl 1.8s infinite}
+.oldfold{display:flex;align-items:center;gap:8px;margin-top:11px;padding:8px 11px;
+  border-radius:20px;background:rgba(28,43,39,.05);font-size:11px;color:#5B6C66;cursor:pointer;
+  border:1px solid rgba(28,43,39,.1)}
+.bubble{background:#fff;border-radius:4px 14px 14px 14px;padding:11px 13px;font-size:12.5px;
+  line-height:1.68;margin-top:10px;box-shadow:0 2px 5px rgba(0,0,0,.06);white-space:pre-wrap}
+.bubble.me{background:#DDE7E3;border-radius:14px 4px 14px 14px;margin-left:36px}
+.tstamp{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink3);margin:9px 0 0;text-align:center}
+.tin{display:flex;gap:9px;margin-top:12px;align-items:center;
+  border-top:1px solid rgba(28,43,39,.13);padding-top:12px}
+.tin input{flex:1;border:0;background:transparent;font-size:13px;font-family:inherit;
+  color:var(--ink);padding:6px 2px}
+.tin input:focus{outline:0}
+.send{width:38px;height:38px;border-radius:50%;background:#3E7A9B;color:#fff;border:0;
+  font-size:14px;cursor:pointer;box-shadow:0 3px 0 #27536B,0 5px 10px rgba(0,0,0,.3);flex:0 0 38px}
+.send:active{transform:translateY(3px);box-shadow:0 0 0 #27536B}
+
+/* 새 일 시작 */
+.newjob{border:1px solid var(--line);border-radius:9px;padding:13px;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03))}
+.newjob input,.newjob textarea{width:100%;border:1px solid var(--line);border-radius:6px;
+  background:rgba(0,0,0,.18);color:var(--paper);font-family:inherit;font-size:12.5px;
+  padding:9px 10px;margin-top:7px}
+.newjob input:focus,.newjob textarea:focus{outline:0;border-color:rgba(91,147,180,.55)}
+.chans{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.chn{font-size:10.5px;padding:6px 11px;border-radius:20px;border:1px solid var(--line);
+  background:rgba(255,255,255,.04);color:#9FB5AC;cursor:pointer;user-select:none}
+.chn.on{background:rgba(91,147,180,.22);border-color:rgba(91,147,180,.55);color:#BBD7E6}
+
+.empty{font-size:11.5px;color:#6F8B82;padding:14px 2px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+  background:rgba(18,33,30,.96);border:1px solid var(--line);color:var(--paper);
+  padding:11px 18px;border-radius:22px;font-size:12px;z-index:99;
+  box-shadow:0 8px 22px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <div><div class="eb">AGENT MANAGER</div><h1>에이전트 매니저</h1></div>
+    <div class="now" id="clock"></div>
+  </div>
+  <div class="summary" id="summary"></div>
+  <div id="board"><div class="empty">불러오는 중…</div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="./photos.js"></script>
+<script>
+/* ─────────────────────────────────────────────
+   에이전트 매니저 — 백엔드에 물린 실제 화면
+   규칙: 하나만 크게, 나머지는 접는다.
+   ───────────────────────────────────────────── */
+const API = (location.hostname.endsWith("github.io"))
+  ? "https://sns-agent-backend.onrender.com"
+  : (localStorage.getItem("backendUrl") || "https://sns-agent-backend.onrender.com");
+
+const TEAM = {
+  ops:        { nm:"오세라", rl:"총괄실 · 비서",        tags:["조율","일정"] },
+  creation:   { nm:"윤소희", rl:"디1 디자인팀 · 아트",   tags:["시안","레이아웃"] },
+  strategy:   { nm:"한지우", rl:"글2 이야기팀 · 카피",   tags:["후킹","카피"] },
+  publishing: { nm:"정유진", rl:"글3 · 블로그",          tags:["SEO","장문"] },
+  analytics:  { nm:"최은지", rl:"디2 · 그래픽",          tags:["카드뉴스","도표"] },
+  scout:      { nm:"강민아", rl:"필름팀 · 영상 PD",      tags:["쇼츠","스토리보드"] },
+  monetization:{nm:"박하늘", rl:"커머스 · 그로스",       tags:["전환","가격"] },
+  advisory:   { nm:"서다은", rl:"자문 · 서기",           tags:["법무","기록"] }
+};
+const KEYS = Object.keys(TEAM);
+
+let BOARD = { live:[], done:[] };
+let OPEN  = {};           // 접힘 상태
+let TALK  = null;         // 열린 대화
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("on");
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("on"), 2600); }
+
+function tick(){
+  const d=new Date(), w="일월화수목금토"[d.getDay()];
+  $("#clock").innerHTML = `${d.getMonth()+1}월 ${d.getDate()}일 ${w}<br>`
+    + `${String(d.getHours()).padStart(2,"0")} : ${String(d.getMinutes()).padStart(2,"0")}`;
+}
+function ago(iso){
+  if(!iso) return "";
+  const m = Math.floor((Date.now()-new Date(iso).getTime())/60000);
+  if(m<1) return "방금";
+  if(m<60) return m+"분";
+  const h=Math.floor(m/60);
+  if(h<24) return h+"시간 "+(m%60)+"분";
+  return Math.floor(h/24)+"일";
+}
+/* 담당자 배정 — 채널/주제로 그럴듯하게 고정 매핑 */
+function whoOf(row){
+  const t = (row.target_channel||"") + " " + (row.topic||"");
+  if(/홈페이지|랜딩|웹/.test(t)) return "creation";
+  if(/스레드|threads/i.test(t))  return "strategy";
+  if(/블로그|카페|네이버/.test(t)) return "publishing";
+  if(/유튜브|영상|쇼츠|릴스/.test(t)) return "scout";
+  if(/상세|상품|가격/.test(t))   return "monetization";
+  if(/인스타/.test(t))           return "analytics";
+  return "ops";
+}
+function faceOf(key, cls){
+  const src = (window.PHOTOS && PHOTOS[key]) || "";
+  return `<span class="ph ${cls}">${src?`<img src="${src}" alt="">`:""}</span>`;
+}
+const STAGE_KR = { queued:"대기", research:"자료 읽는 중", director:"기준 세우는 중",
+  write:"원고 쓰는 중", critic:"검수 중", crossjudge:"판단 검증 중", adapt:"채널별 재가공",
+  cards:"카드뉴스 구성", page:"페이지 구성안", design:"디자인 방향", build:"페이지 제작",
+  threads:"스레드 체인", done:"마무리" };
+
+async function api(path, opts){
+  const r = await fetch(API+path, Object.assign({headers:{"Content-Type":"application/json"}}, opts||{}));
+  return await r.json();
+}
+async function load(){
+  try{
+    const d = await api("/api/manager/board");
+    if(d.ok){ BOARD = { live:d.live||[], done:d.done||[] }; render(); }
+    else { $("#board").innerHTML = `<div class="empty">${esc(d.error||"불러오지 못했습니다")}</div>`; }
+  }catch(e){
+    $("#board").innerHTML = `<div class="empty">서버를 깨우는 중입니다. 잠시 뒤 다시 시도해 주세요.<br>${esc(e.message)}</div>`;
+  }
+}
+
+/* ── 조각들 ── */
+function sealBig(r){
+  const k=whoOf(r), p=TEAM[k];
+  return `<div class="big-seal">
+    <div class="row">${faceOf(k,"s56")}
+      <div><div class="nm">${p.nm}</div><div class="rl">${p.rl}</div></div>
+      <span class="waitfor">${ago(r.created_at)} 대기</span></div>
+    <p class="tt">${esc(r.topic)}</p>
+    <div class="meta">결함 ${r.ai_self_score??"-"} · 수준 ${r.creativity_score??"-"}${
+      r.judgment_gap!=null?` · 교차 ${r.judgment_gap>0?"−":"+"}${Math.abs(r.judgment_gap)}`:""} · 재작성 ${r.revision_count??0}회</div>
+    <div style="display:flex;gap:9px;margin-top:12px;align-items:center;flex-wrap:wrap">
+      <button class="press p-ink" data-approve="${r.generation_id}"><span>결 재</span></button>
+      <button class="press p-plain" data-open="${r.generation_id}">내용 보기</button>
+    </div></div>`;
+}
+function sealFold(r){
+  const k=whoOf(r);
+  return `<div class="fold" data-open="${r.generation_id}">
+    ${faceOf(k,"s32")}<span class="t">${esc(r.topic)}</span>
+    <span class="w">${ago(r.created_at)}</span>
+    <button class="press p-ink sm" data-approve="${r.generation_id}"><span>결재</span></button></div>`;
+}
+function askCard(r){
+  const k=whoOf(r), p=TEAM[k];
+  const qs = Array.isArray(r.open_questions)? r.open_questions : [];
+  const q  = qs[0] || r.blocked_reason || "확인이 필요합니다";
+  return `<div class="ask">
+    <div class="row">${faceOf(k,"s44")}
+      <div><div class="nm">${p.nm}</div><div class="rl">${p.rl}</div></div>
+      <span class="waitfor" style="color:#8A6D1F">${ago(r.created_at)}</span></div>
+    <div class="say">${esc(r.topic)} 진행 중 막혔어요.<br><b>${esc(q)}</b></div>
+    <div class="ansin">
+      <input placeholder="답을 적어 주세요 · 모르면 비워두세요" data-ansfor="${r.generation_id}">
+      <button class="press p-blue" data-answer="${r.generation_id}">보내기</button>
+    </div>
+    ${qs.length>1?`<div class="rest">답하면 다음 걸 여쭐게요 · 남은 질문 ${qs.length-1}개</div>`:""}
+  </div>`;
+}
+function runRow(r){
+  const k=whoOf(r);
+  const order=["research","director","write","critic","crossjudge"];
+  const idx=Math.max(0, order.indexOf(r.stage));
+  const pips=order.map((_,i)=>`<i class="pip ${i<idx?"d":(i===idx?"c":"")}"></i>`).join("");
+  return `<div class="run">${faceOf(k,"s32")}<span class="dot"></span>
+    <span style="flex:1;font-size:11.5px;min-width:0">
+      <span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.topic)}</span>
+      <span style="font-size:9.5px;color:#8FA79E">${esc(STAGE_KR[r.stage]||r.stage||"진행 중")}</span></span>
+    <span class="pips">${pips}</span></div>`;
+}
+function failRow(r){
+  const k=whoOf(r);
+  return `<div class="fold" style="background:rgba(237,233,223,.72)" data-open="${r.generation_id}">
+    ${faceOf(k,"s32")}<span class="t">${esc(r.topic)}</span>
+    <span class="w" style="color:var(--seal)">중단</span>
+    <button class="press p-blue" style="padding:5px 10px;font-size:10.5px" data-retry="${r.generation_id}">다시</button></div>`;
+}
+
+function render(){
+  const live=BOARD.live, done=BOARD.done;
+  const seal = live.filter(r=>r.approval_status==="pending");
+  const ask  = live.filter(r=>r.approval_status==="needs_input");
+  const run  = live.filter(r=>r.approval_status==="processing");
+  const fail = live.filter(r=>r.approval_status==="failed");
+  const busy = new Set([...seal,...ask,...run].map(whoOf));
+  const free = KEYS.filter(k=>!busy.has(k));
+
+  $("#summary").innerHTML =
+    (seal.length?`<span class="chip c-seal">● 결재 ${seal.length}</span>`:"")
+  + (ask.length ?`<span class="chip c-wait">● 확인 ${ask.length}</span>`:"")
+  + (run.length ?`<span class="chip c-run">● 진행 ${run.length}</span>`:"")
+  + (done.length?`<span class="chip c-done">✓ 완료 ${done.length}</span>`:"")
+  + `<span class="chip c-idle">○ 여유 ${free.length}</span>`;
+
+  let h = "";
+
+  if(seal.length){
+    h += `<div class="sect"><b>결재</b> · ${seal.length}건 · 오래 기다린 순</div>`;
+    h += sealBig(seal[0]);
+    seal.slice(1).forEach(r=> h += sealFold(r));
+  }
+  if(ask.length){
+    h += `<div class="sect"><b>확인 요청</b> · ${ask.length}건</div>`;
+    h += askCard(ask[0]);
+    ask.slice(1).forEach(r=>{
+      const k=whoOf(r);
+      h += `<div class="fold" style="background:rgba(244,239,226,.9)" data-open="${r.generation_id}">
+        ${faceOf(k,"s32")}<span class="t">${esc((r.open_questions||[])[0]||r.topic)}</span>
+        <span class="w">${ago(r.created_at)}</span><span style="font-size:15px;color:var(--ink3)">›</span></div>`;
+    });
+  }
+  if(run.length){
+    h += `<div class="sect"><b>진행 중</b> · ${run.length}건</div>`;
+    run.forEach(r=> h += runRow(r));
+  }
+  if(fail.length){
+    h += `<div class="sect"><b>중단됨</b> · ${fail.length}건</div>`;
+    fail.forEach(r=> h += failRow(r));
+  }
+  if(done.length){
+    h += `<div class="sect"><b>끝난 일</b> · ${done.length}건</div>`;
+    const d0=done[0], k0=whoOf(d0), p0=TEAM[k0];
+    h += `<div class="donebig"><span class="stmp">완료</span>
+      <div class="row">${faceOf(k0,"s36")}
+        <div><div class="nm">${p0.nm}</div><div class="rl" style="color:#7E9A90">${p0.rl}</div></div></div>
+      <div style="font-size:12px;margin-top:9px">${esc(d0.topic)}</div>
+      <div style="font-size:9.5px;color:#7FC7A5;margin-top:4px">${ago(d0.approved_at)} 전${
+        d0.edit_distance!=null?` · 수정률 ${Math.round(d0.edit_distance*100)}%`:""}</div></div>`;
+    if(done.length>1){
+      const rest=done.slice(1);
+      h += `<div class="donestrip" data-toggle="done">
+        <span class="lbl">이전 ${rest.length}건</span>
+        <span class="dfaces">${rest.slice(0,7).map(r=>faceOf(whoOf(r),"s26")).join("")}</span>
+        <span class="morec">${OPEN.done?"접기 ▴":"펼치기 ▾"}</span></div>`;
+      if(OPEN.done){
+        rest.forEach(r=>{
+          h += `<div class="fold" style="background:rgba(46,125,91,.1);color:var(--paper);box-shadow:none;border:1px solid rgba(46,125,91,.22)">
+            ${faceOf(whoOf(r),"s26")}<span class="t" style="font-weight:400">${esc(r.topic)}</span>
+            <span class="w" style="color:#7FC7A5">${ago(r.approved_at)}</span></div>`;
+        });
+      }
+    }
+  }
+
+  /* 부를 수 있는 자리 */
+  h += `<div class="sect"><b>부를 수 있는 자리</b> · ${free.length}</div>
+    <div class="bench"><div class="hscroll">`;
+  (free.length?free:KEYS).slice(0,8).forEach(k=>{
+    const p=TEAM[k];
+    h += `<div class="pcard" data-call="${k}">
+      <div style="display:flex;gap:10px">${faceOf(k,"s60")}
+        <div><div class="nm">${p.nm}</div><div class="rl" style="color:#7E9A90">${p.rl}</div></div></div>
+      <div style="margin-top:6px">${p.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+      <button class="press p-blue" style="margin-top:9px;width:100%;padding:8px 0">부르기</button></div>`;
+  });
+  h += `</div></div>`;
+
+  /* 대화 또는 새 일 */
+  if(TALK){
+    const p=TEAM[TALK.key];
+    h += `<div class="sect"><b>대화</b> · ${p.nm}</div>
+      <div class="talk"><div class="th">${faceOf(TALK.key,"s56")}
+        <div><div class="nm" style="font-size:14px">${p.nm}</div><div class="rl">${p.rl}</div></div>
+        <span class="live"><i></i>지금 자리에</span></div>`;
+    const ms=TALK.msgs;
+    if(ms.length>4 && !OPEN.talk){
+      h += `<div class="oldfold" data-toggle="talk">▸ 이전 대화 ${ms.length-2}개</div>`;
+      ms.slice(-2).forEach(m=> h += `<div class="bubble ${m.me?"me":""}">${esc(m.t)}</div>`);
+    } else {
+      ms.forEach(m=> h += `<div class="bubble ${m.me?"me":""}">${esc(m.t)}</div>`);
+    }
+    h += `<div class="tin"><span style="font-size:15px;opacity:.35">✎</span>
+      <input id="talkin" placeholder="편하게 말씀해 주세요">
+      <button class="send press" data-say="1">▶</button></div></div>`;
+  } else {
+    h += `<div class="sect"><b>새 일 시작</b></div>
+      <div class="newjob">
+        <input id="njTopic" placeholder="무엇을 만들까요">
+        <textarea id="njRef" rows="2" placeholder="참고 URL (선택 · 한 줄에 하나)"></textarea>
+        <div class="chans" id="njChans">
+          ${["인스타그램","네이버 블로그/카페","유튜브","상품 상세페이지","스레드(Threads)","홈페이지"]
+            .map((c,i)=>`<span class="chn${i===0?" on":""}" data-chn="${c}">${c}</span>`).join("")}
+        </div>
+        <button class="press p-blue" id="njGo" style="margin-top:11px;width:100%;padding:11px 0">시작</button>
+      </div>`;
+  }
+
+  $("#board").innerHTML = h;
+}
+
+/* ── 조작 ── */
+document.addEventListener("click", async (e)=>{
+  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],#njGo,[data-chn]");
+  if(!t) return;
+
+  if(t.dataset.chn!=null){ t.classList.toggle("on"); return; }
+
+  if(t.dataset.toggle){ OPEN[t.dataset.toggle]=!OPEN[t.dataset.toggle]; render(); return; }
+
+  if(t.dataset.approve){
+    const id=t.dataset.approve;
+    t.disabled=true;
+    const d = await api("/api/content/approve",{method:"POST",body:JSON.stringify({generation_id:id,action:"approve"})});
+    if(d.ok){ toast("결재했습니다"); await load(); } else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.dataset.answer){
+    const id=t.dataset.answer;
+    const inp=document.querySelector(`[data-ansfor="${id}"]`);
+    const v=(inp&&inp.value||"").trim();
+    if(!v){ toast("답을 적어 주세요"); return; }
+    t.disabled=true;
+    const d = await api("/api/pipeline/answer",{method:"POST",body:JSON.stringify({generation_id:id,answers:[v]})});
+    if(d.ok){ toast("답변을 반영해 다시 만듭니다"); await load(); } else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.dataset.call){
+    const k=t.dataset.call, p=TEAM[k];
+    const recent = BOARD.done[0];
+    TALK = { key:k, msgs:[{ t:`네, 부르셨네요.\n${recent?`방금 「${recent.topic}」이 끝났던데 — 이어서 뭘 해볼까요?`:"무엇을 도와드릴까요?"}` }] };
+    render();
+    window.scrollTo({top:document.body.scrollHeight, behavior:"smooth"});
+    return;
+  }
+  if(t.dataset.say){
+    const inp=$("#talkin"); const v=(inp&&inp.value||"").trim();
+    if(!v) return;
+    TALK.msgs.push({me:true, t:v}); inp.value=""; render();
+    try{
+      const d = await api("/api/instruct",{method:"POST",body:JSON.stringify({
+        instruction: v, depts:[TALK.key], via:"manager" })});
+      TALK.msgs.push({ t: d && d.status==="running"
+        ? "알겠습니다. 바로 시작할게요 — 진행 상황은 위에 표시됩니다."
+        : "받았습니다." });
+    }catch(err){ TALK.msgs.push({ t:"연결이 잠시 끊겼어요. 다시 말씀해 주세요." }); }
+    render(); load();
+    return;
+  }
+  if(t.dataset.retry){ toast("다시 시작하려면 아래 '새 일 시작'을 이용해 주세요"); return; }
+
+  if(t.id==="njGo"){
+    const topic=$("#njTopic").value.trim();
+    if(!topic){ toast("무엇을 만들지 적어 주세요"); return; }
+    const chans=[...document.querySelectorAll("#njChans .chn.on")].map(x=>x.dataset.chn);
+    if(!chans.length){ toast("만들 것을 하나 이상 고르세요"); return; }
+    const refs=$("#njRef").value.split("\n").map(s=>s.trim()).filter(s=>/^https?:\/\//.test(s)).slice(0,3);
+    t.disabled=true; toast("시작합니다…");
+    const d = await api("/api/pipeline/run",{method:"POST",
+      body:JSON.stringify({topic, channels:chans, refUrls:refs})});
+    if(d.ok){ $("#njTopic").value=""; $("#njRef").value=""; toast("작업이 시작되었습니다"); await load(); }
+    else { toast(d.error||"실패"); }
+    t.disabled=false;
+    return;
+  }
+});
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="Enter" && e.target && e.target.id==="talkin"){
+    const b=document.querySelector("[data-say]"); if(b) b.click();
+  }
+});
+
+tick(); setInterval(tick, 20000);
+load();
+/* 진행 중인 일이 있을 때만 갱신 — 없으면 화면이 조용하다 */
+setInterval(()=>{
+  const running = BOARD.live.some(r=>r.approval_status==="processing");
+  const typing = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)
+                 && document.activeElement.value;
+  if(running && !typing) load();
+}, 20000);
+</script>
+</body>
+</html>
