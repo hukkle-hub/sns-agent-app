@@ -864,7 +864,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v256</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v258</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -6650,10 +6650,10 @@ function bindOffice(){
 /* v255: 홈·디자인·쇼츠 제거, 부서는 작업 현황만.
    제거한 뷰(console/design/shorts/project/meeting)의 코드는 지우지 않고 남겨둔다.
    되돌리려면 아래 두 줄만 원복하면 된다. */
-var VIEW_GROUP={content:"make",learn:"grow",record:"grow",cycle:"grow",results:"grow",analytics:"grow",office:"dept",project:"dept",meeting:"dept",settings:"settings"};
-var GROUP_VIEWS={make:["content"],grow:["cycle","learn","record"],dept:["office"],settings:["settings"]};
-var GROUP_DEFAULT={make:"content",grow:"cycle",dept:"office",settings:"settings"};
-var SUBVIEW_LABEL={console:"홈",content:"콘텐츠",design:"🎨 디자인",shorts:"🎬 쇼츠",cycle:"🔄 선순환",learn:"학습",record:"기록·분석",office:"오피스",project:"프로젝트",settings:"설정"};
+var VIEW_GROUP={console:"make",content:"make",learn:"grow",record:"grow",cycle:"grow",results:"grow",analytics:"grow",office:"dept",project:"dept",meeting:"dept",settings:"settings"};
+var GROUP_VIEWS={make:["console","content"],grow:["cycle","learn","record"],dept:["office"],settings:["settings"]};
+var GROUP_DEFAULT={make:"console",grow:"cycle",dept:"office",settings:"settings"};
+var SUBVIEW_LABEL={console:"💬 대화",content:"✍️ 콘텐츠",design:"🎨 디자인",shorts:"🎬 쇼츠",cycle:"🔄 선순환",learn:"학습",record:"기록·분석",office:"오피스",project:"프로젝트",settings:"설정"};
 function curGroup(){ return VIEW_GROUP[STATE.view]||"make"; }
 function syncNav(){
   var g=curGroup();
@@ -6859,7 +6859,7 @@ function render(){
     var _vsc = viewEl ? viewEl.scrollTop : 0;
     var _same = render._v === STATE.view;
     // v255: 없어진 탭이 저장돼 있으면 콘텐츠로 보낸다
-    if(STATE.view==="mobile"||STATE.view==="console"||STATE.view==="design"||STATE.view==="shorts") STATE.view="content";
+    if(STATE.view==="mobile"||STATE.view==="design"||STATE.view==="shorts") STATE.view="content";
     if(STATE.view==="project"||STATE.view==="meeting") STATE.view="office";
     if(STATE.view==="analytics") STATE.view="record";
     if(STATE.view==="console") renderConsole();
@@ -7111,9 +7111,9 @@ function replyChipHtml(){
   return '<div class="replychip">↪ <b style="color:'+a.c+'">'+escapeHtml(nm)+'</b>('+a.kr+') 답변에 이어서 대화 중'+(rt.snippet?'<span class="rc-snip">“'+escapeHtml(rt.snippet)+'”</span>':'')+'<button class="rc-x" id="replyChipX">✕</button></div>';
 }
 function renderConsole(){
-  viewEl.innerHTML = '<div class="c-wrap"><div class="c-hd"><div class="c-logo">팀 에이전트</div></div>'
+  viewEl.innerHTML = '<div class="c-wrap"><div class="c-hd"><div class="c-logo">팀 에이전트</div><div style="font-size:11px;color:#8b93a3;margin-top:2px">링크를 붙여넣고 대화하듯 지시하세요</div></div>'
     +'<div class="c-log" id="logScroll">'+consoleMessages()+'</div>'
-    +'<div class="composer"><div id="attachBar" class="attbar" style="display:none"></div>'+replyChipHtml()+'<div class="inrow"><button class="attbtn" id="attBtn" title="사진·영상 첨부">📎</button><textarea id="inp" rows="1" placeholder="부서에 지시를 입력하세요…"></textarea><button class="send" id="snd">▶</button></div><input type="file" id="attInput" accept="image/*,video/*" multiple style="display:none"></div></div>';
+    +'<div class="composer"><div id="attachBar" class="attbar" style="display:none"></div>'+replyChipHtml()+'<div class="inrow"><button class="attbtn" id="attBtn" title="사진·영상 첨부">📎</button><textarea id="inp" rows="1" placeholder="지시를 입력하거나 유튜브·웹 링크를 붙여넣으세요…"></textarea><button class="send" id="snd">▶</button></div><input type="file" id="attInput" accept="image/*,video/*" multiple style="display:none"></div></div>';
   scrollLog(); bindPublish();
 }
 function renderMobile(){
