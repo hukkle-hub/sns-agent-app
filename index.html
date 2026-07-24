@@ -864,7 +864,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v255</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v256</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -2892,10 +2892,25 @@ function renderOfficeSimple(){
      + '<button id="offRefresh" style="margin-left:auto;font-size:12px;padding:6px 10px;'
      + 'border:1px solid #dfe4ec;background:#fff;border-radius:8px;cursor:pointer">새로고침</button></div>';
 
+  // 팀별로 묶어서 보여준다
+  var teams = [];
   people.forEach(function(p){
+    var tn = (p.team && p.team.name) || "기타";
+    var t = teams.filter(function(x){ return x.name === tn; })[0];
+    if(!t){ t = { name:tn, color:(p.team && p.team.color) || "#9aa3b3", members:[] }; teams.push(t); }
+    t.members.push(p);
+  });
+
+  teams.forEach(function(tm){
+  h += '<div style="display:flex;align-items:center;gap:7px;margin:14px 4px 7px">'
+     + '<span style="font-size:12px;font-weight:700;color:'+tm.color+'">'+esc(tm.name)+'</span>'
+     + '<span style="flex:1;height:1px;background:#eef1f5"></span></div>';
+  tm.members.forEach(function(p){
     var id = p.key;
     var a = AGENTS[id] || {};
     var name = p.n || a.kr || id;
+    var role = p.r || "";
+    var photo = (typeof DEPT_PHOTOS !== "undefined" && DEPT_PHOTOS[id]) ? DEPT_PHOTOS[id] : "";
     var color = p.c || a.c || "#9aa3b3";
     var busy = deptBusy(id);
     var dir = (STATE.deptDirective && STATE.deptDirective[id]) ? String(STATE.deptDirective[id]).trim() : "";
@@ -2910,14 +2925,32 @@ function renderOfficeSimple(){
 
     h += '<div class="offrow" data-id="'+id+'" style="border:1px solid #e6eaf1;border-radius:12px;'
        + 'margin-bottom:8px;background:#fff;overflow:hidden">';
-    h += '<div class="offhead" data-id="'+id+'" style="display:flex;align-items:center;gap:9px;'
-       + 'padding:12px 12px;cursor:pointer">'
-       + '<span style="width:9px;height:9px;border-radius:50%;background:'+dot+';flex-shrink:0"></span>'
-       + '<span style="font-size:13px;font-weight:700;color:'+color+';flex-shrink:0">'+esc(name)+'</span>'
-       + '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'
-       + 'font-size:13px;color:'+(dir?"#1c2433":"#8b93a3")+'">'+esc(head)+'</span>'
-       + '<span style="font-size:11px;color:#a7aebc;flex-shrink:0">'+_offAgo(lastAt)+'</span>'
-       + '<span style="font-size:11px;color:#a7aebc;flex-shrink:0">'+(open?"▲":"▼")+'</span>'
+    var avatar = photo
+      ? '<img src="'+photo+'" alt="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;'
+        + 'flex-shrink:0;border:2px solid '+color+'">'
+      : '<span style="width:38px;height:38px;border-radius:50%;flex-shrink:0;background:'+color+';'
+        + 'color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;'
+        + 'font-weight:700">'+esc(String(p.no||name).slice(0,2))+'</span>';
+
+    h += '<div class="offhead" data-id="'+id+'" style="display:flex;align-items:center;gap:10px;'
+       + 'padding:11px 12px;cursor:pointer">'
+       + '<span style="position:relative;flex-shrink:0;line-height:0">' + avatar
+       + '<span style="position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;'
+       + 'background:'+dot+';border:2px solid #fff"></span></span>'
+       + '<span style="flex:1;min-width:0">'
+       +   '<span style="display:flex;align-items:baseline;gap:6px">'
+       +     '<b style="font-size:13px;color:'+color+'">'+esc(name)+'</b>'
+       +     '<span style="font-size:11px;color:#9aa3b3;overflow:hidden;text-overflow:ellipsis;'
+       +     'white-space:nowrap">'+esc(role)+'</span>'
+       +   '</span>'
+       +   '<span style="display:block;font-size:12.5px;margin-top:2px;overflow:hidden;'
+       +   'text-overflow:ellipsis;white-space:nowrap;color:'+(dir?"#1c2433":"#8b93a3")+'">'
+       +   esc(head)+'</span>'
+       + '</span>'
+       + '<span style="flex-shrink:0;text-align:right">'
+       +   '<span style="display:block;font-size:10.5px;color:#a7aebc">'+_offAgo(lastAt)+'</span>'
+       +   '<span style="display:block;font-size:10px;color:#c2c8d4">'+(open?"▲":"▼")+'</span>'
+       + '</span>'
        + '</div>';
 
     if(open){
@@ -2942,6 +2975,7 @@ function renderOfficeSimple(){
       h += '</div>';
     }
     h += '</div>';
+  });
   });
 
   h += '</div>';
