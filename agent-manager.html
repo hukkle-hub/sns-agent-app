@@ -360,11 +360,18 @@ function runRow(r){
 }
 function failRow(r){
   const k=whoOf(r);
-  return `<div class="fold" style="background:rgba(237,233,223,.72)" data-open="${r.generation_id}">
-    ${faceOf(k,"s32")}<span class="t">${esc(r.topic)}</span>
-    <span class="w" style="color:var(--seal)">중단</span>
-    <button class="press p-blue" style="padding:5px 10px;font-size:10.5px" data-retry="${r.generation_id}">다시</button></div>`;
+  const why = String(r.blocked_reason||"").replace(/\s+/g," ").trim();
+  return `<div class="slip" style="background:rgba(237,233,223,.86);padding:12px">
+    <div style="display:flex;align-items:center;gap:9px">
+      ${faceOf(k,"s32")}
+      <span style="font-size:12.5px;font-weight:600;flex:1">${esc(r.topic)}</span>
+      <span style="font-size:10px;color:var(--seal)">중단</span>
+      <button class="press p-blue" style="padding:6px 13px;font-size:11px"
+        data-retry="${r.generation_id}">다시</button></div>
+    ${why?`<div style="font-size:10.5px;color:#6B7A74;line-height:1.6;margin-top:8px">${esc(why.slice(0,160))}</div>`:""}
+  </div>`;
 }
+
 
 function render(){
   const live=BOARD.live, done=BOARD.done;
@@ -536,7 +543,14 @@ document.addEventListener("click", async (e)=>{
     load();
     return;
   }
-  if(t.dataset.retry){ toast("다시 시작하려면 아래 '새 일 시작'을 이용해 주세요"); return; }
+  if(t.dataset.retry){
+    t.disabled=true; toast("다시 시작합니다…");
+    const d = await api("/api/pipeline/retry",{method:"POST",
+      body:JSON.stringify({generation_id:t.dataset.retry})});
+    if(d.ok){ toast("다시 돌리는 중입니다"); await load(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
 
   if(t.id==="njGo"){
     const topic=$("#njTopic").value.trim();
