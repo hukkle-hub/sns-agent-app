@@ -864,7 +864,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v270</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v272</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -7022,16 +7022,15 @@ function pubControls(m){
 var CONSOLE_RECENT = 12;
 
 function stampMessages(){
-  var changed = false;
+  /* v271: 여기서 saveState() 를 부르면 매 렌더마다 상태 전체가 직렬화된다.
+     타이핑 중 렌더가 잦아 버벅임의 원인이 됐다.
+     날짜 도장은 메모리에만 찍고, 저장은 원래 저장 시점에 함께 나간다. */
   if(!STATE._tsMigrated){
-    // 최초 1회: 기존 메시지는 날짜를 알 수 없으므로 null 로 표시
-    STATE.messages.forEach(function(m){ if(m.ts===undefined){ m.ts=null; changed=true; } });
-    STATE._tsMigrated = true; changed = true;
+    STATE.messages.forEach(function(m){ if(m.ts===undefined) m.ts=null; });
+    STATE._tsMigrated = true;
   } else {
-    // 이후 새로 들어온 메시지에만 날짜를 찍는다
-    STATE.messages.forEach(function(m){ if(m.ts===undefined){ m.ts=Date.now(); changed=true; } });
+    STATE.messages.forEach(function(m){ if(m.ts===undefined) m.ts=Date.now(); });
   }
-  if(changed) saveState();
 }
 
 function dayKey(ts){
@@ -10105,14 +10104,35 @@ async function loadAndApplyPatches(){
 })();
 if("serviceWorker" in navigator){
   // 새 버전 활성화되면 자동 새로고침(캐시 갇힘 근본 차단) — 단, 무한 새로고침 방지 가드
+  /* v271: 가드가 일반 변수라 새로고침되면 같이 초기화됐다.
+     그래서 SW 가 다시 알림을 보내면 또 새로고침되는 반복이 생긴다.
+     캐시 이름별로 세션에 기록해 '이 버전은 이미 새로고침했다'를 기억한다.
+     또한 입력 중일 때는 새로고침을 미룬다 — 쓰던 글이 날아가면 안 된다. */
   var _swReloaded = false;
+  function _swAlreadyReloaded(cache){
+    try{ return sessionStorage.getItem("sw_reloaded") === String(cache||"1"); }catch(_){ return false; }
+  }
+  function _swMarkReloaded(cache){
+    try{ sessionStorage.setItem("sw_reloaded", String(cache||"1")); }catch(_){}
+  }
   navigator.serviceWorker.addEventListener("message", function(ev){
-    if(ev.data && ev.data.type==="SW_UPDATED" && !_swReloaded){
-      _swReloaded = true;
-      // 사용자가 입력 중일 수 있으니, 데이터 저장 후 새로고침
-      try{ if(typeof saveState==="function") saveState(); }catch(_){}
-      setTimeout(function(){ location.reload(); }, 300);
+    if(!(ev.data && ev.data.type==="SW_UPDATED")) return;
+    if(_swReloaded || _swAlreadyReloaded(ev.data.cache)) return;
+    _swReloaded = true;
+    _swMarkReloaded(ev.data.cache);
+
+    // 입력 중이거나 작업 중이면 새로고침하지 않는다 (쓰던 내용 보호)
+    var typing = false;
+    try{
+      var el = document.activeElement;
+      typing = !!(el && (el.tagName==="TEXTAREA" || el.tagName==="INPUT") && String(el.value||"").trim());
+    }catch(_){}
+    if(typing || STATE.busy){
+      try{ if(typeof toast==="function") toast("새 버전이 준비됐어요. 작업을 마치면 새로고침해 주세요."); }catch(_){}
+      return;
     }
+    try{ if(typeof saveState==="function") saveState(); }catch(_){}
+    setTimeout(function(){ location.reload(); }, 300);
   });
   // 새 SW로 제어가 바뀌면(첫 설치 제외) 새로고침
   var _hadController = !!navigator.serviceWorker.controller;
