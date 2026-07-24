@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>설정 · 에이전트 매니저</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#12211E; --paper:#EDE9DF; --paper3:#F4EFE2;
+  --ink:#1C2B27; --ink3:#6B7A74;
+  --seal:#B23A32; --done:#2E7D5B; --wait:#C9A227; --idle:#5B93B4;
+  --line:rgba(255,255,255,.13);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;padding:0 0 60px;
+  background:radial-gradient(1100px 460px at 50% -8%,#1A2E29 0%,transparent 62%),var(--desk);
+  color:var(--paper);font-family:'IBM Plex Sans KR',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:0 13px}
+
+.hd{padding:20px 0 13px;display:flex;align-items:flex-end;gap:12px}
+.hd .eb{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:#7E9A90}
+.hd h1{font-family:'Gowun Batang',serif;font-size:23px;margin:5px 0 0}
+.back{margin-left:auto;text-decoration:none;color:#A9C0B7;font-size:11.5px;
+  border:1px solid var(--line);border-radius:5px;padding:7px 12px}
+.back:active{background:rgba(255,255,255,.06)}
+
+/* 서랍 */
+.drawer{border:1px solid var(--line);border-radius:11px;margin-bottom:10px;
+  background:rgba(255,255,255,.028);overflow:hidden}
+.dh{display:flex;align-items:center;gap:10px;padding:15px 14px;cursor:pointer}
+.dh .ic{font-size:15px}
+.dh .tt{font-size:13.5px;font-weight:600}
+.dh .sub{font-size:10.5px;color:#7E9A90;margin-top:2px}
+.dh .cnt{margin-left:auto;font-size:10.5px;color:#9FCBE4;
+  background:rgba(91,147,180,.16);border-radius:20px;padding:4px 10px}
+.dh .cnt.hot{color:#E39189;background:rgba(178,58,50,.18)}
+.db{padding:0 14px 16px;display:none}
+.drawer.on .db{display:block}
+.drawer.on{background:rgba(255,255,255,.05)}
+
+/* 전표 */
+.slip{background:var(--paper3);color:var(--ink);border-radius:8px;padding:13px;margin-bottom:9px;
+  box-shadow:0 3px 0 rgba(0,0,0,.28),0 8px 18px rgba(0,0,0,.28)}
+.slip .mt{font-size:10px;color:var(--ink3);display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.slip .bd{font-size:12.5px;line-height:1.65;margin-top:8px;white-space:pre-wrap;word-break:break-word}
+.slip .acts{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+.tagx{background:rgba(28,43,39,.08);border-radius:20px;padding:3px 9px;font-size:9.5px}
+
+textarea,input[type=text],input[type=time],select{
+  width:100%;font-family:inherit;font-size:12.5px;color:var(--ink);
+  background:#fff;border:1px solid rgba(28,43,39,.22);border-radius:6px;padding:10px 11px;
+  line-height:1.6;resize:vertical}
+textarea:focus,input:focus,select:focus{outline:2px solid rgba(62,122,155,.45);outline-offset:0}
+label.fl{display:block;font-size:10.5px;color:#7E9A90;margin:12px 0 5px}
+
+.press{font-family:inherit;font-weight:600;cursor:pointer;border:0;
+  transition:transform .06s ease, box-shadow .06s ease}
+.p-ink{position:relative;background:transparent;color:#B23A32;border-radius:5px;
+  padding:9px 16px;font-size:12px;border:1.6px solid rgba(178,58,50,.6);overflow:hidden}
+.p-ink:before{content:"";position:absolute;inset:0;background:var(--seal);
+  transform:scale(.2);opacity:0;border-radius:50%;transition:transform .2s ease,opacity .2s ease}
+.p-ink:active{color:#fff;border-color:var(--seal)}
+.p-ink:active:before{transform:scale(1.7);opacity:1}
+.p-ink span{position:relative}
+.p-blue{background:#3E7A9B;color:#fff;border-radius:5px;padding:9px 15px;font-size:11.5px;
+  box-shadow:0 3px 0 #27536B,0 5px 10px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.25)}
+.p-blue:active{transform:translateY(3px);box-shadow:0 0 0 #27536B}
+.p-plain{background:transparent;color:#5B6C66;border:1px solid rgba(28,43,39,.2);
+  border-radius:5px;padding:8px 13px;font-size:11.5px}
+.p-ghost{background:transparent;color:#8FA8A0;border:1px solid var(--line);
+  border-radius:5px;padding:8px 13px;font-size:11.5px}
+
+.chn{display:inline-block;font-size:11px;padding:6px 11px;border-radius:20px;margin:0 5px 5px 0;
+  border:1px solid var(--line);color:#A9C0B7;cursor:pointer}
+.chn.on{background:#3E7A9B;color:#fff;border-color:#3E7A9B}
+
+.ph{border-radius:6px;overflow:hidden;flex:0 0 auto;display:block;width:30px;height:30px;
+  border:1.5px solid rgba(255,255,255,.7);background:#2A3A35}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .ini{display:flex;width:100%;height:100%;align-items:center;justify-content:center;
+  font-weight:700;color:#CFE3DA;font-size:11px}
+
+.empty{color:#6F8B82;font-size:11.5px;padding:16px 2px;text-align:center;line-height:1.7}
+.note{font-size:10.5px;color:#7E9A90;line-height:1.7;margin-top:10px}
+.row{display:flex;gap:8px;align-items:center}
+.grow{flex:1}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+  background:#EDE9DF;color:#1C2B27;font-size:12px;padding:10px 17px;border-radius:7px;
+  box-shadow:0 8px 22px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
+.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <div><div class="eb">SETTINGS</div><h1>설정</h1></div>
+    <a class="back" href="./agent-manager.html">← 매니저</a>
+  </div>
+
+  <div class="drawer" data-d="learn">
+    <div class="dh"><span class="ic">🧠</span>
+      <div><div class="tt">학습 검토</div><div class="sub">부서가 배운 것을 사람이 승인해야 지식이 된다</div></div>
+      <span class="cnt" id="c-learn">…</span></div>
+    <div class="db" id="b-learn"></div>
+  </div>
+
+  <div class="drawer" data-d="brand">
+    <div class="dh"><span class="ic">🎙️</span>
+      <div><div class="tt">브랜드 보이스</div><div class="sub">모든 글이 따르는 말투·태도</div></div>
+      <span class="cnt" id="c-brand">…</span></div>
+    <div class="db" id="b-brand"></div>
+  </div>
+
+  <div class="drawer" data-d="rules">
+    <div class="dh"><span class="ic">📚</span>
+      <div><div class="tt">규칙</div><div class="sub">두 번 틀리지 않게 못 박아 둔 것</div></div>
+      <span class="cnt" id="c-rules">…</span></div>
+    <div class="db" id="b-rules"></div>
+  </div>
+
+  <div class="drawer" data-d="sched">
+    <div class="dh"><span class="ic">🗓️</span>
+      <div><div class="tt">발행 예약</div><div class="sub">정해둔 시각에 스스로 내보낸다</div></div>
+      <span class="cnt" id="c-sched">…</span></div>
+    <div class="db" id="b-sched"></div>
+  </div>
+
+  <div class="note">아직 여기 없는 것 — 대결 평가 · 홈페이지 스튜디오 · 외부 서비스 등록.<br>
+    관제탑(Streamlit)에서 계속 쓰면 되고, 다음 차례로 옮긴다.</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="./photos.js"></script>
+<script>
+const API = (location.hostname.endsWith("github.io"))
+  ? "https://sns-agent-backend.onrender.com"
+  : (localStorage.getItem("backendUrl") || "https://sns-agent-backend.onrender.com");
+
+const TEAM = {
+  ops:"오세라", creation:"이서연", strategy:"한지우", advisory:"정유진",
+  publishing:"임채원", scout:"서다은", editing:"노아라",
+  monetization:"윤소희", analytics:"강민서", graphic:"오하늘"
+};
+const PLATFORMS = ["유튜브","인스타그램","페이스북","블로그","홈페이지","티스토리","네이버블로그","네이버카페","다음카페"];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("on");
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("on"), 2600); }
+
+async function api(path, opts){
+  let r;
+  try{ r = await fetch(API+path, Object.assign({headers:{"Content-Type":"application/json"}}, opts||{})); }
+  catch(e){ return { ok:false, error:"서버에 닿지 못했습니다 — "+(e.message||"연결 실패") }; }
+  let d=null; try{ d = await r.json(); }catch(e){ d=null; }
+  if(!r.ok) return { ok:false, status:r.status, error:(d&&d.error)||("서버 오류 "+r.status) };
+  if(d==null) return { ok:false, error:"빈 응답" };
+  if(Array.isArray(d)) return { ok:true, list:d };
+  if(d.ok===undefined) d.ok = true;
+  return d;
+}
+function face(key){
+  const P = (typeof PHOTOS!=="undefined" && PHOTOS) || window.PHOTOS || {};
+  const src = P[key]||"", nm = TEAM[key]||"";
+  return `<span class="ph">${src?`<img src="${src}" alt="">`
+    :`<b class="ini">${esc(nm.slice(1,2)||"·")}</b>`}</span>`;
+}
+function ago(t){
+  if(!t) return "";
+  const ms = Date.now()-new Date(t).getTime(), m=Math.floor(ms/60000);
+  if(m<1) return "방금"; if(m<60) return m+"분 전";
+  const h=Math.floor(m/60); if(h<24) return h+"시간 전";
+  return Math.floor(h/24)+"일 전";
+}
+
+/* ───────── 학습 검토 ───────── */
+let LEARN=[];
+async function loadLearn(){
+  $("#b-learn").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  const d = await api("/api/learning/pending?status=pending&limit=30");
+  if(!d.ok){ $("#b-learn").innerHTML = `<div class="empty">${esc(d.error)}</div>`; $("#c-learn").textContent="—"; return; }
+  LEARN = d.rows||[];
+  $("#c-learn").textContent = LEARN.length ? LEARN.length+"건" : "없음";
+  $("#c-learn").className = "cnt" + (LEARN.length?" hot":"");
+  if(!LEARN.length){ $("#b-learn").innerHTML = `<div class="empty">검토할 것이 없습니다.<br>부서가 새로 배우면 여기로 올라옵니다.</div>`; return; }
+  $("#b-learn").innerHTML = LEARN.map(r=>{
+    const k = r.dept||"ops";
+    return `<div class="slip">
+      <div class="mt">${face(k)}<b style="font-size:11.5px">${esc(TEAM[k]||r.dept_name||r.dept||"")}</b>
+        ${r.source?`<span class="tagx">${esc(r.source)}</span>`:""}
+        <span style="margin-left:auto">${ago(r.created_at)}</span></div>
+      ${r.trigger?`<div class="mt" style="margin-top:7px">계기 · ${esc(String(r.trigger).slice(0,120))}</div>`:""}
+      <textarea rows="4" data-lrn="${esc(r.review_id)}">${esc(r.human_edited||r.ai_learned||"")}</textarea>
+      <div class="acts">
+        <button class="press p-ink" data-lok="${esc(r.review_id)}"><span>이대로 배우게</span></button>
+        <button class="press p-plain" data-lno="${esc(r.review_id)}">버리기</button>
+      </div></div>`;
+  }).join("");
+}
+
+/* ───────── 브랜드 보이스 ───────── */
+async function loadBrand(){
+  $("#b-brand").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  const d = await api("/api/brand");
+  if(!d.ok){ $("#b-brand").innerHTML = `<div class="empty">${esc(d.error)}</div>`; return; }
+  const txt = d.text||"";
+  $("#c-brand").textContent = txt ? "정해짐" : "비어 있음";
+  $("#c-brand").className = "cnt" + (txt?"":" hot");
+  $("#b-brand").innerHTML = `<div class="slip">
+    <div class="mt">${d.at?`마지막 수정 ${ago(d.at)}`:"아직 적힌 것이 없습니다"}</div>
+    <textarea id="brandtx" rows="10" placeholder="우리는 이렇게 말한다 — 어투, 자주 쓰는 말, 절대 쓰지 않는 말, 손님을 부르는 방식…">${esc(txt)}</textarea>
+    <div class="acts"><button class="press p-blue" id="brandsave">저장</button></div>
+  </div>
+  <div class="note">여기 적힌 말투가 모든 부서의 글에 먼저 들어갑니다. 짧고 단호할수록 잘 지켜집니다.</div>`;
+}
+
+/* ───────── 규칙 ───────── */
+async function loadRules(){
+  $("#b-rules").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  const d = await api("/api/lessons?limit=200");
+  if(!d.ok){ $("#b-rules").innerHTML = `<div class="empty">${esc(d.error)}</div>`; return; }
+  const rows = d.lessons||[];
+  $("#c-rules").textContent = rows.length+"개";
+  $("#c-rules").className = "cnt";
+  const add = `<div class="slip">
+    <label class="fl" style="color:var(--ink3)">새 규칙</label>
+    <input type="text" id="rulein" placeholder="예: 가격은 반드시 100g 기준으로 함께 적는다">
+    <div class="acts"><button class="press p-blue" id="ruleadd">못 박기</button></div>
+    <div class="mt" style="margin-top:9px">한 번에 들어가는 규칙은 최대 ${d.injectMax||"—"}개 · 전체 ${d.total||rows.length}개</div>
+  </div>`;
+  const list = rows.length ? rows.map(x=>`<div class="slip">
+    <div class="mt">${x.pinned?`<span class="tagx" style="background:rgba(178,58,50,.14);color:#B23A32">고정</span>`:""}
+      ${x.source?`<span class="tagx">${esc(x.source)}</span>`:""}
+      ${x.applied?`<span class="tagx">쓰인 ${x.applied}회${x.avg!=null?` · 평균 ${x.avg}점`:""}</span>`:""}
+      <span style="margin-left:auto">${x.at?ago(x.at):""}</span></div>
+    <div class="bd">${esc(x.guide||x.text)}</div>
+    <div class="acts">
+      <button class="press p-plain" data-rpin="${esc(x.id)}">${x.pinned?"고정 풀기":"고정"}</button>
+      <button class="press p-plain" data-rdel="${esc(x.id)}">지우기</button>
+    </div></div>`).join("") : `<div class="empty">아직 못 박은 규칙이 없습니다.</div>`;
+  $("#b-rules").innerHTML = add + list;
+}
+
+/* ───────── 발행 예약 ───────── */
+async function loadSched(){
+  $("#b-sched").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  const d = await api("/api/publish-schedules");
+  if(!d.ok){ $("#b-sched").innerHTML = `<div class="empty">${esc(d.error)}</div>`; return; }
+  const rows = d.list||[];
+  const live = rows.filter(x=>!x.disabled).length;
+  $("#c-sched").textContent = rows.length ? `${live}/${rows.length} 켜짐` : "없음";
+  $("#c-sched").className = "cnt";
+  const form = `<div class="slip">
+    <label class="fl" style="color:var(--ink3)">시각</label>
+    <input type="time" id="stime" value="09:00">
+    <label class="fl" style="color:var(--ink3)">내보낼 곳</label>
+    <div id="splat">${PLATFORMS.map(p=>`<span class="chn" data-p="${p}" style="border-color:rgba(28,43,39,.2);color:#5B6C66">${p}</span>`).join("")}</div>
+    <label class="fl" style="color:var(--ink3)">주제 (AI가 그때그때 새로 씀)</label>
+    <input type="text" id="stopic" placeholder="예: 고흥 유자청 겨울 선물세트">
+    <label class="fl" style="color:var(--ink3)">또는 정해진 문구를 그대로</label>
+    <textarea id="scap" rows="3" placeholder="비워두면 AI가 씁니다"></textarea>
+    <div class="acts">
+      <button class="press p-blue" id="sadd">예약 걸기</button>
+      <span style="font-size:10.5px;color:var(--ink3);align-self:center">매일 반복</span>
+    </div></div>`;
+  const list = rows.length ? rows.map(x=>`<div class="slip" style="${x.disabled?"opacity:.55":""}">
+    <div class="mt"><b style="font-family:'IBM Plex Mono',monospace;font-size:13px">${esc(x.time)}</b>
+      <span class="tagx">${x.repeat==="once"?"한 번":"매일"}</span>
+      ${x.autoGen?`<span class="tagx">AI 자동</span>`:""}
+      <span style="margin-left:auto">${x.disabled?"멈춤":"켜짐"}</span></div>
+    <div class="bd">${esc(x.topic||x.caption||"")}</div>
+    <div class="mt" style="margin-top:7px">${(x.platforms||[]).map(p=>`<span class="tagx">${esc(p)}</span>`).join(" ")}</div>
+    <div class="acts">
+      <button class="press p-plain" data-stog="${esc(x.id)}">${x.disabled?"다시 켜기":"멈추기"}</button>
+      <button class="press p-plain" data-sdel="${esc(x.id)}">지우기</button>
+    </div></div>`).join("") : `<div class="empty">걸어둔 예약이 없습니다.</div>`;
+  $("#b-sched").innerHTML = form + list;
+}
+
+const LOADER = { learn:loadLearn, brand:loadBrand, rules:loadRules, sched:loadSched };
+
+/* ───────── 손짓 ───────── */
+document.addEventListener("click", async (e)=>{
+  const head = e.target.closest(".dh");
+  if(head){
+    const dr = head.parentElement, was = dr.classList.contains("on");
+    document.querySelectorAll(".drawer").forEach(x=>x.classList.remove("on"));
+    if(!was){ dr.classList.add("on"); LOADER[dr.dataset.d](); }
+    return;
+  }
+  const t = e.target.closest("button,[data-p]");
+  if(!t) return;
+
+  if(t.dataset.p!=null){ t.classList.toggle("on"); return; }
+
+  if(t.dataset.lok || t.dataset.lno){
+    const id = t.dataset.lok || t.dataset.lno;
+    const ta = document.querySelector(`[data-lrn="${id}"]`);
+    t.disabled = true;
+    const d = await api("/api/learning/review",{method:"POST",body:JSON.stringify({
+      review_id:id, action:(t.dataset.lok?"approve":"reject"), edited:(ta&&ta.value||"").trim() })});
+    if(d.ok){ toast(t.dataset.lok?"부서 지식이 되었습니다":"버렸습니다"); loadLearn(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.id==="brandsave"){
+    const v = ($("#brandtx").value||"").trim();
+    t.disabled=true;
+    const d = await api("/api/brand",{method:"POST",body:JSON.stringify({text:v})});
+    toast(d.ok?"저장했습니다":(d.error||"실패")); t.disabled=false;
+    if(d.ok) loadBrand();
+    return;
+  }
+  if(t.id==="ruleadd"){
+    const v = ($("#rulein").value||"").trim();
+    if(!v){ toast("규칙을 적어 주세요"); return; }
+    t.disabled=true;
+    const d = await api("/api/lessons",{method:"POST",body:JSON.stringify({text:v})});
+    if(d.ok){ toast("못 박았습니다"); loadRules(); } else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.dataset.rpin){
+    const d = await api("/api/lessons/pin",{method:"POST",body:JSON.stringify({id:t.dataset.rpin})});
+    if(d.ok) loadRules(); else toast(d.error||"실패");
+    return;
+  }
+  if(t.dataset.rdel){
+    const d = await api("/api/lessons/delete",{method:"POST",body:JSON.stringify({id:t.dataset.rdel})});
+    if(d.ok){ toast("지웠습니다"); loadRules(); } else toast(d.error||"실패");
+    return;
+  }
+  if(t.id==="sadd"){
+    const time = $("#stime").value;
+    const plats = [...document.querySelectorAll("#splat .chn.on")].map(x=>x.dataset.p);
+    const topic = ($("#stopic").value||"").trim();
+    const caption = ($("#scap").value||"").trim();
+    if(!plats.length){ toast("내보낼 곳을 하나 이상 고르세요"); return; }
+    if(!topic && !caption){ toast("주제나 문구 중 하나는 필요합니다"); return; }
+    t.disabled=true;
+    const d = await api("/api/publish-schedule",{method:"POST",body:JSON.stringify({
+      time, platforms:plats, topic, caption, autoGen:!caption, count:1, repeat:"daily" })});
+    if(d.ok){ toast("예약했습니다"); loadSched(); } else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.dataset.stog){
+    const d = await api("/api/publish-schedule/toggle",{method:"POST",body:JSON.stringify({id:+t.dataset.stog})});
+    if(d.ok) loadSched(); else toast(d.error||"실패");
+    return;
+  }
+  if(t.dataset.sdel){
+    const d = await api("/api/publish-schedule/delete",{method:"POST",body:JSON.stringify({id:+t.dataset.sdel})});
+    if(d.ok){ toast("지웠습니다"); loadSched(); } else toast(d.error||"실패");
+    return;
+  }
+});
+
+/* 머리에 개수만 미리 채운다 — 무엇이 급한지 열기 전에 보이게 */
+(async ()=>{
+  const a = await api("/api/learning/pending?status=pending&limit=30");
+  if(a.ok){ const n=(a.rows||[]).length;
+    $("#c-learn").textContent = n?n+"건":"없음"; $("#c-learn").className="cnt"+(n?" hot":""); }
+  else $("#c-learn").textContent = "—";
+  const b = await api("/api/brand");
+  if(b.ok){ $("#c-brand").textContent = b.text?"정해짐":"비어 있음";
+    $("#c-brand").className = "cnt"+(b.text?"":" hot"); } else $("#c-brand").textContent="—";
+  const c = await api("/api/lessons?limit=200");
+  $("#c-rules").textContent = c.ok ? ((c.lessons||[]).length+"개") : "—";
+  const s = await api("/api/publish-schedules");
+  if(s.ok){ const rows=s.list||[]; $("#c-sched").textContent = rows.length
+    ? `${rows.filter(x=>!x.disabled).length}/${rows.length} 켜짐` : "없음"; }
+  else $("#c-sched").textContent="—";
+})();
+</script>
+</body>
+</html>

@@ -39,6 +39,9 @@ body{margin:0;padding:0 0 40px;
 .ph{border-radius:8px;overflow:hidden;flex:0 0 auto;display:block;
   border:1.5px solid rgba(255,255,255,.7);background:#2A3A35}
 .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.hd{position:relative}
+.gear{position:absolute;right:0;bottom:-13px;font-size:16px;text-decoration:none;opacity:.5}
+.gear:active{opacity:1}
 .ph .ini{display:flex;width:100%;height:100%;align-items:center;justify-content:center;
   font-weight:700;color:#CFE3DA;font-size:.8em;letter-spacing:0}
 .s26{width:26px;height:26px;border-radius:6px}.s32{width:32px;height:32px;border-radius:6px}
@@ -182,6 +185,7 @@ body{margin:0;padding:0 0 40px;
   <div class="hd">
     <div><div class="eb">AGENT MANAGER</div><h1>에이전트 매니저</h1></div>
     <div class="now" id="clock"></div>
+    <a class="gear" href="./settings.html" title="설정">⚙️</a>
   </div>
   <div class="summary" id="summary"></div>
   <div id="board"><div class="empty">불러오는 중…</div></div>
@@ -236,7 +240,7 @@ function ago(iso){
   return Math.floor(h/24)+"일";
 }
 /* 담당자 배정 — 채널/주제로 그럴듯하게 고정 매핑 */
-function whoOf(row){
+function ownerOf(row){
   const t = (row.target_channel||"") + " " + (row.topic||"");
   if(/홈페이지|랜딩|웹|상세|상품/.test(t))      return "analytics";
   if(/스레드|threads/i.test(t))                return "strategy";
@@ -245,6 +249,28 @@ function whoOf(row){
   if(/인스타|카드뉴스|썸네일|배너/.test(t))      return "monetization";
   return "ops";
 }
+function writerOf(row){
+  const t = (row.target_channel||"") + " " + (row.topic||"");
+  if(/블로그|카페|네이버|티스토리/.test(t))      return "advisory";
+  if(/유튜브|영상|쇼츠|릴스/.test(t))           return "scout";
+  return "strategy";
+}
+/* 단계마다 실제로 손을 대는 사람이 다르다 */
+const STAGE_WHO = {
+  queued:"ops", research:"scout", director:"creation", write:writerOf,
+  critic:"advisory", crossjudge:"ops", adapt:"strategy", cards:"graphic",
+  page:"analytics", design:"monetization", build:"analytics",
+  threads:"strategy", done:"ops"
+};
+function whoOf(row){
+  if(row.approval_status==="processing"){
+    const w = STAGE_WHO[row.stage];
+    if(typeof w==="function") return w(row);
+    if(w) return w;
+  }
+  return ownerOf(row);
+}
+
 
 function faceOf(key, cls){
   const P = (typeof PHOTOS!=="undefined" && PHOTOS) || window.PHOTOS || {};
@@ -409,7 +435,7 @@ function render(){
   /* 부를 수 있는 자리 */
   h += `<div class="sect"><b>부를 수 있는 자리</b> · ${free.length}</div>
     <div class="bench"><div class="hscroll">`;
-  (free.length?free:KEYS).slice(0,8).forEach(k=>{
+  (free.length?free:KEYS).forEach(k=>{
     const p=TEAM[k];
     h += `<div class="pcard" data-call="${k}">
       <div style="display:flex;gap:10px">${faceOf(k,"s60")}
