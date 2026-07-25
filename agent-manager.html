@@ -200,6 +200,13 @@ body{margin:0;padding:0 0 40px;
     <a class="gear" href="./settings.html" title="설정">⚙️</a>
   </div>
   <div class="summary" id="summary"></div>
+  <div class="chief" id="chief">
+    <div class="th" id="chiefhead"></div>
+    <div id="cmsgs"></div>
+    <div class="tin"><span style="font-size:15px;opacity:.35">✎</span>
+      <input id="cfin" placeholder="총괄에게 시킬 일" autocomplete="off">
+      <button class="send press" id="cfGo">▶</button></div>
+  </div>
   <div id="board"><div class="empty">불러오는 중…</div></div>
 </div>
 <div class="toast" id="toast"></div>
@@ -316,11 +323,17 @@ function replyOf(j){
 async function load(){
   try{
     const d = await api("/api/manager/board");
-    if(d.ok){ BOARD = { live:d.live||[], done:d.done||[] }; render(); }
+    if(d.ok){ BOARD = { live:d.live||[], done:d.done||[] }; if(!typingNow()) render(); }
     else { $("#board").innerHTML = `<div class="empty">${esc(d.error||"불러오지 못했습니다")}</div>`; }
   }catch(e){
     $("#board").innerHTML = `<div class="empty">서버를 깨우는 중입니다. 잠시 뒤 다시 시도해 주세요.<br>${esc(e.message)}</div>`;
   }
+}
+
+/* 자판을 쓰는 중인지 — 이때 화면을 다시 그리면 키보드가 닫히고 글이 날아간다 */
+function typingNow(){
+  const a = document.activeElement;
+  return !!(a && /INPUT|TEXTAREA/.test(a.tagName||""));
 }
 
 /* ── 조각들 ── */
@@ -387,26 +400,27 @@ function failRow(r){
 }
 
 
-function chiefBar(){
+function chiefHead(){
   const p = TEAM.ops;
-  let h = `<div class="chief"><div class="th">${faceOf("ops","s56")}
+  $("#chiefhead").innerHTML = `${faceOf("ops","s56")}
     <div><div class="nm">${p.nm}</div><div class="rl">${p.rl}</div></div>
-    <span class="badge">${CHIEF.running?"나누는 중":"총괄"}</span></div>`;
+    <span class="badge">${CHIEF.running?"나누는 중":"총괄"}</span>`;
+}
+/* 말풍선만 다시 그린다. 입력칸은 건드리지 않는다 — 글 쓰는 도중에 날아가지 않게. */
+function renderChief(){
+  chiefHead();
   const ms = CHIEF.msgs.slice(-8);
-  if(!ms.length){
-    h += `<div class="bubble">무엇을 시킬까요.
+  $("#cmsgs").innerHTML = ms.length
+    ? ms.map(m=>{
+        const who = m.who && TEAM[m.who]
+          ? `<div class="cwho">${faceOf(m.who,"")}<b>${TEAM[m.who].nm}</b> ${TEAM[m.who].rl}</div>` : "";
+        return `<div class="bubble ${m.me?"me":""}">${who}${esc(m.t)}</div>`;
+      }).join("")
+    : `<div class="bubble">무엇을 시킬까요.
 누구에게 줄지는 제가 정하겠습니다.</div>`;
-  } else {
-    ms.forEach(m=>{
-      const who = m.who && TEAM[m.who]
-        ? `<div class="cwho">${faceOf(m.who,"")}<b>${TEAM[m.who].nm}</b> ${TEAM[m.who].rl}</div>` : "";
-      h += `<div class="bubble ${m.me?"me":""}">${who}${esc(m.t)}</div>`;
-    });
-  }
-  h += `<div class="tin"><span style="font-size:15px;opacity:.35">✎</span>
-    <input id="cfin" placeholder="총괄에게 시킬 일"${CHIEF.running?" disabled":""}>
-    <button class="send press" id="cfGo"${CHIEF.running?" disabled":""}>▶</button></div></div>`;
-  return h;
+  const inp=$("#cfin"), btn=$("#cfGo");
+  if(inp) inp.disabled = CHIEF.running;
+  if(btn) btn.disabled = CHIEF.running;
 }
 
 /* 총괄에게 시킨다 → 서버의 총괄이 분담해 부서들이 순서대로 수행한다.
@@ -414,15 +428,15 @@ function chiefBar(){
 async function chiefSay(v){
   CHIEF.msgs.push({me:true, t:v});
   CHIEF.msgs.push({t:"받았습니다. 누구에게 줄지 정하겠습니다…", pending:true});
-  CHIEF.running = true; render();
+  CHIEF.running = true; renderChief();
   const set = (txt)=>{ const i=CHIEF.msgs.findIndex(m=>m.pending);
-    if(i>=0) CHIEF.msgs[i].t = txt; render(); };
+    if(i>=0) CHIEF.msgs[i].t = txt; renderChief(); };
   const done = (txt)=>{ const i=CHIEF.msgs.findIndex(m=>m.pending);
     if(i>=0) CHIEF.msgs[i] = { t:txt }; else CHIEF.msgs.push({t:txt}); };
 
   const d = await api("/api/instruct",{method:"POST",
     body:JSON.stringify({ instruction:v, source:"manager" })});
-  if(!d.ok || !d.id){ done(d.error||"전달하지 못했습니다."); CHIEF.running=false; render(); return; }
+  if(!d.ok || !d.id){ done(d.error||"전달하지 못했습니다."); CHIEF.running=false; renderChief(); return; }
 
   for(let n=0; n<120; n++){
     await new Promise(r=>setTimeout(r, 2500));
@@ -443,7 +457,7 @@ async function chiefSay(v){
   }
   CHIEF.running = false;
   if(CHIEF.msgs.length > 14) CHIEF.msgs = CHIEF.msgs.slice(-14);
-  render(); load();
+  renderChief(); load();
 }
 
 function render(){
@@ -462,7 +476,7 @@ function render(){
   + (done.length?`<span class="chip c-done">✓ 완료 ${done.length}</span>`:"")
   + `<span class="chip c-idle">○ 여유 ${free.length}</span>`;
 
-  let h = chiefBar();
+  let h = "";
 
   if(seal.length){
     h += `<div class="sect"><b>결재</b> · ${seal.length}건 · 오래 기다린 순</div>`;
@@ -606,7 +620,8 @@ document.addEventListener("click", async (e)=>{
     TALK.msgs.push({me:true, t:v}); inp.value="";
     TALK.msgs.push({ t:"…", pending:true }); render();
     const say = (txt)=>{ const i=TALK.msgs.findIndex(m=>m.pending);
-      if(i>=0) TALK.msgs[i]={t:txt}; else TALK.msgs.push({t:txt}); render(); };
+      if(i>=0) TALK.msgs[i]={t:txt}; else TALK.msgs.push({t:txt});
+      if(!typingNow()) render(); };
     /* 서버는 지시문 안의 이름으로 담당을 고른다 — 이름을 앞에 붙인다 */
     const d = await api("/api/instruct",{method:"POST",body:JSON.stringify({
       instruction: p.nm ? (p.nm+" "+v) : v, source:"manager" })});
@@ -657,14 +672,14 @@ document.addEventListener("keydown",(e)=>{
 });
 
 tick(); setInterval(tick, 20000);
+renderChief();
 load();
 /* 진행 중인 일이 있을 때만 갱신 — 없으면 화면이 조용하다 */
 setInterval(()=>{
   if(CHIEF.running) return;
   const running = BOARD.live.some(r=>r.approval_status==="processing");
-  const typing = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)
-                 && document.activeElement.value;
-  if(running && !typing) load();
+  if(typingNow()) return;          // 손이 자판에 있으면 건드리지 않는다
+  if(running) load();
 }, 20000);
 </script>
 </body>
