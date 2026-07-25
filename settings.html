@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<meta name="app-version" content="v297">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>설정 · 에이전트 매니저</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,7 +25,8 @@ body{margin:0;padding:0 0 60px;
 .hd{padding:20px 0 13px;display:flex;align-items:flex-end;gap:12px}
 .hd .eb{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:#7E9A90}
 .hd h1{font-family:'Gowun Batang',serif;font-size:23px;margin:5px 0 0}
-.back{margin-left:auto;text-decoration:none;color:#A9C0B7;font-size:11.5px;
+.ver{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#6F8B82}
+.back{margin-left:12px;text-decoration:none;color:#A9C0B7;font-size:11.5px;
   border:1px solid var(--line);border-radius:5px;padding:7px 12px}
 .back:active{background:rgba(255,255,255,.06)}
 
@@ -105,6 +107,13 @@ label.fl{display:block;font-size:10.5px;color:#7E9A90;margin:12px 0 5px}
 .fld .ds{font-size:10.5px;color:#7E9A90;margin-top:3px;line-height:1.6}
 
 /* 성적표 */
+.vd{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:5px 11px}
+.vd.ok{background:rgba(46,125,91,.18);color:#7FC7A5}
+.vd.mid{background:rgba(201,162,39,.18);color:#D9BC55}
+.vd.no{background:rgba(178,58,50,.2);color:#E39189}
+.rv{border:1px solid var(--line);border-radius:8px;padding:11px;margin-top:8px;background:rgba(255,255,255,.03)}
+.rv pre{white-space:pre-wrap;font-family:inherit;font-size:11.5px;line-height:1.7;margin:9px 0 0;color:#CFE0D9}
+.rv .df{font-size:10.5px;color:#E39189;line-height:1.6;margin-top:8px}
 .prop{border:1px solid var(--line);border-radius:8px;padding:11px;margin-top:8px;
   background:rgba(255,255,255,.03);cursor:pointer}
 .prop.on{border-color:#3E7A9B;background:rgba(62,122,155,.12)}
@@ -145,13 +154,69 @@ label.fl{display:block;font-size:10.5px;color:#7E9A90;margin:12px 0 5px}
   box-shadow:0 8px 22px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
 .toast.on{opacity:1}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ═══ 화면 크기 구분 ═══
+   모바일: 한 손. 한 줄로 흐른다.
+   태블릿: 두 손. 폭을 넓히고 손가락에 맞게 키운다.
+   PC: 마우스. 두 단으로 벌리고 글자를 줄인다. */
+
+/* 태블릿 — 600px 이상 */
+@media (min-width:600px){
+  .wrap{max-width:860px;padding:0 20px}
+  body{font-size:15px}
+  .press{min-height:44px}                 /* 손가락 기준 최소 크기 */
+  .hd h1{font-size:27px}
+  .hscroll{display:grid;grid-template-columns:repeat(2,1fr);overflow:visible}
+  .pcard{flex:auto;width:auto}
+  .sheet,.slip{padding:17px}
+}
+
+/* PC — 1024px 이상 */
+@media (min-width:1024px){
+  .wrap{max-width:1140px;padding:0 26px}
+  body{font-size:14px}
+  .hscroll{grid-template-columns:repeat(3,1fr)}
+  .press{min-height:38px}                 /* 마우스는 정확하다. 클 필요가 없다 */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  .two > *{min-width:0}
+}
+
+/* 아주 넓은 화면 — 1500px 이상 */
+@media (min-width:1500px){
+  .wrap{max-width:1320px}
+  .hscroll{grid-template-columns:repeat(4,1fr)}
+}
+
+/* 마우스가 있는 기기에서만 hover 를 준다 (터치에서 hover 는 눌린 채로 남는다) */
+@media (hover:hover) and (pointer:fine){
+  .press:hover{filter:brightness(1.06)}
+  .drawer .dh:hover{background:rgba(255,255,255,.04)}
+}
+
+/* 새 판이 올라왔을 때 알리는 띠 */
+.newver{position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:#EDE9DF;color:#1C2B27;padding:13px 16px;display:none;
+  align-items:center;gap:12px;font-size:12.5px;
+  box-shadow:0 -6px 20px rgba(0,0,0,.35)}
+.newver.on{display:flex}
+.newver b{flex:1}
+.newver button{font-family:inherit;font-weight:700;font-size:12px;border:0;border-radius:6px;
+  padding:9px 15px;background:#3E7A9B;color:#fff;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="hd">
     <div><div class="eb">SETTINGS</div><h1>설정</h1></div>
+    <div class="ver" id="vertag"></div>
     <a class="back" href="./agent-manager.html">← 매니저</a>
+  </div>
+
+  <div class="drawer" data-d="cost">
+    <div class="dh"><span class="ic">💸</span>
+      <div><div class="tt">비용</div><div class="sub">어느 단계가 얼마를 쓰는지 나눠서 본다</div></div>
+      <span class="cnt" id="c-cost">…</span></div>
+    <div class="db" id="b-cost"></div>
   </div>
 
   <div class="drawer" data-d="growth">
@@ -161,11 +226,25 @@ label.fl{display:block;font-size:10.5px;color:#7E9A90;margin:12px 0 5px}
     <div class="db" id="b-growth"></div>
   </div>
 
+  <div class="drawer" data-d="exp">
+    <div class="dh"><span class="ic">🧪</span>
+      <div><div class="tt">단일 변수 실험</div><div class="sub">한 번에 하나만 바꾸고 기준과 대조한다</div></div>
+      <span class="cnt" id="c-exp">…</span></div>
+    <div class="db" id="b-exp"></div>
+  </div>
+
   <div class="drawer" data-d="learn">
     <div class="dh"><span class="ic">🧠</span>
       <div><div class="tt">학습 검토</div><div class="sub">부서가 배운 것을 사람이 승인해야 지식이 된다</div></div>
       <span class="cnt" id="c-learn">…</span></div>
     <div class="db" id="b-learn"></div>
+  </div>
+
+  <div class="drawer" data-d="cs">
+    <div class="dh"><span class="ic">💬</span>
+      <div><div class="tt">고객 문의</div><div class="sub">실제로 물어본 것이 가장 정확한 콘텐츠 주제다</div></div>
+      <span class="cnt" id="c-cs">…</span></div>
+    <div class="db" id="b-cs"></div>
   </div>
 
   <div class="drawer" data-d="brand">
@@ -194,6 +273,13 @@ label.fl{display:block;font-size:10.5px;color:#7E9A90;margin:12px 0 5px}
       <div><div class="tt">대결 평가</div><div class="sub">전문가 결과물과 눈 가리고 붙여 본다 — 점수가 아니라 승률</div></div>
       <span class="cnt" id="c-duel">…</span></div>
     <div class="db" id="b-duel"></div>
+  </div>
+
+  <div class="drawer" data-d="review">
+    <div class="dh"><span class="ic">🧰</span>
+      <div><div class="tt">코드 검토</div><div class="sub">밖에서 받은 코드·제안을 노아라가 가려낸다</div></div>
+      <span class="cnt" id="c-review">…</span></div>
+    <div class="db" id="b-review"></div>
   </div>
 
   <div class="drawer" data-d="studio">
@@ -336,7 +422,10 @@ async function loadBrand(){
   $("#b-brand").innerHTML = `<div class="slip">
     <div class="mt">${d.at?`마지막 수정 ${ago(d.at)}`:"아직 적힌 것이 없습니다"}</div>
     <textarea id="brandtx" rows="10" placeholder="우리는 이렇게 말한다 — 어투, 자주 쓰는 말, 절대 쓰지 않는 말, 손님을 부르는 방식…">${esc(txt)}</textarea>
-    <div class="acts"><button class="press p-blue" id="brandsave">저장</button></div>
+    <div class="acts">
+      <button class="press p-blue" id="brandsave">저장</button>
+      <button class="press p-plain" id="branddraft">수정 흔적으로 초안 뽑기</button>
+    </div>
   </div>
   <div class="note">여기 적힌 말투가 모든 부서의 글에 먼저 들어갑니다. 짧고 단호할수록 잘 지켜집니다.</div>`;
 }
@@ -477,6 +566,10 @@ async function loadAuto(){
       <textarea id="autoprompt" rows="2" placeholder="예: 고흥 홍보 플랫폼 자료수집 및 학습">${esc(pick("collect.prompt")||"")}</textarea>
       <div class="acts"><button class="press p-blue" id="autopsave">저장</button></div>
     </div>`
+  + fld("확인 요청을 얼마나 기다릴까",
+        seg("askWaitHours",[["3시간",3],["6시간",6],["12시간",12],["하루",24]]),
+        "사람이 답을 못 주면 그 시간 뒤에 스스로 진행한다. 확인 안 되는 문장은 빼고 쓴다 — 지어내지 않는다.")
+  + tog("askAutoResume","답 없어도 진행","꺼두면 답할 때까지 영원히 멈춰 있는다.")
   + tog("deliberate","협의 모드","지시를 받으면 부서들이 먼저 의견을 내고 총괄이 종합해 분담한다. 느리지만 더 낫다.")
   + tog("semanticSearch","의미검색","키워드가 달라도 뜻이 통하면 과거 작업을 찾아 쓴다.")
   + tog("safety.audit","발행 전 감사·법무 점검","저작권·광고법·정책 위반을 오세라가 먼저 훑는다.")
@@ -506,11 +599,250 @@ async function loadEngine(){
   + tog("allowPaidFallback","유료 폴백 허용","무료 한도가 바닥나면 유료 키로 이어서 한다.")
   + fld("리서치 모드", seg("researchMode",[["무료","free"],["유료","paid"]]),
         "유료는 검색 한도가 크게 늘어난다"+(env.geminiPaid?"":" — 유료 키가 등록돼 있지 않다"))
+  + `<div class="fld"><div class="lb">PC 로컬 워커</div>
+      <div class="ds">PC가 꺼져 있어도 일은 쌓인다. 켜면 밀린 것을 무제한으로 가져가 처리한다.</div></div>
+    <div id="lwrap"><div class="empty">불러오는 중…</div></div>`
   + `<div class="note" style="margin-top:14px">환율·월 예산·백업은 아직 v272 앱 설정에 있다. 서버 ${esc(env.version||"")}</div>`;
+  loadLocal();
 }
 
 
 
+
+
+
+
+/* ───────── PC 로컬 워커 상태 ───────── */
+async function loadLocal(){
+  const box = $("#lwrap"); if(!box) return;
+  const d = await api("/api/local/status");
+  if(!d.ok){ box.innerHTML = `<div class="empty">${esc(d.error)}</div>`; return; }
+  const w = d.worker;
+  const alive = w && w.alive;
+  box.innerHTML = `
+    <div class="score">
+      <div><b>${d.queued}</b><span>밀린 일</span></div>
+      <div><b>${d.running}</b><span>처리 중</span></div>
+      <div><b>${d.done}</b><span>PC가 끝냄</span></div>
+      <div><b>${d.fellback}</b><span>클라우드가 대신</span></div>
+    </div>
+    <div class="grow">
+      <div class="top">
+        <span class="nm2">${alive?"🟢 켜져 있음":"⚪ 꺼져 있음"}</span>
+        <span class="sub3">${w?esc(w.who)+" · "+ago(w.at):"아직 한 번도 붙은 적 없음"}</span>
+      </div>
+      <div class="sub3" style="margin-top:7px">${alive
+        ? "PC가 일을 가져가고 있다."
+        : (d.queued
+            ? d.queued+"건이 기다리고 있다. PC를 켜면 바로 가져간다. "+
+              "12시간이 지나면 클라우드가 대신 처리한다."
+            : "밀린 일이 없다.")}</div>
+    </div>
+    <div class="note">워커 파일(<b>local-worker.mjs</b>)을 PC에 두고 <b>node local-worker.mjs</b> 로 실행하면 된다.
+      Ollama 만 켜져 있으면 되고, 포트포워딩이나 공유기 설정은 필요 없다 — PC가 서버로 먼저 걸기 때문이다.</div>`;
+}
+
+/* ───────── 고객 문의 → 콘텐츠 ───────── */
+const CS_CATS = ["유자","석류","삼치","장어","마늘","김/굴","기타"];
+async function loadCs(){
+  $("#b-cs").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  const d = await api("/api/cs");
+  if(!d.ok){ $("#b-cs").innerHTML = `<div class="empty">${esc(d.error)}</div>`; $("#c-cs").textContent="—"; return; }
+  const rows = d.rows||[], open = rows.filter(r=>!r.converted_to_content);
+  $("#c-cs").textContent = open.length ? open.length+"건 대기" : (rows.length?"모두 처리":"없음");
+  $("#c-cs").className = "cnt" + (open.length?" hot":"");
+
+  let h = `<div class="slip">
+    <label class="fl" style="color:var(--ink3)">손님이 물어본 것</label>
+    <input type="text" id="csq" placeholder="예: 삼치 손질돼서 오나요? 바로 구워 먹을 수 있나요?">
+    <label class="fl" style="color:var(--ink3)">품목</label>
+    <select id="cscat">${CS_CATS.map(c=>`<option>${c}</option>`).join("")}</select>
+    <label class="fl" style="color:var(--ink3)">우리가 실제로 답한 내용 (있으면)</label>
+    <textarea id="csa" rows="2" placeholder="비워두면 확인되지 않은 사실은 쓰지 않고 문의 안내로 마무리한다"></textarea>
+    <div class="acts"><button class="press p-blue" id="csadd">등록</button></div>
+    <div class="mt" style="margin-top:9px">같은 질문을 또 넣으면 건수만 올라간다. 자주 묻는 것이 위로 온다.</div>
+  </div>`;
+
+  h += rows.map(r=>`<div class="slip" style="${r.converted_to_content?"opacity:.6":""}">
+    <div class="mt">
+      ${r.product_category?`<span class="tagx">${esc(r.product_category)}</span>`:""}
+      ${r.frequency_count>1?`<span class="tagx" style="background:rgba(178,58,50,.14);color:var(--seal)">${r.frequency_count}번 물어봄</span>`:""}
+      <span style="margin-left:auto">${ago(r.created_at)}</span></div>
+    <div class="bd">${esc(r.customer_question)}</div>
+    ${r.answer?`<div class="mt" style="margin-top:6px">답변 · ${esc(String(r.answer).slice(0,80))}</div>`:""}
+    <div class="acts">
+      ${r.converted_to_content
+        ? `<span style="font-size:10.5px;color:var(--ink3);align-self:center">콘텐츠로 만들었음</span>`
+        : `<button class="press p-ink" data-csgo="${esc(r.cs_id)}"><span>이걸로 콘텐츠 만들기</span></button>`}
+      <button class="press p-plain" data-csdel="${esc(r.cs_id)}">지우기</button>
+    </div></div>`).join("") || `<div class="empty">아직 등록된 문의가 없다.</div>`;
+  $("#b-cs").innerHTML = h;
+}
+
+/* ───────── 단일 변수 실험 ───────── */
+async function loadExp(){
+  $("#b-exp").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  const d = await api("/api/experiments");
+  if(!d.ok){ $("#b-exp").innerHTML = `<div class="empty">${esc(d.error)}</div>`; $("#c-exp").textContent="—"; return; }
+  const run = d.running, base = d.baseline||{};
+  $("#c-exp").textContent = run ? "진행 중" : ((d.rows||[]).length ? (d.rows||[]).length+"건" : "없음");
+  $("#c-exp").className = "cnt" + (run?" hot":"");
+
+  let h = "";
+  if(run){
+    const avg = run.exp_n ? (run.exp_score_sum/run.exp_n) : null;
+    const diff = (avg!=null && run.baseline_score!=null) ? (avg - run.baseline_score) : null;
+    h += `<div class="slip">
+      <div class="mt"><b style="font-size:12px">진행 중</b>
+        <span class="tagx">${esc(run.target||"전체")}</span>
+        <span style="margin-left:auto">${ago(run.created_at)}</span></div>
+      <div class="bd" style="margin-top:7px"><b>바꾼 것</b> · ${esc(run.variable)}</div>
+      <div class="bd"><b>기대</b> · ${esc(run.hypothesis)}</div>
+      <div class="score" style="margin-top:11px">
+        <div><b>${run.baseline_score!=null?Math.round(run.baseline_score):"—"}</b><span>기준 (${run.baseline_n||0}건)</span></div>
+        <div><b>${avg!=null?Math.round(avg):"—"}</b><span>실험 (${run.exp_n||0}건)</span></div>
+        <div><b style="color:${diff==null?"#7E9A90":(diff>=0?"#2E7D5B":"#B23A32")}">${
+          diff==null?"—":(diff>=0?"+":"")+Math.round(diff)}</b><span>차이</span></div>
+      </div>
+      ${(run.exp_n||0) < 5
+        ? `<div class="mt" style="margin-top:9px">${5-(run.exp_n||0)}건 더 쌓여야 판단할 수 있다. 그 전에 닫으면 우연일 뿐이다.</div>`
+        : `<div class="mt" style="margin-top:9px">${diff>=3?"기준보다 낫다. 채택할 만하다."
+            :(diff<=-3?"기준보다 못하다. 되돌리는 게 낫다.":"차이가 뚜렷하지 않다. 더 모으거나 버려라.")}</div>`}
+      <input type="text" id="expnote" placeholder="닫으며 남길 말 (선택)" style="margin-top:10px">
+      <div class="acts">
+        <button class="press p-ink" data-expdone="${esc(run.experiment_id)}|1"><span>채택</span></button>
+        <button class="press p-plain" data-expdone="${esc(run.experiment_id)}|0">버리기</button>
+      </div></div>`;
+  } else {
+    h += `<div class="slip">
+      <div class="mt">기준 점수 ${base.avg!=null?Math.round(base.avg)+"점 (최근 "+base.n+"건)":"— (표본 부족)"}</div>
+      <label class="fl" style="color:var(--ink3)">무엇을 대상으로</label>
+      <input type="text" id="exptarget" placeholder="예: 인스타그램 캡션 / 제작부 / 전체">
+      <label class="fl" style="color:var(--ink3)">딱 하나만 바꾼 것</label>
+      <input type="text" id="expvar" placeholder="예: 첫 문장을 질문으로 시작하게 했다">
+      <label class="fl" style="color:var(--ink3)">무엇이 좋아질 것이라 보나</label>
+      <input type="text" id="exphypo" placeholder="예: 사람이 첫 문단을 덜 고칠 것이다">
+      <div class="acts"><button class="press p-blue" id="expgo">실험 시작</button></div>
+      <div class="mt" style="margin-top:9px">두 가지를 같이 바꾸면 무엇 때문인지 알 수 없다. 그래서 한 번에 하나만 받는다.</div>
+    </div>`;
+  }
+
+  const done = (d.rows||[]).filter(r=>r.status!=="running");
+  if(done.length){
+    h += `<div class="fld"><div class="lb">지난 실험 ${done.length}건</div></div>`;
+    h += done.slice(0,8).map(r=>{
+      const avg = r.exp_n ? (r.exp_score_sum/r.exp_n) : null;
+      return `<div class="rv">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="vd ${r.status==="adopted"?"ok":"no"}">${r.status==="adopted"?"채택":"버림"}</span>
+          <span style="font-size:11px;flex:1">${esc(String(r.variable).slice(0,40))}</span></div>
+        <div class="sub3" style="font-size:10px;color:#7E9A90;margin-top:6px">
+          기준 ${r.baseline_score!=null?Math.round(r.baseline_score):"—"} → 실험 ${avg!=null?Math.round(avg):"—"}
+          (${r.exp_n||0}건) · ${ago(r.closed_at||r.created_at)}</div>
+        ${r.note?`<pre>${esc(r.note)}</pre>`:""}</div>`;
+    }).join("");
+  }
+  $("#b-exp").innerHTML = h;
+}
+
+/* ───────── 코드 검토 (노아라) ───────── */
+let RV = { last:null };
+const VD_CLS = v => /적용/.test(v) && !/안 됨/.test(v) ? "ok" : (/안 됨|거절/.test(v) ? "no" : "mid");
+
+async function loadReview(){
+  $("#b-review").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  const d = await api("/api/publisher/reviews");
+  if(!RV.files){ const f = await api("/api/publisher/files"); RV.files = f.ok ? (f.files||[]) : []; }
+  const rows = d.ok ? (d.rows||[]) : [];
+  $("#c-review").textContent = d.ok
+    ? (d.hitRate!=null ? Math.round(d.hitRate*100)+"% 적중" : (rows.length? rows.length+"건" : "없음"))
+    : "—";
+  $("#c-review").className = "cnt";
+
+  let h = `<div class="slip">
+    <label class="fl" style="color:var(--ink3)">무엇에 쓸 것인지 (선택)</label>
+    <input type="text" id="rvnote" placeholder="예: 매니저 화면 결재 버튼 고치는 코드">
+    <label class="fl" style="color:var(--ink3)">받은 코드·제안 붙여넣기</label>
+    <textarea id="rvcode" rows="9" placeholder="클로드·제미나이에게 받은 것을 그대로"></textarea>
+    <div class="acts"><button class="press p-blue" id="rvgo">노아라에게 보이기</button></div>
+    <div class="mt" style="margin-top:9px">문법·잘림·키 노출은 기계가 먼저 세고, 그 위에서 판단한다.</div>
+  </div>`;
+
+  if(RV.last) h += rvCard(RV.last, true);
+
+  /* ── 실제 파일 손보기 ── */
+  h += `<div class="fld"><div class="lb">파일 손보기</div>
+    <div class="ds">붙여넣기 대신 실제 파일을 읽어와 그 자리에서 고친다. 고친 파일을 받아 올리면 된다.</div></div>
+    <div class="slip">
+      <label class="fl" style="color:var(--ink3)">어느 파일</label>
+      <select id="pxfile">${(RV.files||[]).map(f=>`<option value="${esc(f)}">${esc(f)}</option>`).join("")}</select>
+      <label class="fl" style="color:var(--ink3)">무엇을 고칠까</label>
+      <textarea id="pxwhat" rows="3" placeholder="화면에 뜨는 문구나 함수 이름을 그대로 적으면 자리를 잘 찾는다"></textarea>
+      <div class="acts"><button class="press p-blue" id="pxgo">자리 찾아 고치기</button></div>
+      <div class="mt" style="margin-top:9px">서버는 '한 번만 나오는 자리'만 바꾼다. 애매하면 안 고치고 알려준다.</div>
+    </div>`;
+  if(RV.patch) h += pxCard(RV.patch);
+
+  if(rows.length){
+    h += `<div class="fld"><div class="lb">지난 판정 ${rows.length}건</div>
+      ${d.judged?`<div class="ds">사람이 알려준 ${d.judged}건 중 ${Math.round((d.hitRate||0)*100)}%가 맞았다.</div>`:
+        `<div class="ds">판정이 맞았는지 알려주면 그때부터 실력이 쌓인다.</div>`}</div>`;
+    h += rows.filter(r=>!RV.last || r.id!==RV.last.id).slice(0,8).map(r=>`<div class="rv">
+      <div class="top" style="display:flex;align-items:center;gap:8px">
+        <span class="vd ${VD_CLS(r.verdict)}">${esc(r.verdict)}</span>
+        <span style="font-size:11px;flex:1">${esc(String(r.note||r.head||"").slice(0,34))}</span>
+        <span style="font-size:10px;color:#7E9A90">${ago(r.at)}</span>
+      </div>
+      <div class="sub3" style="font-size:10px;color:#7E9A90;margin-top:6px">
+        ${esc(r.kind)} · ${r.chars.toLocaleString()}자${r.defects&&r.defects.length?` · 기계 지적 ${r.defects.length}건`:""}
+        ${r.outcome ? (r.outcome==="right"?" · ✔ 맞았음":" · ✘ 틀렸음") : ""}</div>
+      ${!r.outcome ? `<div class="acts" style="margin-top:8px">
+        <button class="press p-plain" data-rvok="${esc(r.id)}">판정이 맞았다</button>
+        <button class="press p-plain" data-rvno="${esc(r.id)}">틀렸다</button></div>` : ""}
+    </div>`).join("");
+  }
+  $("#b-review").innerHTML = h;
+}
+
+function pxCard(p){
+  if(!p.ok) return `<div class="rv" style="border-color:var(--seal)">
+    <div class="df">${esc(p.error||"고치지 못했습니다")}</div></div>`;
+  if(!p.applied || !p.applied.length) return `<div class="rv">
+    <div class="df">고칠 자리를 정하지 못했습니다.</div>
+    <pre>${esc(p.note||"")}${p.needMore?"\n더 봐야 할 것: "+esc(p.needMore):""}</pre>
+    ${(p.skipped||[]).length?`<div class="df">${p.skipped.map(x=>esc(x.why)).join("<br>")}</div>`:""}</div>`;
+  const grew = p.sizeAfter - p.sizeBefore;
+  return `<div class="rv" style="border-color:${p.safe?"#2E7D5B":"#C9A227"}">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="vd ${p.safe?"ok":"mid"}">${p.safe?"문법 이상 없음":"확인 필요"}</span>
+      <span style="font-size:10.5px;color:#7E9A90">${esc(p.file)} · ${p.applied.length}곳 고침 ·
+        ${grew>=0?"+":""}${grew.toLocaleString()}자 · 위험 ${esc(p.risk||"보통")}</span>
+    </div>
+    <pre>${p.applied.map((a,i)=>(i+1)+") "+esc(a.why||"(이유 없음)")+"\n   → "+esc(a.head)+"…").join("\n")}</pre>
+    ${(p.defects||[]).length?`<div class="df">${p.defects.map(esc).join("<br>")}</div>`:""}
+    ${(p.skipped||[]).length?`<div class="df">건너뜀 ${p.skipped.length}곳<br>· ${p.skipped.map(x=>esc(x.why)).join("<br>· ")}</div>`:""}
+    <div class="acts" style="margin-top:10px">
+      <button class="press p-blue" data-pxget="${esc(p.id)}|after">고친 파일 받기</button>
+      <button class="press p-plain" data-pxget="${esc(p.id)}|before">원래 파일 받기</button>
+    </div>
+    <div class="mt" style="font-size:10px;color:#7E9A90;margin-top:8px">받은 내용을 GitHub 에 덮으면 적용된다. 되돌리려면 '원래 파일'을 다시 올리면 된다.</div>
+  </div>`;
+}
+
+function rvCard(r, fresh){
+  return `<div class="rv" style="border-color:#3E7A9B">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="vd ${VD_CLS(r.verdict)}">${esc(r.verdict)}</span>
+      ${r.conf!=null?`<span style="font-size:10.5px;color:#7E9A90">확신 ${r.conf}</span>`:""}
+      <span style="margin-left:auto;font-size:10px;color:#7E9A90">${esc(r.kind)} · ${r.chars.toLocaleString()}자</span>
+    </div>
+    ${r.defects && r.defects.length ? `<div class="df">기계 점검 ${r.defects.length}건<br>· ${r.defects.map(esc).join("<br>· ")}</div>` : ""}
+    <pre>${esc(String(r.text||"").replace(/^판정\s*[:：][^\n]*\n?/,""))}</pre>
+    ${fresh?`<div class="acts" style="margin-top:10px">
+      <button class="press p-plain" data-rvok="${esc(r.id)}">판정이 맞았다</button>
+      <button class="press p-plain" data-rvno="${esc(r.id)}">틀렸다</button></div>`:""}
+  </div>`;
+}
 
 /* ───────── 외부 서비스 ───────── */
 const SVC_TYPES = ["threads","instagram","youtube","naver","tistory","kakao","기타"];
@@ -557,7 +889,8 @@ async function loadSvc(){
 /* ───────── 홈페이지 스튜디오 ───────── */
 let STU = { id:null, row:null, poll:null };
 const STU_STAGE = { analyzing:"참고 사이트 뜯어보는 중", proposing:"방향 고르는 중",
-  chosen:"방향 정해짐", building:"페이지 만드는 중", done:"완성", revising:"고치는 중" };
+  chosen:"방향 정해짐", direction_set:"방향 정해짐", building:"페이지 만드는 중",
+  publishing:"퍼블리셔가 점검 중", built:"완성", done:"완성", revising:"고치는 중" };
 
 async function loadStudio(){
   $("#b-studio").innerHTML = `<div class="empty">불러오는 중…</div>`;
@@ -639,7 +972,7 @@ async function stuDraw(){
   }
 
   // 말 걸기
-  const busy = (st==="analyzing"||st==="building"||st==="revising");
+  const busy = (st==="analyzing"||st==="building"||st==="publishing"||st==="revising");
   h += `<div class="slip" style="margin-top:12px">
     <input type="text" id="smsg" placeholder="${busy?"진행 중입니다…":(r.html?"고칠 점을 말해 주세요":"고르거나 고칠 점을 말해 주세요")}"${busy?" disabled":""}>
     <div class="acts">
@@ -653,6 +986,46 @@ async function stuDraw(){
   // 진행 중이면 스스로 다시 본다
   clearTimeout(STU.poll);
   if(busy) STU.poll = setTimeout(()=>{ if(STU.id) stuDraw(); }, 4000);
+}
+
+
+/* ───────── 비용 ───────── */
+async function loadCost(){
+  $("#b-cost").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  const d = await api("/api/cost");
+  if(!d.ok){ $("#b-cost").innerHTML = `<div class="empty">${esc(d.error)}</div>`; $("#c-cost").textContent="—"; return; }
+  const won = n => Number(n||0).toLocaleString("ko-KR")+"원";
+  $("#c-cost").textContent = won(d.today.won);
+  $("#c-cost").className = "cnt" + (d.today.won >= 10000 ? " hot" : "");
+
+  const rows = d.byStage||[];
+  const top = rows[0];
+  let h = `<div class="score">
+    <div><b style="font-size:16px">${won(d.today.won)}</b><span>오늘 ${d.today.calls}회</span></div>
+    <div><b style="font-size:16px">${won(d.month.won)}</b><span>이번 달</span></div>
+  </div>
+  <div class="note" style="margin:0 0 12px">모델 <b>${esc(d.model||"?")}</b> ·
+    입력 $${d.price.inPerM}/M · 출력 $${d.price.outPerM}/M · 환율 ${d.price.usdKrw}</div>`;
+
+  if(!rows.length){
+    h += `<div class="empty">오늘 기록이 아직 없다.<br>작업이 한 번 돌면 단계별로 쌓인다.</div>`;
+  } else {
+    const max = Math.max(...rows.map(r=>r.won), 1);
+    h += rows.map(r=>`<div class="grow">
+      <div class="top">
+        <span class="nm2">${esc(r.stage)}</span>
+        <span class="pt" style="color:${r.won>=max*0.5?"#E39189":"#A9C0B7"}">${won(r.won)}</span>
+      </div>
+      <div class="bar"><i style="width:${Math.round(r.won/max*100)}%;background:${r.won>=max*0.5?"#B23A32":"#2E7D5B"}"></i></div>
+      <div class="sub3">${r.calls}회 · 입력 ${(r.in/1000).toFixed(1)}K · 출력 ${(r.out/1000).toFixed(1)}K
+        · 건당 약 ${won(Math.round(r.won/Math.max(1,r.calls)))}</div>
+    </div>`).join("");
+    if(top) h += `<div class="note">가장 많이 쓰는 곳은 <b>${esc(top.stage)}</b>다.
+      줄이려면 여기부터 봐야 한다 — 무료 엔진으로 돌리거나, 출력 길이를 줄이거나, 횟수를 줄인다.</div>`;
+  }
+  h += `<div class="note" style="margin-top:10px">모델이 비싼 것으로 잡혀 있으면 무엇을 줄여도 소용없다.
+    Render 환경변수 <b>MODEL</b> 을 먼저 확인해라.</div>`;
+  $("#b-cost").innerHTML = h;
 }
 
 /* ───────── 지능 성장 ───────── */
@@ -672,6 +1045,18 @@ async function loadGrowth(){
     <div><b>${d.todayDone||0}/${d.perDay||1}</b><span>오늘 학습</span></div>
   </div>`;
 
+  const ds = await api("/api/dataset");
+  if(ds.ok){
+    h += `<div class="slip" style="margin-bottom:4px">
+      <div class="mt"><b style="font-size:12px">정답지</b>
+        <span style="margin-left:auto">승인 ${ds.approved}건 · 사람이 고친 것 ${ds.edited}건</span></div>
+      <div class="mt" style="margin-top:6px">${ds.avgEdit!=null
+        ? "평균 수정률 "+Math.round(ds.avgEdit*100)+"% — 이 숫자가 내려가면 처음부터 잘 쓰게 된 것이다."
+        : "사람이 고쳐서 승인한 원고가 쌓이면 여기에 수정률 추세가 뜬다."}</div>
+      <div class="acts"><button class="press p-plain" id="dsget">정답지 내려받기 (JSONL)</button></div>
+      <div class="mt" style="margin-top:8px">지금 미세조정을 하려는 게 아니다. 나중에 로컬 모델을 우리 말투로 길들일 때 필요하다 — 안 모으면 영영 못 모은다.</div>
+    </div>`;
+  }
   h += fld("하루 몇 부서를 학습시킬까",
       seg("benchmarkPerDay",[["1곳",1],["2곳",2],["3곳",3],["5곳",5]]),
       `1곳이면 한 부서가 다시 배우기까지 ${rows.length}일이 걸린다. 자율수행이 돌 때마다 한 부서씩 나눠 돈다 — 한꺼번에 몰지 않는다.`);
@@ -783,8 +1168,9 @@ async function loadDuel(){
   $("#b-duel").innerHTML = h;
 }
 
-const LOADER = { growth:loadGrowth, learn:loadLearn, brand:loadBrand, rules:loadRules,
-                 sched:loadSched, duel:loadDuel, studio:loadStudio, svc:loadSvc,
+const LOADER = { cost:loadCost, growth:loadGrowth, cs:loadCs, exp:loadExp,
+                 learn:loadLearn, brand:loadBrand, rules:loadRules,
+                 sched:loadSched, duel:loadDuel, studio:loadStudio, svc:loadSvc, review:loadReview,
                  quality:loadQuality, auto:loadAuto, engine:loadEngine };
 
 /* ───────── 손짓 ───────── */
@@ -797,7 +1183,7 @@ document.addEventListener("click", async (e)=>{
     if(!was){ dr.classList.add("on"); LOADER[dr.dataset.d](); }
     return;
   }
-  const t = e.target.closest("button,[data-p],[data-sk],[data-pay],[data-stu],[data-spick],[data-svtog],[data-svdel]");
+  const t = e.target.closest("button,[data-p],[data-sk],[data-pay],[data-stu],[data-spick],[data-svtog],[data-svdel],[data-rvok],[data-rvno],[data-csgo],[data-csdel],[data-expdone]");
   if(!t) return;
 
   if(t.dataset.p!=null){ t.classList.toggle("on"); return; }
@@ -821,6 +1207,17 @@ document.addEventListener("click", async (e)=>{
       review_id:id, action:(t.dataset.lok?"approve":"reject"), edited:(ta&&ta.value||"").trim() })});
     if(d.ok){ toast(t.dataset.lok?"부서 지식이 되었습니다":"버렸습니다"); loadLearn(); }
     else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.id==="branddraft"){
+    t.disabled=true; toast("사람이 고친 원고에서 말투를 뽑는 중입니다…");
+    const d = await api("/api/brand/draft",{method:"POST",body:"{}"});
+    if(d.ok && d.draft){
+      const ta=$("#brandtx");
+      if(ta) ta.value = (ta.value||"").trim() ? (ta.value.trim()+"\n\n"+d.draft) : d.draft;
+      toast(`${d.basedOn}건에서 뽑았습니다 — 읽고 고친 뒤 저장하세요`);
+    } else toast(d.error||"실패");
+    t.disabled=false;
     return;
   }
   if(t.id==="brandsave"){
@@ -849,6 +1246,93 @@ document.addEventListener("click", async (e)=>{
     if(d.ok){ toast("지웠습니다"); loadRules(); } else toast(d.error||"실패");
     return;
   }
+  /* ── 고객 문의 ── */
+  if(t.id==="csadd"){
+    const q=($("#csq").value||"").trim();
+    if(q.length<3){ toast("문의 내용을 적어 주세요"); return; }
+    t.disabled=true;
+    const d = await api("/api/cs",{method:"POST",body:JSON.stringify({
+      question:q, category:$("#cscat").value, answer:($("#csa").value||"").trim() })});
+    if(d.ok){ toast(d.merged?`같은 질문 ${d.count}번째로 기록했습니다`:"등록했습니다"); loadCs(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.dataset.csgo){
+    t.disabled=true; toast("문의를 바탕으로 만드는 중입니다…");
+    const d = await api("/api/cs/to-content",{method:"POST",body:JSON.stringify({cs_id:t.dataset.csgo})});
+    if(d.ok){ toast("매니저 화면에서 진행 상황을 볼 수 있습니다"); loadCs(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.dataset.csdel){
+    const d = await api("/api/cs/delete",{method:"POST",body:JSON.stringify({cs_id:t.dataset.csdel})});
+    if(d.ok){ toast("지웠습니다"); loadCs(); } else toast(d.error||"실패");
+    return;
+  }
+
+  /* ── 단일 변수 실험 ── */
+  if(t.id==="expgo"){
+    const v=($("#expvar").value||"").trim(), hy=($("#exphypo").value||"").trim();
+    if(!v || !hy){ toast("바꾼 것과 기대하는 것을 둘 다 적어 주세요"); return; }
+    t.disabled=true;
+    const d = await api("/api/experiments",{method:"POST",body:JSON.stringify({
+      target:($("#exptarget").value||"전체").trim(), variable:v, hypothesis:hy })});
+    if(d.ok){ toast("실험을 시작했습니다"); loadExp(); } else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.dataset.expdone){
+    const [id,adopt]=t.dataset.expdone.split("|");
+    t.disabled=true;
+    const d = await api("/api/experiments/close",{method:"POST",body:JSON.stringify({
+      experiment_id:id, adopt:adopt==="1", note:($("#expnote") && $("#expnote").value || "").trim() })});
+    if(d.ok){ toast(adopt==="1"?"채택했습니다":"버렸습니다 — 기록은 남습니다"); loadExp(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+
+  /* ── 코드 검토 ── */
+  if(t.id==="rvgo"){
+    const code=($("#rvcode").value||"").trim();
+    if(code.length<20){ toast("검토할 내용을 붙여넣어 주세요"); return; }
+    t.disabled=true; toast("노아라가 읽는 중입니다…");
+    const d = await api("/api/publisher/review",{method:"POST",body:JSON.stringify({
+      code, note:($("#rvnote").value||"").trim() })});
+    if(d.ok && d.review){ RV.last=d.review; await loadReview(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.id==="pxgo"){
+    const what=($("#pxwhat").value||"").trim();
+    if(what.length<5){ toast("무엇을 고칠지 적어 주세요"); return; }
+    t.disabled=true; toast("파일을 읽고 자리를 찾는 중입니다…");
+    const d = await api("/api/publisher/patch",{method:"POST",body:JSON.stringify({
+      file:$("#pxfile").value, instruction:what })});
+    RV.patch = d;
+    await loadReview();
+    if(!d.ok) toast(d.error||"실패");
+    return;
+  }
+  if(t.dataset.pxget){
+    const [id,which]=t.dataset.pxget.split("|");
+    const url = API+"/api/publisher/patched?id="+encodeURIComponent(id)+"&which="+which
+      + (TOKEN?("&token="+encodeURIComponent(TOKEN)):"");
+    window.open(url, "_blank");
+    return;
+  }
+  if(t.dataset.rvok || t.dataset.rvno){
+    const id=t.dataset.rvok||t.dataset.rvno, right=!!t.dataset.rvok;
+    let why="";
+    if(!right){
+      why=(window.prompt("무엇이 틀렸나요? (이게 다음 판단 기준이 됩니다)")||"").trim();
+      if(!why){ toast("이유가 있어야 배웁니다"); return; }
+    }
+    t.disabled=true;
+    const d = await api("/api/publisher/outcome",{method:"POST",body:JSON.stringify({id, right, why})});
+    if(d.ok){ toast(right?"기록했습니다":"학습 검토로 올렸습니다"); if(RV.last&&RV.last.id===id) RV.last=null; loadReview(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+
   /* ── 외부 서비스 ── */
   if(t.id==="svadd"){
     const name=($("#svname").value||"").trim(), key=($("#svkey").value||"").trim();
@@ -930,6 +1414,10 @@ document.addEventListener("click", async (e)=>{
     return;
   }
 
+  if(t.id==="dsget"){
+    window.open(API+"/api/dataset/jsonl"+(TOKEN?("?token="+encodeURIComponent(TOKEN)):""), "_blank");
+    return;
+  }
   if(t.id==="grev"){
     t.disabled=true; toast("총괄이 부서 기준을 읽는 중입니다…");
     const d = await api("/api/learn/leader-review",{method:"POST",body:"{}"});
@@ -1043,6 +1531,19 @@ document.addEventListener("click", async (e)=>{
     $("#c-brand").className = "cnt"+(b.text?"":" hot"); } else $("#c-brand").textContent="—";
   const c = await api("/api/lessons?limit=200");
   $("#c-rules").textContent = c.ok ? ((c.lessons||[]).length+"개") : "—";
+  const ct = await api("/api/cost");
+  if(ct.ok){ $("#c-cost").textContent = Number(ct.today.won||0).toLocaleString("ko-KR")+"원";
+    $("#c-cost").className = "cnt"+(ct.today.won>=10000?" hot":""); } else $("#c-cost").textContent="—";
+  const cs = await api("/api/cs");
+  if(cs.ok){ const o=(cs.rows||[]).filter(r=>!r.converted_to_content).length;
+    $("#c-cs").textContent = o?o+"건 대기":((cs.rows||[]).length?"모두 처리":"없음");
+    $("#c-cs").className="cnt"+(o?" hot":""); } else $("#c-cs").textContent="—";
+  const ex = await api("/api/experiments");
+  $("#c-exp").textContent = ex.ok ? (ex.running?"진행 중":((ex.rows||[]).length?(ex.rows||[]).length+"건":"없음")) : "—";
+  if(ex.ok && ex.running) $("#c-exp").className="cnt hot";
+  const rv = await api("/api/publisher/reviews");
+  $("#c-review").textContent = rv.ok ? (rv.hitRate!=null ? Math.round(rv.hitRate*100)+"% 적중"
+    : ((rv.rows||[]).length ? (rv.rows||[]).length+"건" : "없음")) : "—";
   const sv = await api("/api/services");
   $("#c-svc").textContent = sv.ok ? ((sv.rows||[]).length ? (sv.rows||[]).filter(r=>r.is_active).length+"/"+(sv.rows||[]).length+" 켜짐" : "없음") : "—";
   const su = await api("/api/studio/get");
@@ -1068,6 +1569,46 @@ document.addEventListener("click", async (e)=>{
     ? `${rows.filter(x=>!x.disabled).length}/${rows.length} 켜짐` : "없음"; }
   else $("#c-sched").textContent="—";
 })();
+
+/* ═══ 판 번호 확인 ═══
+   GitHub Pages 는 한 번 받은 화면을 오래 들고 있는다.
+   그래서 새로 올려도 폰에서는 옛 화면이 계속 뜬다.
+   자기 주소를 캐시 없이 다시 읽어 표식이 달라졌으면 알려준다. */
+const APP_VER = (document.querySelector('meta[name="app-version"]')||{}).content || "";
+let SRV_VER = "";
+
+async function checkVersions(){
+  // 서버 판 번호
+  try{
+    const r = await fetch(API+"/api/version", { cache:"no-store" });
+    const d = await r.json();
+    SRV_VER = d && d.version || "";
+  }catch(e){}
+  // 내 화면이 최신인지 — 자기 파일을 다시 읽어 표식만 본다
+  try{
+    const r = await fetch(location.pathname + "?_=" + Date.now(), { cache:"no-store" });
+    const t = await r.text();
+    const m = t.match(/name="app-version"\s+content="([^"]+)"/);
+    if (m && m[1] && APP_VER && m[1] !== APP_VER){
+      const el = document.getElementById("newver");
+      if (el) el.classList.add("on");
+    }
+  }catch(e){}
+  paintVersion();
+}
+function paintVersion(){
+  const el = document.getElementById("vertag");
+  if (!el) return;
+  const same = !SRV_VER || !APP_VER || SRV_VER === APP_VER;
+  el.innerHTML = APP_VER + (SRV_VER ? (" · 서버 " + SRV_VER) : "")
+    + (same ? "" : ' <span style="color:#C9A227">· 앱과 다름</span>');
+}
+setTimeout(checkVersions, 3000);
+setInterval(checkVersions, 10*60*1000);
 </script>
+<div class="newver" id="newver">
+  <b>새 판이 올라왔습니다. 새로고침하면 반영됩니다.</b>
+  <button onclick="location.reload(true)">새로고침</button>
+</div>
 </body>
 </html>

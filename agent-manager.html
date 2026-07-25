@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<meta name="app-version" content="v297">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#12211E">
 <title>에이전트 매니저</title>
@@ -40,6 +41,8 @@ body{margin:0;padding:0 0 40px;
   border:1.5px solid rgba(255,255,255,.7);background:#2A3A35}
 .ph img{width:100%;height:100%;object-fit:cover;display:block}
 .hd{position:relative}
+.ver{position:absolute;right:0;top:-3px;font-family:'IBM Plex Mono',monospace;
+  font-size:9px;color:#6F8B82;letter-spacing:.02em}
 .gear{position:absolute;right:0;bottom:-13px;font-size:16px;text-decoration:none;opacity:.5}
 .gear:active{opacity:1}
 .ph .ini{display:flex;width:100%;height:100%;align-items:center;justify-content:center;
@@ -205,6 +208,54 @@ body{margin:0;padding:0 0 40px;
   box-shadow:0 8px 22px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ═══ 화면 크기 구분 ═══
+   모바일: 한 손. 한 줄로 흐른다.
+   태블릿: 두 손. 폭을 넓히고 손가락에 맞게 키운다.
+   PC: 마우스. 두 단으로 벌리고 글자를 줄인다. */
+
+/* 태블릿 — 600px 이상 */
+@media (min-width:600px){
+  .wrap{max-width:860px;padding:0 20px}
+  body{font-size:15px}
+  .press{min-height:44px}                 /* 손가락 기준 최소 크기 */
+  .hd h1{font-size:27px}
+  .hscroll{display:grid;grid-template-columns:repeat(2,1fr);overflow:visible}
+  .pcard{flex:auto;width:auto}
+  .sheet,.slip{padding:17px}
+}
+
+/* PC — 1024px 이상 */
+@media (min-width:1024px){
+  .wrap{max-width:1140px;padding:0 26px}
+  body{font-size:14px}
+  .hscroll{grid-template-columns:repeat(3,1fr)}
+  .press{min-height:38px}                 /* 마우스는 정확하다. 클 필요가 없다 */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  .two > *{min-width:0}
+}
+
+/* 아주 넓은 화면 — 1500px 이상 */
+@media (min-width:1500px){
+  .wrap{max-width:1320px}
+  .hscroll{grid-template-columns:repeat(4,1fr)}
+}
+
+/* 마우스가 있는 기기에서만 hover 를 준다 (터치에서 hover 는 눌린 채로 남는다) */
+@media (hover:hover) and (pointer:fine){
+  .press:hover{filter:brightness(1.06)}
+  .drawer .dh:hover{background:rgba(255,255,255,.04)}
+}
+
+/* 새 판이 올라왔을 때 알리는 띠 */
+.newver{position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:#EDE9DF;color:#1C2B27;padding:13px 16px;display:none;
+  align-items:center;gap:12px;font-size:12.5px;
+  box-shadow:0 -6px 20px rgba(0,0,0,.35)}
+.newver.on{display:flex}
+.newver b{flex:1}
+.newver button{font-family:inherit;font-weight:700;font-size:12px;border:0;border-radius:6px;
+  padding:9px 15px;background:#3E7A9B;color:#fff;cursor:pointer}
 </style>
 </head>
 <body>
@@ -212,6 +263,7 @@ body{margin:0;padding:0 0 40px;
   <div class="hd">
     <div><div class="eb">AGENT MANAGER</div><h1>에이전트 매니저</h1></div>
     <div class="now" id="clock"></div>
+    <div class="ver" id="vertag"></div>
     <a class="gear" href="./settings.html" title="설정">⚙️</a>
   </div>
   <div class="summary" id="summary"></div>
@@ -240,13 +292,13 @@ const TEAM = {
   ops:         { nm:"오세라", rl:"총괄실 · 비서",            tags:["조율","일정","발행"] },
   creation:    { nm:"이서연", rl:"글1 이야기팀 · 콘텐츠 디렉터", tags:["주제","톤","총괄"] },
   strategy:    { nm:"한지우", rl:"글2 이야기팀 · 카피라이터",   tags:["후킹","캡션","해시태그"] },
-  advisory:    { nm:"정유진", rl:"글3 이야기팀 · 블로그 작가",   tags:["SEO","장문","검수"] },
+  advisory:    { nm:"정유진", rl:"고1 고객팀 · CS 매니저",      tags:["카톡 응대","친구 관리","재구매"] },
   publishing:  { nm:"임채원", rl:"필1 필름팀 · 영상 PD",       tags:["영상기획","연출"] },
   scout:       { nm:"서다은", rl:"필2 필름팀 · 대본 작가",      tags:["대본","트렌드"] },
-  editing:     { nm:"노아라", rl:"필3 필름팀 · 편집·썸네일",     tags:["편집","썸네일"] },
+  editing:     { nm:"노아라", rl:"디3 디자인팀 · 웹 퍼블리셔",    tags:["구현","반응형","검수"] },
   monetization:{ nm:"윤소희", rl:"디1 디자인팀 · 아트 디렉터",   tags:["비주얼","컨셉"] },
   analytics:   { nm:"강민서", rl:"디2 디자인팀 · 웹 디자이너",   tags:["상세페이지","레이아웃"] },
-  graphic:     { nm:"오하늘", rl:"디3 디자인팀 · 그래픽 디자이너", tags:["카드뉴스","배너"] }
+  graphic:     { nm:"오하늘", rl:"디4 디자인팀 · 그래픽 디자이너", tags:["카드뉴스","배너"] }
 };
 const KEYS  = Object.keys(TEAM);
 const BENCH = KEYS.filter(k=>k!=="ops");   // 총괄은 벤치에 앉지 않는다
@@ -281,22 +333,23 @@ function ownerOf(row){
   const t = (row.target_channel||"") + " " + (row.topic||"");
   if(/홈페이지|랜딩|웹|상세|상품/.test(t))      return "analytics";
   if(/스레드|threads/i.test(t))                return "strategy";
-  if(/블로그|카페|네이버|티스토리/.test(t))      return "advisory";
+  if(/카카오|카톡|문의|응대|고객/.test(t))       return "advisory";
+  if(/블로그|카페|네이버|티스토리/.test(t))      return "creation";
   if(/유튜브|영상|쇼츠|릴스/.test(t))           return "publishing";
   if(/인스타|카드뉴스|썸네일|배너/.test(t))      return "monetization";
   return "ops";
 }
 function writerOf(row){
   const t = (row.target_channel||"") + " " + (row.topic||"");
-  if(/블로그|카페|네이버|티스토리/.test(t))      return "advisory";
+  if(/블로그|카페|네이버|티스토리/.test(t))      return "creation";
   if(/유튜브|영상|쇼츠|릴스/.test(t))           return "scout";
   return "strategy";
 }
 /* 단계마다 실제로 손을 대는 사람이 다르다 */
 const STAGE_WHO = {
   queued:"ops", research:"scout", director:"creation", write:writerOf,
-  critic:"advisory", crossjudge:"ops", adapt:"strategy", cards:"graphic",
-  page:"analytics", design:"monetization", build:"analytics",
+  critic:"ops", crossjudge:"ops", adapt:"strategy", cards:"graphic",
+  page:"analytics", design:"monetization", build:"editing", publishing_check:"editing",
   threads:"strategy", done:"ops"
 };
 function whoOf(row){
@@ -319,7 +372,7 @@ function faceOf(key, cls){
 const STAGE_KR = { queued:"대기", research:"자료 읽는 중", director:"기준 세우는 중",
   write:"원고 쓰는 중", critic:"검수 중", crossjudge:"판단 검증 중", adapt:"채널별 재가공",
   cards:"카드뉴스 구성", page:"페이지 구성안", design:"디자인 방향", build:"페이지 제작",
-  threads:"스레드 체인", done:"마무리" };
+  publishing:"퍼블리셔 점검 중", threads:"스레드 체인", done:"마무리" };
 
 let TOKEN = "";
 try{ TOKEN = localStorage.getItem("authToken") || ""; }catch(e){}
@@ -405,7 +458,7 @@ function askCard(r){
       <span class="waitfor" style="color:#8A6D1F">${ago(r.created_at)}</span></div>
     <div class="say">${esc(r.topic)} 진행 중 막혔어요.<br><b>${esc(q)}</b></div>
     <div class="ansin">
-      <input placeholder="답을 적어 주세요 · 모르면 비워두세요" data-ansfor="${r.generation_id}">
+      <input placeholder="답을 적어 주세요 · 모르면 그냥 보내기" data-ansfor="${r.generation_id}">
       <button class="press p-blue" data-answer="${r.generation_id}">보내기</button>
     </div>
     ${qs.length>1?`<div class="rest">답하면 다음 걸 여쭐게요 · 남은 질문 ${qs.length-1}개</div>`:""}
@@ -570,9 +623,9 @@ function viewSheet(r){
   if(pend){
     h += `<div class="sheet" style="background:rgba(237,233,223,.94)">
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="press p-ink" data-appredit="${r.generation_id}"><span>고쳐서 결재</span></button>
-        <button class="press p-plain" data-approve="${r.generation_id}">그대로 결재</button>
+        <button class="press p-ink" data-appredit="${r.generation_id}"><span>결재</span></button>
       </div>
+      <div class="vmeta" style="color:#6B7A74;margin-top:7px">위에서 고친 내용이 그대로 함께 넘어갑니다.</div>
       <input type="text" id="rejwhy" placeholder="반려 사유 — 이것도 배움이 된다"
         style="width:100%;margin-top:11px;font-size:12px;font-family:inherit;color:var(--ink);
         background:#fff;border:1px solid rgba(28,43,39,.2);border-radius:6px;padding:9px 10px">
@@ -772,8 +825,10 @@ document.addEventListener("click", async (e)=>{
     const d = await api("/api/content/approve",{method:"POST",body:JSON.stringify({
       generation_id:id, action:"approve", edited })});
     if(d.ok){
-      const pct = d.edit_distance!=null ? Math.round(d.edit_distance*100) : null;
-      toast(pct ? `결재했습니다 · ${pct}% 고침 — 배움으로 올립니다` : "결재했습니다");
+      const pct = d.edit_distance!=null ? Math.round(d.edit_distance*100) : 0;
+      toast(pct>=5 ? `결재했습니다 · ${pct}% 고침 — 배움으로 올립니다`
+                   : (pct>0 ? `결재했습니다 · ${pct}% 고침 (5% 미만은 배움으로 안 올라갑니다)`
+                            : "결재했습니다 · 고친 데 없음"));
       VIEW=null; await load(true);
     } else { toast(d.error||"실패"); t.disabled=false; }
     return;
@@ -790,19 +845,33 @@ document.addEventListener("click", async (e)=>{
   }
   if(t.dataset.approve){
     const id=t.dataset.approve;
+    // 편집칸이 열려 있으면 거기 적은 것을 반드시 함께 보낸다.
+    // 예전에는 '그대로 결재'가 사람이 고친 글을 조용히 버렸다.
+    const ta=$("#cp-main");
+    const edited=(ta && ta.value!=null) ? String(ta.value).trim() : "";
     t.disabled=true;
-    const d = await api("/api/content/approve",{method:"POST",body:JSON.stringify({generation_id:id,action:"approve"})});
-    if(d.ok){ toast("결재했습니다"); await load(true); } else { toast(d.error||"실패"); t.disabled=false; }
+    const d = await api("/api/content/approve",{method:"POST",
+      body:JSON.stringify(edited ? {generation_id:id,action:"approve",edited}
+                                 : {generation_id:id,action:"approve"})});
+    if(d.ok){
+      const pct = d.edit_distance!=null ? Math.round(d.edit_distance*100) : 0;
+      toast(pct>=5 ? `결재했습니다 · ${pct}% 고침 — 배움으로 올립니다`
+                   : (pct>0 ? `결재했습니다 · ${pct}% 고침 (5% 미만은 배움으로 안 올라갑니다)`
+                            : "결재했습니다 · 고친 데 없음"));
+      VIEW=null; await load(true);
+    } else { toast(d.error||"실패"); t.disabled=false; }
     return;
   }
   if(t.dataset.answer){
     const id=t.dataset.answer;
     const inp=document.querySelector(`[data-ansfor="${id}"]`);
     const v=(inp&&inp.value||"").trim();
-    if(!v){ toast("답을 적어 주세요"); return; }
+    // 비워서 보내면 '알아서 진행' 이다. 모르는 걸 억지로 적게 하지 않는다.
     t.disabled=true;
-    const d = await api("/api/pipeline/answer",{method:"POST",body:JSON.stringify({generation_id:id,answers:[v]})});
-    if(d.ok){ toast("답변을 반영해 다시 만듭니다"); if(inp) inp.blur(); await load(true); } else { toast(d.error||"실패"); t.disabled=false; }
+    const d = await api("/api/pipeline/answer",{method:"POST",
+      body:JSON.stringify({ generation_id:id, answers: v ? [v] : [] })});
+    if(d.ok){ toast(v?"답변을 반영해 다시 만듭니다":"모르는 부분은 빼고 진행합니다"); if(inp) inp.blur(); await load(true); }
+    else { toast(d.error||"실패"); t.disabled=false; }
     return;
   }
   if(t.dataset.call){
@@ -885,6 +954,46 @@ setInterval(()=>{
   if(typingNow()) return;          // 손이 자판에 있으면 건드리지 않는다
   if(running) load();
 }, 20000);
+
+/* ═══ 판 번호 확인 ═══
+   GitHub Pages 는 한 번 받은 화면을 오래 들고 있는다.
+   그래서 새로 올려도 폰에서는 옛 화면이 계속 뜬다.
+   자기 주소를 캐시 없이 다시 읽어 표식이 달라졌으면 알려준다. */
+const APP_VER = (document.querySelector('meta[name="app-version"]')||{}).content || "";
+let SRV_VER = "";
+
+async function checkVersions(){
+  // 서버 판 번호
+  try{
+    const r = await fetch(API+"/api/version", { cache:"no-store" });
+    const d = await r.json();
+    SRV_VER = d && d.version || "";
+  }catch(e){}
+  // 내 화면이 최신인지 — 자기 파일을 다시 읽어 표식만 본다
+  try{
+    const r = await fetch(location.pathname + "?_=" + Date.now(), { cache:"no-store" });
+    const t = await r.text();
+    const m = t.match(/name="app-version"\s+content="([^"]+)"/);
+    if (m && m[1] && APP_VER && m[1] !== APP_VER){
+      const el = document.getElementById("newver");
+      if (el) el.classList.add("on");
+    }
+  }catch(e){}
+  paintVersion();
+}
+function paintVersion(){
+  const el = document.getElementById("vertag");
+  if (!el) return;
+  const same = !SRV_VER || !APP_VER || SRV_VER === APP_VER;
+  el.innerHTML = APP_VER + (SRV_VER ? (" · 서버 " + SRV_VER) : "")
+    + (same ? "" : ' <span style="color:#C9A227">· 앱과 다름</span>');
+}
+setTimeout(checkVersions, 3000);
+setInterval(checkVersions, 10*60*1000);
 </script>
+<div class="newver" id="newver">
+  <b>새 판이 올라왔습니다. 새로고침하면 반영됩니다.</b>
+  <button onclick="location.reload(true)">새로고침</button>
+</div>
 </body>
 </html>
