@@ -137,6 +137,18 @@ body{margin:0;padding:0 0 40px;
 .tag{display:inline-block;font-size:9px;padding:2px 7px;border-radius:20px;
   background:rgba(255,255,255,.09);color:#9FB5AC;margin:4px 3px 0 0}
 
+/* 총괄석 — 늘 맨 위. 여기서 시키면 총괄이 부서에 나눠 준다 */
+.chief{background:var(--paper);color:var(--ink);border-radius:10px;padding:13px;margin:0 0 16px;
+  border-top:3px solid var(--seal);
+  box-shadow:0 12px 26px rgba(0,0,0,.42),inset 0 1px 0 #fff}
+.chief .th{display:flex;align-items:center;gap:11px;padding-bottom:11px;
+  border-bottom:1px solid rgba(28,43,39,.13)}
+.chief .rl{font-size:10px;color:var(--ink3)}
+.chief .nm{font-weight:700;font-size:14px}
+.chief .badge{margin-left:auto;font-size:9.5px;color:var(--seal);
+  border:1px solid rgba(178,58,50,.35);border-radius:20px;padding:4px 10px}
+.cwho{display:flex;align-items:center;gap:7px;margin:0 0 7px;font-size:10.5px;color:var(--ink3)}
+.cwho .ph{width:22px;height:22px;border-radius:5px}
 .talk{background:var(--paper);color:var(--ink);border-radius:9px;padding:13px;
   box-shadow:0 12px 26px rgba(0,0,0,.4),inset 0 1px 0 #fff}
 .th{display:flex;align-items:center;gap:11px;padding-bottom:11px;
@@ -214,11 +226,13 @@ const TEAM = {
   analytics:   { nm:"강민서", rl:"디2 디자인팀 · 웹 디자이너",   tags:["상세페이지","레이아웃"] },
   graphic:     { nm:"오하늘", rl:"디3 디자인팀 · 그래픽 디자이너", tags:["카드뉴스","배너"] }
 };
-const KEYS = Object.keys(TEAM);
+const KEYS  = Object.keys(TEAM);
+const BENCH = KEYS.filter(k=>k!=="ops");   // 총괄은 벤치에 앉지 않는다
 
 let BOARD = { live:[], done:[] };
 let OPEN  = {};           // 접힘 상태
 let TALK  = null;         // 열린 대화
+let CHIEF = { msgs:[], running:false };   // 총괄석 — 지시하면 부서로 넘어간다
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -373,6 +387,65 @@ function failRow(r){
 }
 
 
+function chiefBar(){
+  const p = TEAM.ops;
+  let h = `<div class="chief"><div class="th">${faceOf("ops","s56")}
+    <div><div class="nm">${p.nm}</div><div class="rl">${p.rl}</div></div>
+    <span class="badge">${CHIEF.running?"나누는 중":"총괄"}</span></div>`;
+  const ms = CHIEF.msgs.slice(-8);
+  if(!ms.length){
+    h += `<div class="bubble">무엇을 시킬까요.
+누구에게 줄지는 제가 정하겠습니다.</div>`;
+  } else {
+    ms.forEach(m=>{
+      const who = m.who && TEAM[m.who]
+        ? `<div class="cwho">${faceOf(m.who,"")}<b>${TEAM[m.who].nm}</b> ${TEAM[m.who].rl}</div>` : "";
+      h += `<div class="bubble ${m.me?"me":""}">${who}${esc(m.t)}</div>`;
+    });
+  }
+  h += `<div class="tin"><span style="font-size:15px;opacity:.35">✎</span>
+    <input id="cfin" placeholder="총괄에게 시킬 일"${CHIEF.running?" disabled":""}>
+    <button class="send press" id="cfGo"${CHIEF.running?" disabled":""}>▶</button></div></div>`;
+  return h;
+}
+
+/* 총괄에게 시킨다 → 서버의 총괄이 분담해 부서들이 순서대로 수행한다.
+   이름을 붙이지 않는 것이 핵심 — 이름을 붙이면 그 사람에게 직행한다. */
+async function chiefSay(v){
+  CHIEF.msgs.push({me:true, t:v});
+  CHIEF.msgs.push({t:"받았습니다. 누구에게 줄지 정하겠습니다…", pending:true});
+  CHIEF.running = true; render();
+  const set = (txt)=>{ const i=CHIEF.msgs.findIndex(m=>m.pending);
+    if(i>=0) CHIEF.msgs[i].t = txt; render(); };
+  const done = (txt)=>{ const i=CHIEF.msgs.findIndex(m=>m.pending);
+    if(i>=0) CHIEF.msgs[i] = { t:txt }; else CHIEF.msgs.push({t:txt}); };
+
+  const d = await api("/api/instruct",{method:"POST",
+    body:JSON.stringify({ instruction:v, source:"manager" })});
+  if(!d.ok || !d.id){ done(d.error||"전달하지 못했습니다."); CHIEF.running=false; render(); return; }
+
+  for(let n=0; n<120; n++){
+    await new Promise(r=>setTimeout(r, 2500));
+    const j = await api("/api/instruct/"+d.id);
+    if(!j.ok) continue;
+    if(j.status==="error"){ done("하다가 막혔습니다 — "+(j.error||"원인 불명")); break; }
+    if(j.status==="done"){
+      const ds = (j.depts||[]).filter(k=>TEAM[k]);
+      done((ds.length ? ds.map(k=>TEAM[k].nm).join(" · ")+"에게 넘겼습니다." : "제가 처리했습니다.")
+           + (j.plan ? "\n\n"+String(j.plan).trim() : ""));
+      (j.results||[]).forEach(r=>{
+        const t = String(r.text||"").trim();
+        if(t) CHIEF.msgs.push({ who:r.dept, t:t });
+      });
+      break;
+    }
+    set(j.progress ? String(j.progress) : "부서에 나누는 중…");
+  }
+  CHIEF.running = false;
+  if(CHIEF.msgs.length > 14) CHIEF.msgs = CHIEF.msgs.slice(-14);
+  render(); load();
+}
+
 function render(){
   const live=BOARD.live, done=BOARD.done;
   const seal = live.filter(r=>r.approval_status==="pending");
@@ -380,7 +453,7 @@ function render(){
   const run  = live.filter(r=>r.approval_status==="processing");
   const fail = live.filter(r=>r.approval_status==="failed");
   const busy = new Set([...seal,...ask,...run].map(whoOf));
-  const free = KEYS.filter(k=>!busy.has(k));
+  const free = BENCH.filter(k=>!busy.has(k));
 
   $("#summary").innerHTML =
     (seal.length?`<span class="chip c-seal">● 결재 ${seal.length}</span>`:"")
@@ -389,7 +462,7 @@ function render(){
   + (done.length?`<span class="chip c-done">✓ 완료 ${done.length}</span>`:"")
   + `<span class="chip c-idle">○ 여유 ${free.length}</span>`;
 
-  let h = "";
+  let h = chiefBar();
 
   if(seal.length){
     h += `<div class="sect"><b>결재</b> · ${seal.length}건 · 오래 기다린 순</div>`;
@@ -442,7 +515,7 @@ function render(){
   /* 부를 수 있는 자리 */
   h += `<div class="sect"><b>부를 수 있는 자리</b> · ${free.length}</div>
     <div class="bench"><div class="hscroll">`;
-  (free.length?free:KEYS).forEach(k=>{
+  (free.length?free:BENCH).forEach(k=>{
     const p=TEAM[k];
     h += `<div class="pcard" data-call="${k}">
       <div style="display:flex;gap:10px">${faceOf(k,"s60")}
@@ -487,13 +560,20 @@ function render(){
 
 /* ── 조작 ── */
 document.addEventListener("click", async (e)=>{
-  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],#njGo,[data-chn]");
+  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],#njGo,#cfGo,[data-chn]");
   if(!t) return;
 
   if(t.dataset.chn!=null){ t.classList.toggle("on"); return; }
 
   if(t.dataset.toggle){ OPEN[t.dataset.toggle]=!OPEN[t.dataset.toggle]; render(); return; }
 
+  if(t.id==="cfGo"){
+    const inp=$("#cfin"); const v=(inp&&inp.value||"").trim();
+    if(!v){ toast("무엇을 시킬지 적어 주세요"); return; }
+    inp.value="";
+    await chiefSay(v);
+    return;
+  }
   if(t.dataset.approve){
     const id=t.dataset.approve;
     t.disabled=true;
@@ -571,12 +651,16 @@ document.addEventListener("keydown",(e)=>{
   if(e.key==="Enter" && e.target && e.target.id==="talkin"){
     const b=document.querySelector("[data-say]"); if(b) b.click();
   }
+  if(e.key==="Enter" && e.target && e.target.id==="cfin"){
+    const b=document.querySelector("#cfGo"); if(b) b.click();
+  }
 });
 
 tick(); setInterval(tick, 20000);
 load();
 /* 진행 중인 일이 있을 때만 갱신 — 없으면 화면이 조용하다 */
 setInterval(()=>{
+  if(CHIEF.running) return;
   const running = BOARD.live.some(r=>r.approval_status==="processing");
   const typing = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName)
                  && document.activeElement.value;
