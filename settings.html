@@ -797,8 +797,8 @@ async function loadReview(){
         ${esc(r.kind)} · ${r.chars.toLocaleString()}자${r.defects&&r.defects.length?` · 기계 지적 ${r.defects.length}건`:""}
         ${r.outcome ? (r.outcome==="right"?" · ✔ 맞았음":" · ✘ 틀렸음") : ""}</div>
       ${!r.outcome ? `<div class="acts" style="margin-top:8px">
-        <button class="press p-plain" data-rvok="${esc(r.id)}">판정이 맞았다</button>
-        <button class="press p-plain" data-rvno="${esc(r.id)}">틀렸다</button></div>` : ""}
+        <button class="press p-ghost" data-rvok="${esc(r.id)}">판정이 맞았다</button>
+        <button class="press p-ghost" data-rvno="${esc(r.id)}">틀렸다</button></div>` : ""}
     </div>`).join("");
   }
   $("#b-review").innerHTML = h;
@@ -823,7 +823,7 @@ function pxCard(p){
     ${(p.skipped||[]).length?`<div class="df">건너뜀 ${p.skipped.length}곳<br>· ${p.skipped.map(x=>esc(x.why)).join("<br>· ")}</div>`:""}
     <div class="acts" style="margin-top:10px">
       <button class="press p-blue" data-pxget="${esc(p.id)}|after">고친 파일 받기</button>
-      <button class="press p-plain" data-pxget="${esc(p.id)}|before">원래 파일 받기</button>
+      <button class="press p-ghost" data-pxget="${esc(p.id)}|before">원래 파일 받기</button>
     </div>
     <div class="mt" style="font-size:10px;color:#7E9A90;margin-top:8px">받은 내용을 GitHub 에 덮으면 적용된다. 되돌리려면 '원래 파일'을 다시 올리면 된다.</div>
   </div>`;
@@ -839,8 +839,8 @@ function rvCard(r, fresh){
     ${r.defects && r.defects.length ? `<div class="df">기계 점검 ${r.defects.length}건<br>· ${r.defects.map(esc).join("<br>· ")}</div>` : ""}
     <pre>${esc(String(r.text||"").replace(/^판정\s*[:：][^\n]*\n?/,""))}</pre>
     ${fresh?`<div class="acts" style="margin-top:10px">
-      <button class="press p-plain" data-rvok="${esc(r.id)}">판정이 맞았다</button>
-      <button class="press p-plain" data-rvno="${esc(r.id)}">틀렸다</button></div>`:""}
+      <button class="press p-ghost" data-rvok="${esc(r.id)}">판정이 맞았다</button>
+      <button class="press p-ghost" data-rvno="${esc(r.id)}">틀렸다</button></div>`:""}
   </div>`;
 }
 
