@@ -112,6 +112,21 @@ body{margin:0;padding:0 0 40px;
 .pip{height:3px;flex:1;border-radius:2px;background:rgba(255,255,255,.15)}
 .pip.d{background:var(--done)}.pip.c{background:var(--wait)}
 
+/* 결과물 보기 */
+.sheet{background:var(--paper3);color:var(--ink);border-radius:9px;padding:15px;margin-top:10px;
+  box-shadow:0 3px 0 rgba(0,0,0,.28),0 10px 22px rgba(0,0,0,.3)}
+.sheet h4{margin:0 0 9px;font-size:11px;color:var(--ink3);font-weight:600;
+  display:flex;align-items:center;gap:8px}
+.sheet h4 .cp{margin-left:auto;font-size:10.5px;color:#3E7A9B;border:1px solid rgba(62,122,155,.4);
+  border-radius:5px;padding:4px 10px;cursor:pointer;background:transparent;font-family:inherit}
+.sheet .body{font-size:12.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word}
+.vhd{display:flex;align-items:center;gap:11px;margin-bottom:4px}
+.vback{border:1px solid var(--line);background:transparent;color:#A9C0B7;border-radius:5px;
+  padding:8px 13px;font-size:11.5px;font-family:inherit;cursor:pointer}
+.vmeta{font-size:10px;color:#7E9A90;margin-top:5px}
+.cardn{border-top:1px dashed rgba(28,43,39,.2);padding-top:9px;margin-top:9px;font-size:12.5px;
+  line-height:1.7;white-space:pre-wrap}
+.cardn:first-of-type{border-top:0;padding-top:0;margin-top:0}
 .donebig{border:1px solid rgba(46,125,91,.32);background:rgba(46,125,91,.09);
   border-radius:8px;padding:11px;position:relative}
 .stmp{position:absolute;right:11px;top:11px;width:36px;height:36px;border-radius:50%;
@@ -239,7 +254,8 @@ const BENCH = KEYS.filter(k=>k!=="ops");   // 총괄은 벤치에 앉지 않는�
 let BOARD = { live:[], done:[] };
 let OPEN  = {};           // 접힘 상태
 let TALK  = null;         // 열린 대화
-let CHIEF = { msgs:[], running:false };   // 총괄석 — 지시하면 부서로 넘어간다
+let CHIEF = { msgs:[], running:false, jobId:null, since:0 };
+let VIEW  = null;         // 열어 본 결과물 (generation_id)   // 총괄석 — 지시하면 부서로 넘어간다
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -305,11 +321,32 @@ const STAGE_KR = { queued:"대기", research:"자료 읽는 중", director:"기�
   cards:"카드뉴스 구성", page:"페이지 구성안", design:"디자인 방향", build:"페이지 제작",
   threads:"스레드 체인", done:"마무리" };
 
-async function api(path, opts){
+let TOKEN = "";
+try{ TOKEN = localStorage.getItem("authToken") || ""; }catch(e){}
+async function unlock(){
+  const pw = window.prompt("비밀번호를 입력해 주세요");
+  if(!pw) return false;
+  try{
+    const r = await fetch(API+"/api/login",{method:"POST",
+      headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
+    const d = await r.json().catch(()=>null);
+    if(d && d.token){ TOKEN = d.token; try{ localStorage.setItem("authToken",TOKEN); }catch(e){} return true; }
+  }catch(e){}
+  toast("비밀번호가 맞지 않습니다");
+  return false;
+}
+async function api(path, opts, _retried){
   let r;
-  try{ r = await fetch(API+path, Object.assign({headers:{"Content-Type":"application/json"}}, opts||{})); }
+  const opt = Object.assign({}, opts||{});
+  opt.headers = Object.assign({"Content-Type":"application/json"},
+    TOKEN ? {"Authorization":"Bearer "+TOKEN} : {}, opt.headers||{});
+  try{ r = await fetch(API+path, opt); }
   catch(e){ return { ok:false, error:"서버에 닿지 못했습니다 — "+(e.message||"연결 실패") }; }
   let d=null; try{ d = await r.json(); }catch(e){ d=null; }
+  if(r.status===401 && !_retried){                     // 잠겨 있다 — 한 번만 열어 보고 다시 시도
+    if(await unlock()) return api(path, opts, true);
+    return { ok:false, status:401, error:"잠겨 있습니다" };
+  }
   if(!r.ok) return { ok:false, status:r.status, error:(d&&d.error)||("서버 오류 "+r.status) };
   if(!d) return { ok:false, error:"빈 응답" };
   if(d.ok===undefined) d.ok = true;
@@ -348,7 +385,7 @@ function sealBig(r){
       r.judgment_gap!=null?` · 교차 ${r.judgment_gap>0?"−":"+"}${Math.abs(r.judgment_gap)}`:""} · 재작성 ${r.revision_count??0}회</div>
     <div style="display:flex;gap:9px;margin-top:12px;align-items:center;flex-wrap:wrap">
       <button class="press p-ink" data-approve="${r.generation_id}"><span>결 재</span></button>
-      <button class="press p-plain" data-open="${r.generation_id}">내용 보기</button>
+      <button class="press p-plain" data-open="${r.generation_id}">읽고 고치기</button>
     </div></div>`;
 }
 function sealFold(r){
@@ -423,41 +460,157 @@ function renderChief(){
   if(btn) btn.disabled = CHIEF.running;
 }
 
+/* 총괄석은 새로고침을 견뎌야 한다. 서버는 계속 일하고 있는데 화면만 비면
+   사람은 일이 사라진 줄 안다. 대화와 진행 중인 작업 번호를 기기에 남긴다. */
+const CHIEF_KEY = "chief-v1";
+function saveChief(){
+  try{ localStorage.setItem(CHIEF_KEY, JSON.stringify({
+    msgs: CHIEF.msgs.slice(-14), running: CHIEF.running,
+    jobId: CHIEF.jobId, since: CHIEF.since })); }catch(e){}
+}
+function loadChief(){
+  try{
+    const d = JSON.parse(localStorage.getItem(CHIEF_KEY)||"null");
+    if(d && Array.isArray(d.msgs)) CHIEF = {
+      msgs:d.msgs, running:!!d.running, jobId:d.jobId||null, since:d.since||0 };
+  }catch(e){}
+}
+
 /* 총괄에게 시킨다 → 서버의 총괄이 분담해 부서들이 순서대로 수행한다.
    이름을 붙이지 않는 것이 핵심 — 이름을 붙이면 그 사람에게 직행한다. */
 async function chiefSay(v){
   CHIEF.msgs.push({me:true, t:v});
   CHIEF.msgs.push({t:"받았습니다. 누구에게 줄지 정하겠습니다…", pending:true});
-  CHIEF.running = true; renderChief();
-  const set = (txt)=>{ const i=CHIEF.msgs.findIndex(m=>m.pending);
-    if(i>=0) CHIEF.msgs[i].t = txt; renderChief(); };
-  const done = (txt)=>{ const i=CHIEF.msgs.findIndex(m=>m.pending);
-    if(i>=0) CHIEF.msgs[i] = { t:txt }; else CHIEF.msgs.push({t:txt}); };
+  CHIEF.running = true; CHIEF.since = Date.now(); CHIEF.jobId = null;
+  saveChief(); renderChief();
 
   const d = await api("/api/instruct",{method:"POST",
     body:JSON.stringify({ instruction:v, source:"manager" })});
-  if(!d.ok || !d.id){ done(d.error||"전달하지 못했습니다."); CHIEF.running=false; renderChief(); return; }
+  if(!d.ok || !d.id){ chiefDone(d.error||"전달하지 못했습니다."); return; }
+  CHIEF.jobId = d.id; saveChief();
+  await watchChief(d.id);
+}
 
-  for(let n=0; n<120; n++){
+function chiefSet(txt){
+  const i = CHIEF.msgs.findIndex(m=>m.pending);
+  if(i>=0) CHIEF.msgs[i].t = txt;
+  renderChief();
+}
+function chiefDone(txt){
+  const i = CHIEF.msgs.findIndex(m=>m.pending);
+  if(i>=0) CHIEF.msgs[i] = { t:txt }; else CHIEF.msgs.push({ t:txt });
+  CHIEF.running = false; CHIEF.jobId = null;
+  if(CHIEF.msgs.length > 14) CHIEF.msgs = CHIEF.msgs.slice(-14);
+  saveChief(); renderChief(); load();
+}
+
+/* 진행 중인 분담을 지켜본다. 새로고침 뒤에도 이 함수만 다시 붙이면 이어진다. */
+async function watchChief(id){
+  CHIEF.running = true; renderChief();
+  const MAX = 150;                    // 2.5초 x 150 ≈ 6분
+  for(let n=0; n<MAX; n++){
     await new Promise(r=>setTimeout(r, 2500));
-    const j = await api("/api/instruct/"+d.id);
+    const j = await api("/api/instruct/"+id);
+    if(j.status===404 || (!j.ok && j.status===404)){
+      chiefDone("총괄이 그 일을 기억하지 못합니다 — 서버가 다시 시작된 듯합니다. 다시 시켜 주세요.");
+      return;
+    }
     if(!j.ok) continue;
-    if(j.status==="error"){ done("하다가 막혔습니다 — "+(j.error||"원인 불명")); break; }
+    if(j.status==="error"){ chiefDone("하다가 막혔습니다 — "+(j.error||"원인 불명")); return; }
     if(j.status==="done"){
       const ds = (j.depts||[]).filter(k=>TEAM[k]);
-      done((ds.length ? ds.map(k=>TEAM[k].nm).join(" · ")+"에게 넘겼습니다." : "제가 처리했습니다.")
-           + (j.plan ? "\n\n"+String(j.plan).trim() : ""));
+      const head = (ds.length ? ds.map(k=>TEAM[k].nm).join(" · ")+"에게 넘겼습니다." : "제가 처리했습니다.")
+                 + (j.plan ? "\n\n"+String(j.plan).trim() : "");
+      const i = CHIEF.msgs.findIndex(m=>m.pending);
+      if(i>=0) CHIEF.msgs[i] = { t:head }; else CHIEF.msgs.push({ t:head });
       (j.results||[]).forEach(r=>{
         const t = String(r.text||"").trim();
         if(t) CHIEF.msgs.push({ who:r.dept, t:t });
       });
-      break;
+      CHIEF.running = false; CHIEF.jobId = null;
+      if(CHIEF.msgs.length > 14) CHIEF.msgs = CHIEF.msgs.slice(-14);
+      saveChief(); renderChief(); load();
+      return;
     }
-    set(j.progress ? String(j.progress) : "부서에 나누는 중…");
+    chiefSet(j.progress ? String(j.progress) : "부서에 나누는 중…");
+    if(n % 4 === 0) saveChief();
   }
-  CHIEF.running = false;
-  if(CHIEF.msgs.length > 14) CHIEF.msgs = CHIEF.msgs.slice(-14);
-  renderChief(); load();
+  chiefDone("아직 끝나지 않았습니다. 잠시 뒤 새로고침하면 이어서 보여 드리겠습니다.");
+}
+
+
+function textOf(r){ return String(r.human_modified_output || r.ai_raw_output || "").trim(); }
+function cardText(c){
+  if(typeof c === "string") return c;
+  if(!c || typeof c !== "object") return "";
+  return [c.title, c.body || c.text || c.copy || c.caption].filter(Boolean).join("\n");
+}
+function viewSheet(r){
+  const k = whoOf(r), p = TEAM[k];
+  const when = r.approved_at || r.created_at;
+  let h = `<div class="vhd"><button class="vback" id="vback">← 목록</button>
+    ${faceOf(k,"s36")}<div><div class="nm" style="font-size:13px">${p.nm}</div>
+    <div class="rl" style="font-size:10px;color:#7E9A90">${p.rl}</div></div></div>
+    <div style="font-size:15px;font-weight:600;margin-top:9px">${esc(r.topic||"")}</div>
+    <div class="vmeta">${ago(when)} 전${r.target_channel?` · ${esc(r.target_channel)}`:""}${
+      r.edit_distance!=null?` · 수정률 ${Math.round(r.edit_distance*100)}%`:""}${
+      r.creativity_score!=null?` · 창의 ${Math.round(r.creativity_score)}점`:""}</div>`;
+
+  const body = textOf(r);
+  const pend = r.approval_status === "pending";
+  h += `<div class="sheet"><h4>원고
+    <button class="cp" data-copy="main">복사</button></h4>
+    ${pend
+      ? `<textarea id="cp-main" rows="14" style="width:100%;font-size:12.5px;line-height:1.75;
+           font-family:inherit;color:var(--ink);background:#fff;border:1px solid rgba(28,43,39,.2);
+           border-radius:6px;padding:11px;resize:vertical">${esc(body)}</textarea>
+         <div class="vmeta" style="color:#6B7A74">여기서 고친 뒤 결재하면, 무엇을 왜 고쳤는지가 배움으로 올라간다.</div>`
+      : `<div class="body" id="cp-main">${esc(body||"(비어 있음)")}</div>`}
+    </div>`;
+  if(pend){
+    h += `<div class="sheet" style="background:rgba(237,233,223,.94)">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="press p-ink" data-appredit="${r.generation_id}"><span>고쳐서 결재</span></button>
+        <button class="press p-plain" data-approve="${r.generation_id}">그대로 결재</button>
+      </div>
+      <input type="text" id="rejwhy" placeholder="반려 사유 — 이것도 배움이 된다"
+        style="width:100%;margin-top:11px;font-size:12px;font-family:inherit;color:var(--ink);
+        background:#fff;border:1px solid rgba(28,43,39,.2);border-radius:6px;padding:9px 10px">
+      <div style="margin-top:9px"><button class="press p-plain" data-reject="${r.generation_id}">반려</button></div>
+    </div>`;
+  }
+
+  const co = r.channel_outputs;
+  if(co && typeof co === "object"){
+    Object.keys(co).forEach((ch,i)=>{
+      const t = String(co[ch]||"").trim(); if(!t) return;
+      h += `<div class="sheet"><h4>${esc(ch)}
+        <button class="cp" data-copy="ch${i}">복사</button></h4>
+        <div class="body" id="cp-ch${i}">${esc(t)}</div></div>`;
+    });
+  }
+  if(Array.isArray(r.threads_chain) && r.threads_chain.length){
+    h += `<div class="sheet"><h4>스레드 ${r.threads_chain.length}편
+      <button class="cp" data-copy="th">복사</button></h4>
+      <div class="body" id="cp-th">${esc(r.threads_chain.map((t,i)=>(i+1)+". "+t).join("\n\n"))}</div></div>`;
+  }
+  if(Array.isArray(r.cards) && r.cards.length){
+    h += `<div class="sheet"><h4>카드뉴스 ${r.cards.length}장
+      <button class="cp" data-copy="cd">복사</button></h4>
+      <div id="cp-cd">${r.cards.map((c,i)=>
+        `<div class="cardn"><b style="font-size:10px;color:var(--ink3)">${i+1}</b>
+         ${esc(cardText(c))}</div>`).join("")}</div></div>`;
+  }
+  if(r.page_spec && typeof r.page_spec === "object"){
+    const secs = Array.isArray(r.page_spec.sections) ? r.page_spec.sections : null;
+    const txt = secs
+      ? secs.map((x,i)=>(i+1)+". "+(typeof x==="string"?x:[x.name||x.title, x.purpose||x.desc||x.copy].filter(Boolean).join(" — "))).join("\n")
+      : JSON.stringify(r.page_spec, null, 2);
+    h += `<div class="sheet"><h4>홈페이지 구성안
+      <button class="cp" data-copy="pg">복사</button></h4>
+      <div class="body" id="cp-pg">${esc(txt)}</div></div>`;
+  }
+  return h;
 }
 
 function render(){
@@ -475,6 +628,13 @@ function render(){
   + (run.length ?`<span class="chip c-run">● 진행 ${run.length}</span>`:"")
   + (done.length?`<span class="chip c-done">✓ 완료 ${done.length}</span>`:"")
   + `<span class="chip c-idle">○ 여유 ${free.length}</span>`;
+
+  if(VIEW){
+    const all = BOARD.live.concat(BOARD.done);
+    const row = all.find(r=>String(r.generation_id)===String(VIEW));
+    if(row){ $("#board").innerHTML = viewSheet(row); return; }
+    VIEW = null;
+  }
 
   let h = "";
 
@@ -509,7 +669,9 @@ function render(){
         <div><div class="nm">${p0.nm}</div><div class="rl" style="color:#7E9A90">${p0.rl}</div></div></div>
       <div style="font-size:12px;margin-top:9px">${esc(d0.topic)}</div>
       <div style="font-size:9.5px;color:#7FC7A5;margin-top:4px">${ago(d0.approved_at)} 전${
-        d0.edit_distance!=null?` · 수정률 ${Math.round(d0.edit_distance*100)}%`:""}</div></div>`;
+        d0.edit_distance!=null?` · 수정률 ${Math.round(d0.edit_distance*100)}%`:""}</div>
+      <button class="press p-plain" style="margin-top:10px;padding:8px 14px;font-size:11.5px"
+        data-open="${d0.generation_id}">내용 보기</button></div>`;
     if(done.length>1){
       const rest=done.slice(1);
       h += `<div class="donestrip" data-toggle="done">
@@ -574,18 +736,56 @@ function render(){
 
 /* ── 조작 ── */
 document.addEventListener("click", async (e)=>{
-  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],#njGo,#cfGo,[data-chn]");
+  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#cfGo,[data-chn]");
   if(!t) return;
 
   if(t.dataset.chn!=null){ t.classList.toggle("on"); return; }
 
   if(t.dataset.toggle){ OPEN[t.dataset.toggle]=!OPEN[t.dataset.toggle]; render(); return; }
 
+  if(t.dataset.open){ VIEW = t.dataset.open; render(); window.scrollTo({top:0,behavior:"smooth"}); return; }
+  if(t.id==="vback"){ VIEW = null; render(); return; }
+  if(t.dataset.copy){
+    const el = $("#cp-"+t.dataset.copy);
+    const txt = el ? (el.value != null ? el.value : (el.innerText || el.textContent || "")) : "";
+    if(!txt){ toast("복사할 내용이 없습니다"); return; }
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(txt);
+      else { const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta);
+             ta.select(); document.execCommand("copy"); document.body.removeChild(ta); }
+      toast("복사했습니다");
+    }catch(err){ toast("복사하지 못했습니다"); }
+    return;
+  }
   if(t.id==="cfGo"){
     const inp=$("#cfin"); const v=(inp&&inp.value||"").trim();
     if(!v){ toast("무엇을 시킬지 적어 주세요"); return; }
     inp.value="";
     await chiefSay(v);
+    return;
+  }
+  if(t.dataset.appredit){
+    const id=t.dataset.appredit, ta=$("#cp-main");
+    const edited=(ta && ta.value || "").trim();
+    if(!edited){ toast("원고가 비어 있습니다"); return; }
+    t.disabled=true;
+    const d = await api("/api/content/approve",{method:"POST",body:JSON.stringify({
+      generation_id:id, action:"approve", edited })});
+    if(d.ok){
+      const pct = d.edit_distance!=null ? Math.round(d.edit_distance*100) : null;
+      toast(pct ? `결재했습니다 · ${pct}% 고침 — 배움으로 올립니다` : "결재했습니다");
+      VIEW=null; await load(true);
+    } else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.dataset.reject){
+    const id=t.dataset.reject, why=($("#rejwhy") && $("#rejwhy").value || "").trim();
+    if(!why){ toast("반려 사유를 적어 주세요 — 이유가 곧 다음 규칙입니다"); return; }
+    t.disabled=true;
+    const d = await api("/api/content/approve",{method:"POST",body:JSON.stringify({
+      generation_id:id, action:"reject", reason:why })});
+    if(d.ok){ toast("반려했습니다 · 사유는 학습 검토로 올라갑니다"); VIEW=null; await load(true); }
+    else { toast(d.error||"실패"); t.disabled=false; }
     return;
   }
   if(t.dataset.approve){
@@ -672,11 +872,15 @@ document.addEventListener("keydown",(e)=>{
 });
 
 tick(); setInterval(tick, 20000);
+loadChief();
 renderChief();
 load();
+/* 새로고침 전에 돌리던 분담이 있으면 다시 붙는다 */
+if(CHIEF.running && CHIEF.jobId) watchChief(CHIEF.jobId);
+else if(CHIEF.running){ CHIEF.running=false; saveChief(); renderChief(); }
 /* 진행 중인 일이 있을 때만 갱신 — 없으면 화면이 조용하다 */
 setInterval(()=>{
-  if(CHIEF.running) return;
+  if(CHIEF.running || VIEW) return;
   const running = BOARD.live.some(r=>r.approval_status==="processing");
   if(typingNow()) return;          // 손이 자판에 있으면 건드리지 않는다
   if(running) load();

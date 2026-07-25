@@ -84,6 +84,58 @@ label.fl{display:block;font-size:10.5px;color:#7E9A90;margin:12px 0 5px}
 .ph .ini{display:flex;width:100%;height:100%;align-items:center;justify-content:center;
   font-weight:700;color:#CFE3DA;font-size:11px}
 
+/* 스위치 · 분절 버튼 */
+.togr{display:flex;align-items:center;gap:11px;padding:11px 0;cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,.07)}
+.togr:last-child{border-bottom:0}
+.togr b{font-size:12.5px;font-weight:600}
+.sub2{font-size:10.5px;color:#7E9A90;margin-top:3px;line-height:1.55}
+.sw{width:38px;height:22px;border-radius:20px;background:rgba(255,255,255,.14);
+  flex:0 0 38px;position:relative;transition:background .15s}
+.sw i{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;
+  background:#EDE9DF;display:block;transition:left .15s}
+.sw.on{background:#2E7D5B}
+.sw.on i{left:19px}
+.segs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}
+.sg{font-size:11.5px;padding:7px 13px;border-radius:6px;border:1px solid var(--line);
+  color:#A9C0B7;cursor:pointer}
+.sg.on{background:#EDE9DF;color:#1C2B27;border-color:#EDE9DF;font-weight:600}
+.fld{margin-top:14px}
+.fld .lb{font-size:11px;color:#A9C0B7;font-weight:600}
+.fld .ds{font-size:10.5px;color:#7E9A90;margin-top:3px;line-height:1.6}
+
+/* 성적표 */
+.prop{border:1px solid var(--line);border-radius:8px;padding:11px;margin-top:8px;
+  background:rgba(255,255,255,.03);cursor:pointer}
+.prop.on{border-color:#3E7A9B;background:rgba(62,122,155,.12)}
+.prop .pn{font-size:12.5px;font-weight:600;margin-bottom:5px}
+.prop .pd{font-size:10.5px;color:#9FB5AC;line-height:1.6}
+.sw2{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.sw2 i{width:16px;height:16px;border-radius:4px;display:block;border:1px solid rgba(255,255,255,.25)}
+.stg{display:flex;align-items:center;gap:7px;font-size:10.5px;color:#7E9A90;margin:10px 0 2px}
+.stg b{color:#A9C0B7}
+.grow{border:1px solid var(--line);border-radius:8px;padding:11px;margin-bottom:8px;
+  background:rgba(255,255,255,.03)}
+.grow .top{display:flex;align-items:center;gap:9px}
+.grow .nm2{font-size:12.5px;font-weight:600;flex:1}
+.grow .pt{font-family:'IBM Plex Mono',monospace;font-size:15px}
+.grow .bar{height:4px;border-radius:3px;background:rgba(255,255,255,.1);margin-top:9px;overflow:hidden}
+.grow .bar i{display:block;height:100%;background:#2E7D5B}
+.grow .gap{font-size:10.5px;color:#C9A227;margin-top:8px;line-height:1.6}
+.grow .sub3{font-size:10px;color:#7E9A90;margin-top:5px}
+.score{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}
+.score div{flex:1;min-width:74px;border:1px solid var(--line);border-radius:8px;padding:10px 9px;
+  background:rgba(255,255,255,.03)}
+.score b{display:block;font-size:19px;font-family:'IBM Plex Mono',monospace;margin-bottom:3px}
+.score span{font-size:9.5px;color:#7E9A90}
+.ab{display:flex;gap:8px;margin-top:10px}
+.ab>div{flex:1;background:#fff;border-radius:6px;padding:10px;font-size:11.5px;line-height:1.6;
+  max-height:190px;overflow-y:auto;white-space:pre-wrap;border:1px solid rgba(28,43,39,.15)}
+.abh{font-size:10px;color:var(--ink3);font-weight:700;margin-bottom:5px}
+.pay{display:flex;gap:8px;margin-top:9px}
+.pay span{flex:1;font-size:10.5px;border:1px solid rgba(28,43,39,.2);border-radius:5px;
+  padding:7px 9px;cursor:pointer;color:#5B6C66;text-align:center}
+.pay span.on{background:rgba(178,58,50,.1);border-color:var(--seal);color:var(--seal);font-weight:600}
 .empty{color:#6F8B82;font-size:11.5px;padding:16px 2px;text-align:center;line-height:1.7}
 .note{font-size:10.5px;color:#7E9A90;line-height:1.7;margin-top:10px}
 .row{display:flex;gap:8px;align-items:center}
@@ -100,6 +152,13 @@ label.fl{display:block;font-size:10.5px;color:#7E9A90;margin:12px 0 5px}
   <div class="hd">
     <div><div class="eb">SETTINGS</div><h1>설정</h1></div>
     <a class="back" href="./agent-manager.html">← 매니저</a>
+  </div>
+
+  <div class="drawer" data-d="growth">
+    <div class="dh"><span class="ic">📈</span>
+      <div><div class="tt">지능 성장</div><div class="sub">부서가 스스로 조사해 쌓은 기준을 총괄이 채점한다</div></div>
+      <span class="cnt" id="c-growth">…</span></div>
+    <div class="db" id="b-growth"></div>
   </div>
 
   <div class="drawer" data-d="learn">
@@ -130,8 +189,50 @@ label.fl{display:block;font-size:10.5px;color:#7E9A90;margin:12px 0 5px}
     <div class="db" id="b-sched"></div>
   </div>
 
-  <div class="note">아직 여기 없는 것 — 대결 평가 · 홈페이지 스튜디오 · 외부 서비스 등록.<br>
-    관제탑(Streamlit)에서 계속 쓰면 되고, 다음 차례로 옮긴다.</div>
+  <div class="drawer" data-d="duel">
+    <div class="dh"><span class="ic">⚔️</span>
+      <div><div class="tt">대결 평가</div><div class="sub">전문가 결과물과 눈 가리고 붙여 본다 — 점수가 아니라 승률</div></div>
+      <span class="cnt" id="c-duel">…</span></div>
+    <div class="db" id="b-duel"></div>
+  </div>
+
+  <div class="drawer" data-d="studio">
+    <div class="dh"><span class="ic">🌐</span>
+      <div><div class="tt">홈페이지 스튜디오</div><div class="sub">참고 사이트를 뜯어보고 방향을 정해 페이지를 만든다</div></div>
+      <span class="cnt" id="c-studio">…</span></div>
+    <div class="db" id="b-studio"></div>
+  </div>
+
+  <div class="drawer" data-d="quality">
+    <div class="dh"><span class="ic">🎚️</span>
+      <div><div class="tt">품질 기준</div><div class="sub">무엇을 통과시키고 무엇을 되돌릴지</div></div>
+      <span class="cnt" id="c-quality">…</span></div>
+    <div class="db" id="b-quality"></div>
+  </div>
+
+  <div class="drawer" data-d="auto">
+    <div class="dh"><span class="ic">🤖</span>
+      <div><div class="tt">자동 운영</div><div class="sub">사람이 없을 때 무엇을 스스로 할지</div></div>
+      <span class="cnt" id="c-auto">…</span></div>
+    <div class="db" id="b-auto"></div>
+  </div>
+
+  <div class="drawer" data-d="engine">
+    <div class="dh"><span class="ic">💰</span>
+      <div><div class="tt">엔진 · 비용</div><div class="sub">어느 AI로 일할지</div></div>
+      <span class="cnt" id="c-engine">…</span></div>
+    <div class="db" id="b-engine"></div>
+  </div>
+
+  <div class="drawer" data-d="svc">
+    <div class="dh"><span class="ic">🔑</span>
+      <div><div class="tt">외부 서비스</div><div class="sub">발행에 쓰는 키 — 잠금이 켜져 있어야 안전하다</div></div>
+      <span class="cnt" id="c-svc">…</span></div>
+    <div class="db" id="b-svc"></div>
+  </div>
+
+  <div class="note">여기 없는 것 — 브랜드 도면 · 레이아웃 규격 · 백업 · 환율/월 예산.<br>
+    화면 안에서만 쓰이는 값이라 v272 앱 설정에 남겨 뒀다.</div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -153,11 +254,32 @@ const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&l
 function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("on");
   clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove("on"), 2600); }
 
-async function api(path, opts){
+let TOKEN = "";
+try{ TOKEN = localStorage.getItem("authToken") || ""; }catch(e){}
+async function unlock(){
+  const pw = window.prompt("비밀번호를 입력해 주세요");
+  if(!pw) return false;
+  try{
+    const r = await fetch(API+"/api/login",{method:"POST",
+      headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
+    const d = await r.json().catch(()=>null);
+    if(d && d.token){ TOKEN = d.token; try{ localStorage.setItem("authToken",TOKEN); }catch(e){} return true; }
+  }catch(e){}
+  toast("비밀번호가 맞지 않습니다");
+  return false;
+}
+async function api(path, opts, _retried){
   let r;
-  try{ r = await fetch(API+path, Object.assign({headers:{"Content-Type":"application/json"}}, opts||{})); }
+  const opt = Object.assign({}, opts||{});
+  opt.headers = Object.assign({"Content-Type":"application/json"},
+    TOKEN ? {"Authorization":"Bearer "+TOKEN} : {}, opt.headers||{});
+  try{ r = await fetch(API+path, opt); }
   catch(e){ return { ok:false, error:"서버에 닿지 못했습니다 — "+(e.message||"연결 실패") }; }
   let d=null; try{ d = await r.json(); }catch(e){ d=null; }
+  if(r.status===401 && !_retried){                     // 잠겨 있다 — 한 번만 열어 보고 다시 시도
+    if(await unlock()) return api(path, opts, true);
+    return { ok:false, status:401, error:"잠겨 있습니다" };
+  }
   if(!r.ok) return { ok:false, status:r.status, error:(d&&d.error)||("서버 오류 "+r.status) };
   if(d==null) return { ok:false, error:"빈 응답" };
   if(Array.isArray(d)) return { ok:true, list:d };
@@ -282,7 +404,388 @@ async function loadSched(){
   $("#b-sched").innerHTML = form + list;
 }
 
-const LOADER = { learn:loadLearn, brand:loadBrand, rules:loadRules, sched:loadSched };
+
+/* ───────── 설정값 (부분 저장) ───────── */
+let SET = null;
+async function getSet(force){
+  if(SET && !force) return SET;
+  const d = await api("/api/settings");
+  SET = d.ok ? d : null;
+  return SET;
+}
+function pick(path){
+  const v = SET && SET.settings;
+  return path.split(".").reduce((o,k)=> (o==null?undefined:o[k]), v);
+}
+async function putSet(path, val){
+  const parts = path.split(".");
+  const patch = parts.length===1 ? { [parts[0]]: val } : { [parts[0]]: { [parts[1]]: val } };
+  const d = await api("/api/settings",{method:"POST",body:JSON.stringify(patch)});
+  if(!d.ok){ toast(d.error||"저장 실패"); return false; }
+  if(SET && SET.settings){
+    if(parts.length===1) SET.settings[parts[0]] = val;
+    else { SET.settings[parts[0]] = Object.assign({}, SET.settings[parts[0]]||{}); 
+           SET.settings[parts[0]][parts[1]] = val; }
+  }
+  toast("저장했습니다");
+  return true;
+}
+function tog(path, label, desc){
+  const on = !!pick(path);
+  return `<div class="togr" data-sk="${path}" data-sv='${JSON.stringify(!on)}'>
+    <span class="sw${on?" on":""}"><i></i></span>
+    <div><b>${label}</b>${desc?`<div class="sub2">${desc}</div>`:""}</div></div>`;
+}
+function seg(path, opts){
+  const cur = pick(path);
+  return `<div class="segs">${opts.map(o=>{
+    const on = String(o[1])===String(cur);
+    return `<span class="sg${on?" on":""}" data-sk="${path}" data-sv='${JSON.stringify(o[1])}'>${o[0]}</span>`;
+  }).join("")}</div>`;
+}
+function fld(lb, inner, ds){
+  return `<div class="fld"><div class="lb">${lb}</div>${ds?`<div class="ds">${ds}</div>`:""}${inner}</div>`;
+}
+
+async function loadQuality(){
+  $("#b-quality").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  if(!await getSet()){ $("#b-quality").innerHTML = `<div class="empty">불러오지 못했습니다</div>`; return; }
+  $("#c-quality").textContent = "기준 "+(pick("oseraMin")||80)+"%";
+  $("#b-quality").innerHTML =
+    tog("oseraGate","오세라 최종 검수","나가는 모든 완성본을 요구 이행률로 채점한다. 취향이 아니라 대조라 같은 결과물이면 늘 같은 점수가 나온다.")
+  + fld("통과 이행률", seg("oseraMin",[["70%",70],["80%",80],["90%",90],["95%",95]]),
+        "100%에 가까울수록 보완이 자주 돌아 비용이 오른다. 80%가 기본.")
+  + tog("viralGate","바이럴 점수 게이트","발행 전에 '이게 실제로 먹힐까'를 채점한다.")
+  + (pick("viralGate") ? fld("합격 기준", seg("viralMin",[["60점",60],["70점",70],["80점",80]])) : "")
+  + fld("부서 내부 QA", seg("designReviewLoops",[["끔",0],["1회",1],["2회",2],["3회",3]]),
+        "오세라에게 넘기기 전에 부서가 스스로 점검하는 횟수. 많을수록 품질↑ 비용↑.")
+  + fld("한 번에 넣는 규칙 수", seg("lessonInject",[["8개",8],["14개",14],["20개",20],["30개",30]]),
+        "못 박아 둔 규칙 중 몇 개를 프롬프트에 넣을지. 많이 넣으면 다른 지시가 묻힌다.");
+}
+
+async function loadAuto(){
+  $("#b-auto").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  if(!await getSet()){ $("#b-auto").innerHTML = `<div class="empty">불러오지 못했습니다</div>`; return; }
+  const every = +(pick("collect.everyMin")||0);
+  $("#c-auto").textContent = every>0 ? (every>=60 ? (every/60)+"시간마다" : every+"분마다") : "꺼짐";
+  $("#c-auto").className = "cnt";
+  $("#b-auto").innerHTML =
+    fld("자율수행 주기", seg("collect.everyMin",[["끔",0],["30분",30],["1시간",60],["3시간",180],["6시간",360]]),
+        "정해진 간격으로 부서들이 스스로 자료를 모으고 배운다. 근무 시간에만 돈다.")
+  + `<div class="slip" style="margin-top:12px">
+      <div class="mt">자율수행 때 줄 지시</div>
+      <textarea id="autoprompt" rows="2" placeholder="예: 고흥 홍보 플랫폼 자료수집 및 학습">${esc(pick("collect.prompt")||"")}</textarea>
+      <div class="acts"><button class="press p-blue" id="autopsave">저장</button></div>
+    </div>`
+  + tog("deliberate","협의 모드","지시를 받으면 부서들이 먼저 의견을 내고 총괄이 종합해 분담한다. 느리지만 더 낫다.")
+  + tog("semanticSearch","의미검색","키워드가 달라도 뜻이 통하면 과거 작업을 찾아 쓴다.")
+  + tog("safety.audit","발행 전 감사·법무 점검","저작권·광고법·정책 위반을 오세라가 먼저 훑는다.")
+  + `<div class="slip" style="margin-top:12px">
+      <div class="mt">하루 발행 한도 (0 = 무제한)</div>
+      <input type="text" id="daylimit" inputmode="numeric" value="${esc(String(pick("safety.dailyLimit")||0))}">
+      <div class="acts"><button class="press p-blue" id="daylimitsave">저장</button></div>
+    </div>`;
+}
+
+async function loadEngine(){
+  $("#b-engine").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  if(!await getSet()){ $("#b-engine").innerHTML = `<div class="empty">불러오지 못했습니다</div>`; return; }
+  const env = SET.env || {};
+  $("#c-engine").textContent = pick("freeLLMFirst") ? "무료 우선"
+    : (pick("workEngine")==="gemini" ? "Gemini" : "Claude");
+  $("#b-engine").innerHTML =
+    fld("직접 시킨 일의 엔진", seg("workEngine",[["Claude",  "claude"],["Gemini","gemini"]]),
+        "자율수행·예약은 늘 무료(Gemini)로 돈다. 이 설정은 사람이 직접 시킨 일에만 적용된다.")
+  + tog("freeLLMFirst","무료 우선 (NVIDIA)","콘텐츠 생성을 NVIDIA 무료 모델로 먼저 시도하고, 실패하면 되돌아온다."
+        + (env.nvidia ? "" : " <b style='color:#C9A227'>키가 등록돼 있지 않다</b>"))
+  + (pick("freeLLMFirst") ? `<div class="slip" style="margin-top:10px">
+      <div class="mt">모델 ID (비우면 기본값)</div>
+      <input type="text" id="nvmodel" placeholder="meta/llama-3.1-70b-instruct" value="${esc(pick("nvidiaModel")||"")}">
+      <div class="acts"><button class="press p-blue" id="nvsave">저장</button></div>
+    </div>` : "")
+  + tog("allowPaidFallback","유료 폴백 허용","무료 한도가 바닥나면 유료 키로 이어서 한다.")
+  + fld("리서치 모드", seg("researchMode",[["무료","free"],["유료","paid"]]),
+        "유료는 검색 한도가 크게 늘어난다"+(env.geminiPaid?"":" — 유료 키가 등록돼 있지 않다"))
+  + `<div class="note" style="margin-top:14px">환율·월 예산·백업은 아직 v272 앱 설정에 있다. 서버 ${esc(env.version||"")}</div>`;
+}
+
+
+
+
+/* ───────── 외부 서비스 ───────── */
+const SVC_TYPES = ["threads","instagram","youtube","naver","tistory","kakao","기타"];
+async function loadSvc(){
+  $("#b-svc").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  const d = await api("/api/services");
+  if(!d.ok){ $("#b-svc").innerHTML = `<div class="empty">${esc(d.error)}</div>`; $("#c-svc").textContent="—"; return; }
+  const rows = d.rows||[];
+  $("#c-svc").textContent = rows.length ? rows.filter(r=>r.is_active).length+"/"+rows.length+" 켜짐" : "없음";
+  $("#c-svc").className = "cnt" + (d.locked ? "" : " hot");
+
+  let h = d.locked
+    ? `<div class="note" style="margin:0 0 10px">🔒 잠금이 켜져 있다. 비밀번호를 아는 사람만 볼 수 있다.</div>`
+    : `<div class="slip" style="background:#F6E7E5">
+        <div class="bd" style="font-size:11.5px"><b>잠금이 꺼져 있다.</b> 이 주소를 아는 사람은 누구나 키를 넣고 지울 수 있다.
+        Render 환경변수에 <b>ADMIN_PASSWORD</b>와 <b>REQUIRE_AUTH=1</b>을 넣은 뒤 쓰는 걸 권한다.</div></div>`;
+
+  h += rows.map(r=>`<div class="slip">
+    <div class="mt"><b style="font-size:12px">${esc(r.service_name)}</b>
+      <span class="tagx">${esc(r.service_type)}</span>
+      <span style="margin-left:auto">${r.is_active?"켜짐":"꺼짐"}</span></div>
+    ${r.endpoint_url?`<div class="mt" style="margin-top:5px">${esc(r.endpoint_url.slice(0,60))}</div>`:""}
+    <div class="mt" style="margin-top:5px">키 ${esc(r.key_tail||"(없음)")}</div>
+    <div class="acts">
+      <button class="press p-plain" data-svtog="${esc(r.service_id)}|${r.is_active?"0":"1"}">${r.is_active?"끄기":"켜기"}</button>
+      <button class="press p-plain" data-svdel="${esc(r.service_id)}">지우기</button>
+    </div></div>`).join("");
+
+  h += `<div class="slip">
+    <label class="fl" style="color:var(--ink3)">새 서비스 이름</label>
+    <input type="text" id="svname" placeholder="예: 스레드 본계정">
+    <label class="fl" style="color:var(--ink3)">종류</label>
+    <select id="svtype">${SVC_TYPES.map(t=>`<option value="${t}">${t}</option>`).join("")}</select>
+    <label class="fl" style="color:var(--ink3)">주소 (선택)</label>
+    <input type="text" id="svurl" placeholder="https://...">
+    <label class="fl" style="color:var(--ink3)">키 · 토큰</label>
+    <input type="password" id="svkey" placeholder="붙여넣기">
+    <div class="acts"><button class="press p-blue" id="svadd">등록</button></div>
+    <div class="mt" style="margin-top:9px">키는 저장 뒤 다시 보여주지 않는다. 끝 4자리만 표시된다.</div>
+  </div>`;
+  $("#b-svc").innerHTML = h;
+}
+
+/* ───────── 홈페이지 스튜디오 ───────── */
+let STU = { id:null, row:null, poll:null };
+const STU_STAGE = { analyzing:"참고 사이트 뜯어보는 중", proposing:"방향 고르는 중",
+  chosen:"방향 정해짐", building:"페이지 만드는 중", done:"완성", revising:"고치는 중" };
+
+async function loadStudio(){
+  $("#b-studio").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  if(STU.id){ await stuDraw(); return; }
+  const d = await api("/api/studio/get");
+  if(!d.ok){ $("#b-studio").innerHTML = `<div class="empty">${esc(d.error)}</div>`; $("#c-studio").textContent="—"; return; }
+  const rows = d.rows||[];
+  $("#c-studio").textContent = rows.length ? rows.length+"건" : "없음";
+  $("#c-studio").className = "cnt";
+  $("#b-studio").innerHTML = `<div class="slip">
+      <label class="fl" style="color:var(--ink3)">무엇을 만들까</label>
+      <input type="text" id="stopic2" placeholder="예: 고흥 유자 농장 소개 홈페이지">
+      <label class="fl" style="color:var(--ink3)">참고할 사이트 (선택 · 한 줄에 하나, 최대 3개)</label>
+      <textarea id="sref" rows="3" placeholder="https://..."></textarea>
+      <div class="acts"><button class="press p-blue" id="sstart">시작</button></div>
+      <div class="mt" style="margin-top:9px">참고 사이트의 구조만 뜯어본다. 베끼지 않는다.</div>
+    </div>`
+    + (rows.length ? `<div class="fld"><div class="lb">지난 작업</div></div>` + rows.map(r=>
+        `<div class="grow" data-stu="${esc(r.session_id)}" style="cursor:pointer">
+          <div class="top"><span class="nm2">${esc(String(r.topic||"").slice(0,40))}</span>
+          <span class="sub3">${esc(STU_STAGE[r.status]||r.status||"")}</span></div>
+          <div class="sub3">${ago(r.updated_at||r.created_at)}</div></div>`).join("") : "");
+}
+
+async function stuOpen(id){
+  STU.id = id; STU.row = null;
+  $("#b-studio").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  await stuDraw();
+}
+async function stuDraw(){
+  const d = await api("/api/studio/get?id="+encodeURIComponent(STU.id));
+  if(!d.ok || !d.row){ $("#b-studio").innerHTML = `<div class="empty">${esc(d.error||"세션을 찾지 못했습니다")}</div>`; return; }
+  const r = STU.row = d.row;
+  const st = r.status||"";
+  let h = `<div class="stg"><button class="press p-ghost" id="sback">← 목록</button>
+    <b>${esc(String(r.topic||"").slice(0,40))}</b> · ${esc(STU_STAGE[st]||st)}</div>`;
+
+  // 대화
+  (Array.isArray(r.messages)?r.messages.slice(-6):[]).forEach(m=>{
+    h += `<div class="slip" style="${m.role==="user"?"background:#DDE7E3":""}">
+      <div class="bd" style="font-size:12px">${esc(String(m.text||"").slice(0,900))}</div></div>`;
+  });
+
+  // 방향 후보
+  if(Array.isArray(r.proposals) && r.proposals.length && !r.chosen){
+    h += `<div class="fld"><div class="lb">방향 ${r.proposals.length}가지</div>
+      <div class="ds">마음에 드는 쪽을 누르거나, 아래에 고칠 점을 적어 말해도 된다.</div></div>`;
+    r.proposals.forEach((p,i)=>{
+      const cols = Array.isArray(p.color) ? p.color : [];
+      h += `<div class="prop" data-spick="${i}">
+        <div class="pn">${i+1}. ${esc(p.name||"이름 없음")}</div>
+        ${p.layout?`<div class="pd">${esc(String(p.layout).slice(0,160))}</div>`:""}
+        ${p.signature?`<div class="pd" style="margin-top:4px">특징 · ${esc(String(p.signature).slice(0,120))}</div>`:""}
+        ${cols.length?`<div class="sw2">${cols.slice(0,6).map(c=>
+          `<i style="background:${esc(c.hex||"#888")}"></i>`).join("")}</div>`:""}
+      </div>`;
+    });
+  }
+
+  // 확정된 방향
+  if(r.chosen){
+    const c = r.chosen, cols = Array.isArray(c.color)?c.color:[];
+    h += `<div class="slip">
+      <div class="mt"><b style="font-size:12px">확정 · ${esc(c.name||"")}</b></div>
+      ${c.layout?`<div class="bd" style="font-size:11.5px">${esc(c.layout)}</div>`:""}
+      ${cols.length?`<div class="sw2">${cols.map(x=>
+        `<i style="background:${esc(x.hex||"#888")};border-color:rgba(28,43,39,.2)"></i>`).join("")}</div>`:""}
+    </div>`;
+  }
+
+  // 결과
+  if(r.html){
+    h += `<div class="fld"><div class="lb">완성본 ${Math.round(String(r.html).length/1024)}KB</div></div>
+      <div class="acts">
+        <button class="press p-blue" id="sopen">새 창에서 보기</button>
+        <button class="press p-plain" id="scopy">HTML 복사</button>
+      </div>
+      <textarea id="cp-html" style="display:none">${esc(r.html)}</textarea>`;
+  }
+
+  // 말 걸기
+  const busy = (st==="analyzing"||st==="building"||st==="revising");
+  h += `<div class="slip" style="margin-top:12px">
+    <input type="text" id="smsg" placeholder="${busy?"진행 중입니다…":(r.html?"고칠 점을 말해 주세요":"고르거나 고칠 점을 말해 주세요")}"${busy?" disabled":""}>
+    <div class="acts">
+      <button class="press p-blue" id="ssay"${busy?" disabled":""}>보내기</button>
+      ${(r.chosen && !r.html) ? `<button class="press p-ink" id="sbuild"><span>이 방향으로 만들기</span></button>` : ""}
+      ${r.html ? `<button class="press p-plain" id="srev">고쳐 달라기</button>` : ""}
+    </div></div>`;
+
+  $("#b-studio").innerHTML = h;
+
+  // 진행 중이면 스스로 다시 본다
+  clearTimeout(STU.poll);
+  if(busy) STU.poll = setTimeout(()=>{ if(STU.id) stuDraw(); }, 4000);
+}
+
+/* ───────── 지능 성장 ───────── */
+async function loadGrowth(){
+  $("#b-growth").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  const d = await api("/api/growth");
+  if(!d.ok){ $("#b-growth").innerHTML = `<div class="empty">${esc(d.error)}</div>`; $("#c-growth").textContent="—"; return; }
+  const rows = d.rows||[];
+  const learned = rows.filter(r=>r.has).length;
+  $("#c-growth").textContent = d.avgScore!=null ? d.avgScore+"점" : (learned+"/"+rows.length);
+  $("#c-growth").className = "cnt" + (d.avgScore!=null && d.avgScore<60 ? " hot" : "");
+
+  await getSet();
+  let h = `<div class="score">
+    <div><b>${d.avgScore!=null?d.avgScore:"—"}</b><span>총괄 평균 점수</span></div>
+    <div><b>${learned}/${rows.length}</b><span>품질 공식 보유</span></div>
+    <div><b>${d.todayDone||0}/${d.perDay||1}</b><span>오늘 학습</span></div>
+  </div>`;
+
+  h += fld("하루 몇 부서를 학습시킬까",
+      seg("benchmarkPerDay",[["1곳",1],["2곳",2],["3곳",3],["5곳",5]]),
+      `1곳이면 한 부서가 다시 배우기까지 ${rows.length}일이 걸린다. 자율수행이 돌 때마다 한 부서씩 나눠 돈다 — 한꺼번에 몰지 않는다.`);
+  h += tog("benchmarkLearnOn","벤치마크 학습","웹·유튜브에서 최고 사례를 조사해 품질 공식을 갱신한다.");
+  h += tog("knowledgeReviewOn","총괄 학습 점검","쌓인 기준이 실제로 쓸 수 있는지 총괄이 하루 한 번 채점하고, 다음 조사 과제를 지정한다. 무료 엔진으로 돈다.");
+  h += `<div class="acts" style="margin:12px 0 4px">
+    <button class="press p-blue" id="grev">지금 총괄이 점검</button></div>`;
+
+  rows.sort((a,b)=>(a.score==null?999:a.score)-(b.score==null?999:b.score));
+  h += rows.map(r=>`<div class="grow">
+    <div class="top">
+      <span class="nm2">${esc(r.name)}</span>
+      ${r.score!=null?`<span class="pt" style="color:${r.score>=75?"#7FC7A5":r.score>=55?"#C9A227":"#E39189"}">${r.score}</span>`
+        :`<span class="sub3">미점검</span>`}
+    </div>
+    <div class="bar"><i style="width:${r.score!=null?r.score:0}%"></i></div>
+    <div class="sub3">${r.has?`${r.chars.toLocaleString()}자 · 경험 ${r.exp}`:"아직 배운 것 없음"}${
+      r.benchmark?` · ${esc(String(r.benchmark).slice(0,26))}`:""}${
+      r.humanReviewed?` · 사람 승인 ${r.humanReviewed}회`:""}${
+      r.learnedAt?` · ${ago(r.learnedAt)}`:""}</div>
+    ${r.gap?`<div class="gap">다음 과제 · ${esc(r.gap.slice(0,90))}</div>`:""}
+  </div>`).join("");
+
+  h += `<div class="note">부서는 스스로 남긴 빈틈을 다음 조사 주제로 삼는다. 총괄이 점검하면 그 과제를 총괄이 다시 지정한다 — 사람이 매번 시키지 않아도 방향이 잡힌다.</div>`;
+  $("#b-growth").innerHTML = h;
+}
+
+/* ───────── 대결 평가 ───────── */
+let DUEL = { pending:[], pay:{} };
+const DELIVERABLES = [["홈페이지 구성안",3000000],["상세페이지 원고",500000],["블로그 원고 1건",150000],
+  ["인스타 카드뉴스 1세트",200000],["유튜브 대본 1편",300000],["직접 입력",0]];
+const won = n => n ? Number(n).toLocaleString("ko-KR")+"원" : "미설정";
+
+async function loadDuel(){
+  $("#b-duel").innerHTML = `<div class="empty">불러오는 중…</div>`;
+  const d = await api("/api/duels");
+  if(!d.ok){ $("#b-duel").innerHTML = `<div class="empty">${esc(d.error)}</div>`; $("#c-duel").textContent="—"; return; }
+  DUEL.pending = d.pending||[];
+  const st = d.stats||{};
+  $("#c-duel").textContent = DUEL.pending.length ? DUEL.pending.length+"건 판정" : (st.n ? Math.round(st.winRate*100)+"% 승률" : "없음");
+  $("#c-duel").className = "cnt" + (DUEL.pending.length?" hot":"");
+
+  let h = "";
+  if(st.n){
+    h += `<div class="score">
+      <div><b>${Math.round(st.winRate*100)}%</b><span>전체 승률 ${st.wins}/${st.n}</span></div>
+      <div><b>${Math.round(st.recentWinRate*100)}%</b><span>최근 ${st.recentN}전</span></div>
+      <div><b>${Math.round(st.payRateOurs*100)}%</b><span>우리 지불의사</span></div>
+      <div><b>${Math.round(st.payRateRef*100)}%</b><span>상대 지불의사</span></div>
+      ${st.criticN?`<div><b>${Math.round(st.criticAgreeRate*100)}%</b><span>검수 일치 ${st.criticN}전</span></div>`:""}
+    </div>`;
+    h += st.n>=10
+      ? `<div class="note">${st.winRate>=0.5
+          ? "전문가 결과물과 대등하거나 앞서고 있다."
+          : "아직 전문가 쪽이 우세하다. 진 판의 이유가 학습 검토로 올라가 있으니 승인해서 규칙으로 만들면 된다."}</div>`
+      : `<div class="note">${st.n}전 기록. 10전은 넘어야 승률이 뜻을 가진다.</div>`;
+  } else {
+    h += `<div class="empty">아직 대결 기록이 없다.<br>아래에서 첫 대결을 붙여 보자.</div>`;
+  }
+
+  if(DUEL.pending.length){
+    h += `<div class="fld"><div class="lb">판정 대기 ${DUEL.pending.length}건</div>
+      <div class="ds">어느 쪽이 우리 것인지 모르는 채로 고른다.</div></div>`;
+    DUEL.pending.forEach(x=>{
+      const ta = x.ours_is_a ? x.ours_text : x.ref_text;
+      const tb = x.ours_is_a ? x.ref_text  : x.ours_text;
+      const price = x.price_standard ? won(x.price_standard) : "";
+      h += `<div class="slip">
+        <div class="mt"><b style="font-size:12px">${esc(x.topic||"(주제 없음)")}</b></div>
+        <div class="mt" style="margin-top:5px">${esc(x.deliverable||"-")}${price?" · 시장가 "+price:""}</div>
+        <div class="ab">
+          <div><div class="abh">A</div>${esc(String(ta||"").slice(0,1200))}</div>
+          <div><div class="abh">B</div>${esc(String(tb||"").slice(0,1200))}</div>
+        </div>
+        <div class="mt" style="margin-top:10px">${price?price+"을 낸다면 어느 쪽을 사겠는가":"돈을 낸다면 어느 쪽인가"}</div>
+        <div class="pay">
+          <span data-pay="${x.duel_id}|a">A에 지불할 만하다</span>
+          <span data-pay="${x.duel_id}|b">B에 지불할 만하다</span>
+        </div>
+        <input type="text" data-note="${x.duel_id}" placeholder="이유 — 진 판의 이유가 다음 규칙이 된다" style="margin-top:9px">
+        <div class="acts">
+          <button class="press p-ink" data-pick="${x.duel_id}|a"><span>◀ A 선택</span></button>
+          <button class="press p-ink" data-pick="${x.duel_id}|b"><span>B 선택 ▶</span></button>
+        </div></div>`;
+    });
+  }
+
+  h += `<div class="slip" style="margin-top:12px">
+    <label class="fl" style="color:var(--ink3)">새 대결 — 주제</label>
+    <input type="text" id="dtopic" placeholder="예: 고흥 유자청 상세페이지">
+    <label class="fl" style="color:var(--ink3)">결과물 종류</label>
+    <select id="dkind">${DELIVERABLES.map(x=>`<option value="${x[1]}">${x[0]}</option>`).join("")}</select>
+    <label class="fl" style="color:var(--ink3)">시장가 기준 (원)</label>
+    <input type="text" id="dprice" inputmode="numeric" value="3000000">
+    <label class="fl" style="color:var(--ink3)">우리 결과물</label>
+    <textarea id="dours" rows="5"></textarea>
+    <label class="fl" style="color:var(--ink3)">전문가 결과물</label>
+    <textarea id="dref" rows="5"></textarea>
+    <label class="fl" style="color:var(--ink3)">전문가 결과물 출처</label>
+    <input type="text" id="dsrc" placeholder="URL 등">
+    <div class="acts"><button class="press p-blue" id="dadd">대결 등록</button></div>
+    <div class="mt" style="margin-top:9px">전문가 결과물은 비교 전용이다. 생성 프롬프트에는 절대 들어가지 않는다.</div>
+  </div>
+  <div class="slip">
+    <div class="mt"><b style="font-size:12px">우리 결과물끼리 붙이기</b></div>
+    <div class="mt" style="margin-top:5px">검수자가 높게 준 쪽을 나도 고르는지 본다. 자주 어긋나면 검수 기준이 틀린 것이다.</div>
+    <div id="dcands"><button class="press p-plain" id="dloadc" style="margin-top:10px">후보 불러오기</button></div>
+  </div>`;
+  $("#b-duel").innerHTML = h;
+}
+
+const LOADER = { growth:loadGrowth, learn:loadLearn, brand:loadBrand, rules:loadRules,
+                 sched:loadSched, duel:loadDuel, studio:loadStudio, svc:loadSvc,
+                 quality:loadQuality, auto:loadAuto, engine:loadEngine };
 
 /* ───────── 손짓 ───────── */
 document.addEventListener("click", async (e)=>{
@@ -290,13 +793,25 @@ document.addEventListener("click", async (e)=>{
   if(head){
     const dr = head.parentElement, was = dr.classList.contains("on");
     document.querySelectorAll(".drawer").forEach(x=>x.classList.remove("on"));
+    clearTimeout(STU.poll);                      // 다른 서랍을 열면 스튜디오 새로고침을 멈춘다
     if(!was){ dr.classList.add("on"); LOADER[dr.dataset.d](); }
     return;
   }
-  const t = e.target.closest("button,[data-p]");
+  const t = e.target.closest("button,[data-p],[data-sk],[data-pay],[data-stu],[data-spick],[data-svtog],[data-svdel]");
   if(!t) return;
 
   if(t.dataset.p!=null){ t.classList.toggle("on"); return; }
+
+  /* 설정 한 칸 바꾸기 — 준 것만 서버에 덮는다 */
+  if(t.dataset.sk!=null){
+    let v; try{ v = JSON.parse(t.dataset.sv); }catch(e){ v = t.dataset.sv; }
+    if(await putSet(t.dataset.sk, v)){
+      const dr = t.closest(".drawer");
+      if(dr) LOADER[dr.dataset.d]();
+    }
+    return;
+  }
+  if(t.dataset.pay!=null){ t.classList.toggle("on"); return; }
 
   if(t.dataset.lok || t.dataset.lno){
     const id = t.dataset.lok || t.dataset.lno;
@@ -332,6 +847,164 @@ document.addEventListener("click", async (e)=>{
   if(t.dataset.rdel){
     const d = await api("/api/lessons/delete",{method:"POST",body:JSON.stringify({id:t.dataset.rdel})});
     if(d.ok){ toast("지웠습니다"); loadRules(); } else toast(d.error||"실패");
+    return;
+  }
+  /* ── 외부 서비스 ── */
+  if(t.id==="svadd"){
+    const name=($("#svname").value||"").trim(), key=($("#svkey").value||"").trim();
+    if(!name || !key){ toast("이름과 키가 필요합니다"); return; }
+    t.disabled=true;
+    const d = await api("/api/services",{method:"POST",body:JSON.stringify({
+      service_name:name, service_type:$("#svtype").value, endpoint_url:($("#svurl").value||"").trim(), api_key:key })});
+    if(d.ok){ toast("등록했습니다"); loadSvc(); } else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.dataset.svtog){
+    const [id,on]=t.dataset.svtog.split("|");
+    const d = await api("/api/services",{method:"POST",body:JSON.stringify({
+      service_id:id, is_active:on==="1" })});
+    if(d.ok) loadSvc(); else toast(d.error||"실패");
+    return;
+  }
+  if(t.dataset.svdel){
+    const d = await api("/api/services/delete",{method:"POST",body:JSON.stringify({service_id:t.dataset.svdel})});
+    if(d.ok){ toast("지웠습니다"); loadSvc(); } else toast(d.error||"실패");
+    return;
+  }
+
+  /* ── 홈페이지 스튜디오 ── */
+  if(t.dataset.stu){ await stuOpen(t.dataset.stu); return; }
+  if(t.id==="sback"){ clearTimeout(STU.poll); STU.id=null; STU.row=null; loadStudio(); return; }
+  if(t.id==="sstart"){
+    const topic=($("#stopic2").value||"").trim();
+    if(!topic){ toast("무엇을 만들지 적어 주세요"); return; }
+    const refUrls=($("#sref").value||"").split("\n").map(x=>x.trim()).filter(Boolean).slice(0,3);
+    t.disabled=true;
+    const d = await api("/api/studio/start",{method:"POST",body:JSON.stringify({topic, refUrls})});
+    if(d.ok && d.session_id){ toast("시작했습니다"); await stuOpen(d.session_id); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.dataset.spick!=null){
+    const i=+t.dataset.spick, p=(STU.row && STU.row.proposals || [])[i];
+    if(!p) return;
+    const d = await api("/api/studio/reply",{method:"POST",body:JSON.stringify({
+      session_id:STU.id, message:(i+1)+"번 '"+(p.name||"")+"' 방향으로 갑시다." })});
+    if(d.ok){ toast("방향을 전했습니다"); await stuDraw(); } else toast(d.error||"실패");
+    return;
+  }
+  if(t.id==="ssay" || t.id==="srev"){
+    const inp=$("#smsg"), v=(inp&&inp.value||"").trim();
+    if(!v){ toast("무엇을 바꿀지 적어 주세요"); return; }
+    t.disabled=true;
+    const path = (STU.row && STU.row.html) ? "/api/studio/revise" : "/api/studio/reply";
+    const d = await api(path,{method:"POST",body:JSON.stringify({session_id:STU.id, message:v})});
+    if(d.ok){ if(inp) inp.value=""; toast(d.revising?"고치는 중입니다":"전했습니다"); await stuDraw(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.id==="sbuild"){
+    t.disabled=true;
+    const d = await api("/api/studio/build",{method:"POST",body:JSON.stringify({session_id:STU.id})});
+    if(d.ok){ toast("페이지를 만들고 있습니다 — 몇 분 걸립니다"); await stuDraw(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.id==="sopen"){
+    const html = (STU.row && STU.row.html) || "";
+    if(!html){ toast("아직 페이지가 없습니다"); return; }
+    const w = window.open("", "_blank");
+    if(!w){ toast("팝업이 막혔습니다 — 복사해서 쓰세요"); return; }
+    w.document.write(html); w.document.close();
+    return;
+  }
+  if(t.id==="scopy"){
+    const el=$("#cp-html"), txt=el? (el.value||"") : "";
+    if(!txt){ toast("복사할 것이 없습니다"); return; }
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(txt);
+      else { const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta);
+             ta.select(); document.execCommand("copy"); document.body.removeChild(ta); }
+      toast("HTML을 복사했습니다");
+    }catch(e){ toast("복사하지 못했습니다"); }
+    return;
+  }
+
+  if(t.id==="grev"){
+    t.disabled=true; toast("총괄이 부서 기준을 읽는 중입니다…");
+    const d = await api("/api/learn/leader-review",{method:"POST",body:"{}"});
+    if(d.ok){ toast(`${d.reviewed||0}개 부서를 점검했습니다`); loadGrowth(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.id==="autopsave"){
+    if(await putSet("collect.prompt", ($("#autoprompt").value||"").trim())) loadAuto();
+    return;
+  }
+  if(t.id==="daylimitsave"){
+    const n = Math.max(0, parseInt(($("#daylimit").value||"0").replace(/[^0-9]/g,""),10) || 0);
+    if(await putSet("safety.dailyLimit", n)) loadAuto();
+    return;
+  }
+  if(t.id==="nvsave"){
+    if(await putSet("nvidiaModel", ($("#nvmodel").value||"").trim())) loadEngine();
+    return;
+  }
+  if(t.dataset.pick){
+    const [id, side] = t.dataset.pick.split("|");
+    const row = DUEL.pending.find(x=>String(x.duel_id)===id);
+    if(!row) return;
+    const pickedOurs = row.ours_is_a ? (side==="a") : (side==="b");
+    const on = k => { const el=document.querySelector(`[data-pay="${id}|${k}"]`);
+                      return !!(el && el.classList.contains("on")); };
+    const noteEl = document.querySelector(`[data-note="${id}"]`);
+    t.disabled = true;
+    const d = await api("/api/duel/decide",{method:"POST",body:JSON.stringify({
+      duel_id:id, winner: pickedOurs ? "ours" : "ref",
+      would_pay_ours: row.ours_is_a ? on("a") : on("b"),
+      would_pay_ref:  row.ours_is_a ? on("b") : on("a"),
+      note: (noteEl && noteEl.value || "").trim() })});
+    if(d.ok){ toast(pickedOurs?"우리 쪽이 이겼다":"상대 쪽이 이겼다 — 이유는 학습 검토로 올라갔다"); loadDuel(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.id==="dadd"){
+    const ours = ($("#dours").value||"").trim(), ref = ($("#dref").value||"").trim();
+    if(!ours || !ref){ toast("양쪽 결과물이 모두 필요합니다"); return; }
+    t.disabled = true;
+    const kindSel = $("#dkind");
+    const kindNm = kindSel && kindSel.options && kindSel.selectedIndex>=0
+      ? kindSel.options[kindSel.selectedIndex].text : "";
+    const d = await api("/api/duel",{method:"POST",body:JSON.stringify({
+      topic: ($("#dtopic").value||"").trim(), deliverable: kindNm,
+      price_standard: parseInt(($("#dprice").value||"0").replace(/[^0-9]/g,""),10) || null,
+      ours_text: ours, ref_text: ref, ref_source: ($("#dsrc").value||"").trim() })});
+    if(d.ok){ toast("등록했다. 아래에서 눈 가리고 판정하면 된다"); loadDuel(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.id==="dloadc"){
+    t.disabled = true;
+    const d = await api("/api/duel/candidates");
+    if(!d.ok){ toast(d.error||"실패"); t.disabled=false; return; }
+    const rows = (d.rows||[]).filter(r=> (r.human_modified_output||r.ai_raw_output||"").trim());
+    if(rows.length < 2){ $("#dcands").innerHTML = `<div class="mt" style="margin-top:10px">결과물이 2건 이상 있어야 한다.</div>`; return; }
+    const opt = rows.map(r=>`<option value="${esc(r.generation_id)}">${esc(String(r.topic||"(제목없음)").slice(0,28))} · AI ${Math.round(r.creativity_score||0)}점</option>`).join("");
+    $("#dcands").innerHTML = `<label class="fl" style="color:var(--ink3)">첫 번째</label>
+      <select id="dia">${opt}</select>
+      <label class="fl" style="color:var(--ink3)">두 번째</label>
+      <select id="dib">${opt}</select>
+      <div class="acts"><button class="press p-blue" id="dint">붙이기</button></div>`;
+    const b = $("#dib"); if(b && b.options.length>1) b.selectedIndex = 1;
+    return;
+  }
+  if(t.id==="dint"){
+    const a = $("#dia").value, b = $("#dib").value;
+    if(a===b){ toast("서로 다른 결과물을 고르세요"); return; }
+    t.disabled = true;
+    const d = await api("/api/duel/internal",{method:"POST",body:JSON.stringify({a,b})});
+    if(d.ok){ toast("붙였다. 위에서 판정하면 된다"); loadDuel(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
     return;
   }
   if(t.id==="sadd"){
@@ -370,6 +1043,26 @@ document.addEventListener("click", async (e)=>{
     $("#c-brand").className = "cnt"+(b.text?"":" hot"); } else $("#c-brand").textContent="—";
   const c = await api("/api/lessons?limit=200");
   $("#c-rules").textContent = c.ok ? ((c.lessons||[]).length+"개") : "—";
+  const sv = await api("/api/services");
+  $("#c-svc").textContent = sv.ok ? ((sv.rows||[]).length ? (sv.rows||[]).filter(r=>r.is_active).length+"/"+(sv.rows||[]).length+" 켜짐" : "없음") : "—";
+  const su = await api("/api/studio/get");
+  $("#c-studio").textContent = su.ok ? ((su.rows||[]).length ? (su.rows||[]).length+"건" : "없음") : "—";
+  const g = await api("/api/growth");
+  if(g.ok){ const rows=g.rows||[], learned=rows.filter(r=>r.has).length;
+    $("#c-growth").textContent = g.avgScore!=null ? g.avgScore+"점" : (learned+"/"+rows.length);
+    $("#c-growth").className = "cnt"+(g.avgScore!=null&&g.avgScore<60?" hot":""); }
+  else $("#c-growth").textContent="—";
+  const q = await api("/api/duels");
+  if(q.ok){ const n=(q.pending||[]).length, st=q.stats||{};
+    $("#c-duel").textContent = n ? n+"건 판정" : (st.n ? Math.round(st.winRate*100)+"% 승률" : "없음");
+    $("#c-duel").className = "cnt"+(n?" hot":""); } else $("#c-duel").textContent="—";
+  if(await getSet()){
+    $("#c-quality").textContent = "기준 "+(pick("oseraMin")||80)+"%";
+    const every = +(pick("collect.everyMin")||0);
+    $("#c-auto").textContent = every>0 ? (every>=60 ? (every/60)+"시간마다" : every+"분마다") : "꺼짐";
+    $("#c-engine").textContent = pick("freeLLMFirst") ? "무료 우선"
+      : (pick("workEngine")==="gemini" ? "Gemini" : "Claude");
+  } else { ["quality","auto","engine"].forEach(k=>$("#c-"+k).textContent="—"); }
   const s = await api("/api/publish-schedules");
   if(s.ok){ const rows=s.list||[]; $("#c-sched").textContent = rows.length
     ? `${rows.filter(x=>!x.disabled).length}/${rows.length} 켜짐` : "없음"; }
