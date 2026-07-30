@@ -8667,6 +8667,10 @@ function renderSettings(){
     +'<div class="keyrow" style="margin-top:6px"><input type="text" id="nvModelIn" placeholder="모델 ID (예: meta/llama-3.1-70b-instruct)" value="'+escapeHtml(STATE.nvidiaModel||"")+'"><button class="cbtn conn" id="nvModelSave">저장</button></div>'
     +'<div class="keyrow" style="margin-top:5px;gap:6px"><button class="cbtn conn" id="nvModelsBtn" style="flex:1">📋 사용가능 모델</button><button class="cbtn conn" id="nvTestBtn" style="flex:1">🧪 연결 테스트</button></div>'
     +'<div class="note" style="margin-top:5px">먼저 Render 환경변수 <b>NVIDIA_API_KEY</b>(build.nvidia.com의 nvapi- 키)를 등록하세요. 무료 모델은 품질이 낮을 수 있어 <b>기본은 꺼둠</b> — 켜면 Claude 비용을 크게 아껴요. 약 40 RPM·무료 크레딧 한도가 있어요. 모델 ID는 위 \'사용가능 모델\'로 확인해 넣으세요(비우면 기본값).</div></div>'
+    +'<div class="mengine"><div class="mengine-t">🧭 자율학습 v304 — 크로스 심사 · 무료 풀 · 성장 측정</div>'
+    +'<div class="note" style="margin-bottom:6px">· <b>⚖️ 크로스 벤더 심사</b>: 클로드가 쓴 원고를 <b>제미나이가 검수</b>(자기선호 편향 제거), 검증은 제3 무료 엔진이 담당<br>· <b>✅ 출처 자동승인</b>: <b>사람 지시·외부 자료</b>에서 온 배움은 검토 없이 자동 반영 — AI 자기성찰·수치 주장만 사람 검토(검토 병목 해소)<br>· <b>🆓 무료 엔진 풀</b>: NVIDIA 외에 Render 환경변수 <b>GROQ_API_KEY · CEREBRAS_API_KEY · OPENROUTER_API_KEY</b> 등록 시 자동 로테이션 + 매일 벤치로 품질 순위 재조정<br>· <b>📈 성장 측정</b>: 지식을 <b>넓이</b>(새 지점)와 <b>깊이</b>(같은 지점의 고도 상승)로 분리 추적</div>'
+    +'<div class="keyrow" style="gap:6px"><button class="cbtn conn" id="cvJudgeBtn" style="flex:1">⚖️ 크로스 심사 상태</button><button class="cbtn conn" id="autoPassBtn" style="flex:1">✅ 자동승인 상태</button></div>'
+    +'<div class="keyrow" style="margin-top:5px;gap:6px"><button class="cbtn conn" id="octaveBtn" style="flex:1">📈 성장(넓이·깊이)</button><button class="cbtn conn" id="freePoolBtn" style="flex:1">🆓 무료 풀·벤치</button></div></div>'
     +'<div class="mengine"><div class="mengine-t">🔁 부서 내부 QA 루프</div>'
     +'<div class="note" style="margin-bottom:5px"><b>부서 내부 QA</b>입니다 — 결과물을 오세라에게 넘기기 <b>전에</b> 부서가 스스로 점검해요.<br>· <b>📊 리서치 보고서</b> → <b>정유진(글3)</b>이 지어낸 숫자·일반론을 잡아냄<br>· <b>텍스트 4종</b> → 규정·과대광고 검수<br><span style="color:#8a94a6">※ 디자인 검수는 <b>총괄 오세라</b>에게 통합됐습니다 — 비주얼 디렉션 준수도 오세라가 검증해요.</span><br>횟수가 많을수록 품질↑ 비용↑. 0이면 부서 QA 없이 바로 오세라에게 넘깁니다.</div>'
     +'<div class="mengine-opts">'+[0,1,2,3].map(function(n){ var cur=(STATE.designReviewLoops==null?1:+STATE.designReviewLoops); return '<span class="mchip'+(cur===n?" on":"")+'" data-drl="'+n+'">'+(n===0?"끔":n+"회")+'</span>'; }).join(" ")+'</div></div>'
@@ -9269,6 +9273,53 @@ function bindSettings(){
     if(nvList) nvList.addEventListener("click", async function(){ if(!useBackend()){ alert("백엔드 연결이 필요해요 (설정 › AI 백엔드)."); return; } nvList.disabled=true; var ob=nvList.textContent; nvList.textContent="불러오는 중…"; try{ await wakeServer(40000); var r=await fetch(backendOrigin()+"/api/nvidia/models"); var d=await r.json(); if(d.error) throw new Error(d.error); alert("사용가능 모델 "+d.count+"개 (현재: "+d.current+")\n\n"+(d.models||[]).slice(0,60).join("\n")); }catch(e){ alert("모델 목록 실패: "+(e.message||e)); } nvList.disabled=false; nvList.textContent=ob; });
     var nvTest=document.getElementById("nvTestBtn");
     if(nvTest) nvTest.addEventListener("click", async function(){ if(!useBackend()){ alert("백엔드 연결이 필요해요 (설정 › AI 백엔드)."); return; } nvTest.disabled=true; var ob=nvTest.textContent; nvTest.textContent="테스트 중…"; try{ await wakeServer(40000); var body=STATE.nvidiaModel?JSON.stringify({model:STATE.nvidiaModel}):"{}"; var r=await fetch(backendOrigin()+"/api/nvidia/test",{method:"POST",headers:{"Content-Type":"application/json"},body:body}); var d=await r.json(); if(d.error) throw new Error(d.error); alert("✅ 연결 OK ("+d.model+", "+d.ms+"ms)\n\n"+String(d.sample||"")); }catch(e){ alert("테스트 실패: "+(e.message||e)); } nvTest.disabled=false; nvTest.textContent=ob; });
+  })();
+  (function(){   // v304 자율학습 패널
+    function needBE(){ if(!useBackend()){ alert("백엔드 연결이 필요해요 (설정 › AI 백엔드)."); return true; } return false; }
+    async function getSet(){ await wakeServer(40000); var r=await fetch(backendOrigin()+"/api/settings"); return await r.json(); }
+    async function toggleKey(key, label){
+      if(needBE()) return;
+      try{
+        var d=await getSet(); var cur=(d.settings&&d.settings[key])!==false;
+        if(!confirm(label+" 현재: "+(cur?"ON":"OFF")+"\n\n"+(cur?"끌까요?":"켤까요?"))) return;
+        var body={}; body[key]=!cur;
+        await fetch(backendOrigin()+"/api/settings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+        alert(label+" → "+(!cur?"ON":"OFF"));
+      }catch(e){ alert("실패: "+(e.message||e)); }
+    }
+    var cv=document.getElementById("cvJudgeBtn");
+    if(cv) cv.addEventListener("click", function(){ toggleKey("crossVendorJudge","⚖️ 크로스 벤더 심사"); });
+    var ap=document.getElementById("autoPassBtn");
+    if(ap) ap.addEventListener("click", function(){ toggleKey("autoPassOn","✅ 출처 자동승인"); });
+    var oc=document.getElementById("octaveBtn");
+    if(oc) oc.addEventListener("click", async function(){
+      if(needBE()) return; oc.disabled=true; var ob=oc.textContent; oc.textContent="조회 중…";
+      try{ await wakeServer(40000);
+        var r=await fetch(backendOrigin()+"/api/octave"); var d=await r.json();
+        var lg=(d.log||[]).slice(0,8).map(function(x){
+          var k=x.kind==="lift"?("⬆️ 승급 "+x.from+"→"+x.to):(x.kind==="spot"?("🆕 새 지점(고도 "+x.alt+")"):"♻️ 재확인");
+          return k+" ["+(x.dept||"")+"] "+String(x.text||"").slice(0,50); }).join("\n");
+        alert("📈 지식 성장\n\n넓이(새 지점): "+d.breadth+"\n깊이(고도 상승): "+d.depth+"\n\n최근:\n"+(lg||"(기록 없음)"));
+      }catch(e){ alert("조회 실패: "+(e.message||e)); }
+      oc.disabled=false; oc.textContent=ob;
+    });
+    var fp=document.getElementById("freePoolBtn");
+    if(fp) fp.addEventListener("click", async function(){
+      if(needBE()) return; fp.disabled=true; var ob=fp.textContent; fp.textContent="조회 중…";
+      try{ await wakeServer(40000);
+        var r=await fetch(backendOrigin()+"/api/bench/free/status"); var d=await r.json();
+        var msg="🆓 무료 엔진 풀\n\n등록된 키: "+((d.keys||[]).join(", ")||"(없음 — Render 환경변수에 추가하세요)")
+          +"\n순위: "+((d.order||[]).join(" > ")||"(벤치 전)")
+          +(d.scores?("\n점수: "+JSON.stringify(d.scores)):"")
+          +(d.at?("\n마지막 벤치: "+new Date(d.at).toLocaleString()):"");
+        if((d.keys||[]).length && confirm(msg+"\n\n지금 벤치를 돌릴까요? (무료·수십 초)")){
+          fp.textContent="벤치 중…";
+          var r2=await fetch(backendOrigin()+"/api/bench/free/run",{method:"POST"}); var d2=await r2.json();
+          alert(d2.ok?("벤치 완료\n순위: "+((d2.result&&d2.result.order)||[]).join(" > ")):("벤치 실패: "+JSON.stringify(d2)));
+        } else if(!(d.keys||[]).length){ alert(msg); }
+      }catch(e){ alert("조회 실패: "+(e.message||e)); }
+      fp.disabled=false; fp.textContent=ob;
+    });
   })();
   document.querySelectorAll('[data-brfhour]').forEach(function(sel){
     sel.addEventListener("change", function(){ STATE[sel.getAttribute("data-brfhour")]=+sel.value; saveState(); try{ pushState(); }catch(e){} });
