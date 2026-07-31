@@ -1141,7 +1141,7 @@ html[data-device]{}
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v307</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v309</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -11341,11 +11341,13 @@ setInterval(()=>{
    조용한 것이 "잘 돌아간다"인지 "죽었다"인지 알 수 있어야 한다. */
 let RPS = [], RP_CNT = {}, RP_OPEN = false;
 const RP_MARK = { ok:"✅", fixed:"🔧", failed:"⚠️", skipped:"·" };
+let DUTY_ST = null;
 async function loadReports(){
   try{
     const d = await api("/api/reports");
     RPS = (d && d.reports) || []; RP_CNT = (d && d.count) || {};
   }catch(e){ RPS = []; RP_CNT = {}; }
+  try{ DUTY_ST = await api("/api/duty"); }catch(e){ DUTY_ST = null; }
   paintReports();
 }
 function paintReports(){
@@ -11358,11 +11360,30 @@ function paintReports(){
   if (car) car.textContent = RP_OPEN ? "▴" : "▾";
   box.hidden = !RP_OPEN;
   if (!RP_OPEN) return;
+  /* 아무도 안 하고 있는 일이 있으면 무엇보다 먼저 보여야 한다 */
+  let head = "";
+  if (DUTY_ST && DUTY_ST.ok){
+    const 급 = (DUTY_ST.빈몫||[]).concat(DUTY_ST.꺼짐||[]);
+    const 밀 = DUTY_ST.밀림||[];
+    if (급.length){
+      head = `<div class="slip" style="padding:11px 13px;margin-bottom:8px;border-left:3px solid var(--seal)">
+        <b style="font-size:12px;color:var(--seal)">⛔ 아무도 안 하고 있는 일 ${급.length}건</b>
+        ${급.slice(0,4).map(x=>`<div style="font-size:11px;margin-top:4px">· ${esc(x.이름)} — ${esc(x.몫)}</div>`).join("")}
+      </div>`;
+    } else if (밀.length){
+      head = `<div class="slip" style="padding:11px 13px;margin-bottom:8px;border-left:3px solid #C9A227">
+        <b style="font-size:12px;color:#C9A227">⏰ 밀린 일 ${밀.length}건</b>
+        ${밀.slice(0,4).map(x=>`<div style="font-size:11px;margin-top:4px">· ${esc(x.이름)} — ${esc(x.몫)} (${esc(x.지남)})</div>`).join("")}
+      </div>`;
+    } else {
+      head = `<div style="font-size:11px;color:#2E7D5B;padding:6px 2px 10px">✅ 맡은 일 ${DUTY_ST.전체몫||0}개가 전부 굴러가고 있습니다</div>`;
+    }
+  }
   if (!RPS.length){
-    box.innerHTML = '<div class="empty">오늘은 아직 기록이 없어요.<br><span style="font-size:10.5px">정기 일감이 전부 꺼져 있는지 확인해 보세요.</span></div>';
+    box.innerHTML = head + '<div class="empty">오늘은 아직 기록이 없어요.<br><span style="font-size:10.5px">정기 일감이 전부 꺼져 있는지 확인해 보세요.</span></div>';
     return;
   }
-  box.innerHTML = RPS.slice(0,20).map(r=>{
+  box.innerHTML = head + RPS.slice(0,20).map(r=>{
     const who = (TEAM[r.dept] && TEAM[r.dept].nm) || r.dept || "";
     const t = String(r.created_at||"").slice(11,16);
     const col = r.status==="failed" ? "var(--seal)" : (r.status==="fixed" ? "#C9A227" : "var(--ink3)");
