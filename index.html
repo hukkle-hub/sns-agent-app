@@ -10594,9 +10594,15 @@ function whoOf(row){
 
 
 function faceOf(key, cls){
-  const P = (typeof PHOTOS!=="undefined" && PHOTOS) || window.PHOTOS || {};
-  const src = P[key] || "";
+  /* 결재 화면은 원래 따로 살던 파일이라 얼굴 자료가 없어 이름 첫 글자만 띄웠다.
+     이제 한 집에 살게 됐으니 photos.js 의 사진을 그대로 쓴다.
+     이름으로 먼저 찾고(크루), 없으면 부서 얼굴로 내려간다. */
   const nm  = (TEAM[key] && TEAM[key].nm) || "";
+  let src = "";
+  try{
+    if (typeof CREW_PHOTOS !== "undefined" && CREW_PHOTOS && CREW_PHOTOS[nm]) src = CREW_PHOTOS[nm];
+    else if (typeof DEPT_PHOTOS !== "undefined" && DEPT_PHOTOS && DEPT_PHOTOS[key]) src = DEPT_PHOTOS[key];
+  }catch(e){}
   return `<span class="ph ${cls}">${src?`<img src="${src}" alt="">`
     :`<b class="ini">${esc(nm.slice(1,2)||nm.slice(0,1)||"·")}</b>`}</span>`;
 }
@@ -10660,7 +10666,7 @@ function typingNow(){
 /* ── 사진 (v305) ──
    원본은 서버에 쌓지 않는다. 1024px·JPEG 로 줄여 한 번만 보내고,
    AI가 본 내용을 글로 적어 그것만 남긴다. 예전 대역폭 사고를 되풀이하지 않기 위해. */
-let PHOTOS = [];   // [{data(base64), media_type, url(미리보기)}]
+let ATTACH = [];   // 첨부한 사진 [{data(base64), media_type, url(미리보기)}]
 function shrinkPhoto(file){
   return new Promise(resolve=>{
     if(!/^image\//.test(file.type||"")) return resolve(null);
@@ -10678,23 +10684,23 @@ function shrinkPhoto(file){
   });
 }
 async function addPhotos(files){
-  for(let i=0; i<files.length && PHOTOS.length<3; i++){
+  for(let i=0; i<files.length && ATTACH.length<3; i++){
     const p = await shrinkPhoto(files[i]);
-    if(p) PHOTOS.push(p);
+    if(p) ATTACH.push(p);
   }
   paintPhotos();
 }
 function paintPhotos(){
   const bar = ROOT.querySelector("#njPhotoBar");
   if(!bar) return;
-  bar.innerHTML = PHOTOS.map((p,i)=>
+  bar.innerHTML = ATTACH.map((p,i)=>
     `<span style="position:relative;display:inline-block">
        <img src="${p.url}" style="width:52px;height:52px;object-fit:cover;border-radius:7px">
        <b data-px="${i}" style="position:absolute;top:-5px;right:-5px;background:#8A5A44;color:#fff;
          width:17px;height:17px;border-radius:50%;font-size:11px;line-height:17px;text-align:center;cursor:pointer">×</b>
      </span>`).join("");
   bar.querySelectorAll("[data-px]").forEach(b=>{
-    b.onclick = ()=>{ PHOTOS.splice(+b.dataset.px,1); paintPhotos(); };
+    b.onclick = ()=>{ ATTACH.splice(+b.dataset.px,1); paintPhotos(); };
   });
 }
 ROOT.addEventListener("change",(e)=>{
@@ -11220,7 +11226,7 @@ ROOT.addEventListener("click", async (e)=>{
   }
 
   if(t.id==="njPhotoBtn"){
-    if(PHOTOS.length>=3){ toast("사진은 3장까지예요"); return; }
+    if(ATTACH.length>=3){ toast("사진은 3장까지예요"); return; }
     const f=$("#njPhoto"); if(f) f.click();
     return;
   }
@@ -11234,9 +11240,9 @@ ROOT.addEventListener("click", async (e)=>{
     t.disabled=true; toast("시작합니다…");
     const d = await api("/api/pipeline/run",{method:"POST",
       body:JSON.stringify({topic, channels:chans, refUrls:refs,
-        photos: PHOTOS.map(p=>({data:p.data, media_type:p.media_type}))})});
-    if(d.ok){ const np=PHOTOS.length;
-      $("#njTopic").value=""; $("#njRef").value=""; PHOTOS=[]; paintPhotos();
+        photos: ATTACH.map(p=>({data:p.data, media_type:p.media_type}))})});
+    if(d.ok){ const np=ATTACH.length;
+      $("#njTopic").value=""; $("#njRef").value=""; ATTACH=[]; paintPhotos();
       toast(np?("사진 "+np+"장과 함께 시작했습니다"):"작업이 시작되었습니다"); await load(); }
     else { toast(d.error||"실패"); }
     t.disabled=false;
