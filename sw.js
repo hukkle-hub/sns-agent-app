@@ -1,5 +1,5 @@
 // ===== Service Worker — 항상 최신 유지(캐시 갇힘 근본 차단) =====
-const CACHE = "agent-platform-v304";
+const CACHE = "agent-platform-v305m";
 const ASSETS = ["./manifest.json","./icon-192.png","./icon-512.png"]; // HTML/sw는 캐시 목록에서 제외(항상 새로 받음)
 
 self.addEventListener("install", e => {
@@ -43,6 +43,20 @@ self.addEventListener("fetch", e => {
           return r;
         })
         .catch(() => caches.match(req).then(r => r || caches.match("./index.html")))
+    );
+    return;
+  }
+
+  /* v305: 사진 묶음(photos.js)은 2MB가 넘고 거의 바뀌지 않는다.
+     캐시에 있으면 그대로 쓴다 — 매번 내려받으면 폰 데이터가 녹는다.
+     바뀔 때는 캐시 이름(v306…)이 달라지므로 자동으로 새로 받는다. */
+  if (url.pathname.endsWith("/photos.js")) {
+    e.respondWith(
+      caches.match(req).then(hit => hit || fetch(req).then(r => {
+        const copy = r.clone();
+        caches.open(CACHE).then(c => c.put(req, copy)).catch(()=>{});
+        return r;
+      }))
     );
     return;
   }
