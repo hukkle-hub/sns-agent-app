@@ -1141,7 +1141,7 @@ html[data-device]{}
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v309</span>
+    <span id="appver" style="font-size:10px;color:#9aa3b3;margin-left:8px">v310</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -10934,10 +10934,10 @@ function viewSheet(r){
         <button class="press p-ink" data-appredit="${r.generation_id}"><span>결재</span></button>
       </div>
       <div class="vmeta" style="color:#6B7A74;margin-top:7px">위에서 고친 내용이 그대로 함께 넘어갑니다.</div>
-      <input type="text" id="rejwhy" placeholder="반려 사유 — 이것도 배움이 된다"
+      <input type="text" id="rejwhy" placeholder="어디를 어떻게 고칠까요? — 이대로 다시 씁니다"
         style="width:100%;margin-top:11px;font-size:12px;font-family:inherit;color:var(--ink);
         background:#fff;border:1px solid rgba(28,43,39,.2);border-radius:6px;padding:9px 10px">
-      <div style="margin-top:9px"><button class="press p-plain" data-reject="${r.generation_id}">반려</button></div>
+      <div style="margin-top:9px"><button class="press p-plain" data-reject="${r.generation_id}">↩ 다시 쓰기</button></div>
     </div>`;
   }
 
@@ -11158,7 +11158,7 @@ ROOT.addEventListener("click", async (e)=>{
     t.disabled=true;
     const d = await api("/api/content/approve",{method:"POST",body:JSON.stringify({
       generation_id:id, action:"reject", reason:why })});
-    if(d.ok){ toast("반려했습니다 · 사유는 학습 검토로 올라갑니다"); VIEW=null; await load(true); }
+    if(d.ok){ toast("되돌려보냈습니다 · 사유를 반영해 다시 씁니다"); VIEW=null; await load(true); }
     else { toast(d.error||"실패"); t.disabled=false; }
     return;
   }
