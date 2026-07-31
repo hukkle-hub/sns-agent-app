@@ -971,6 +971,26 @@ html[data-device]{}
   color:var(--idle);cursor:pointer;border-bottom:1px dotted currentColor}
 #amRoot .cfold{opacity:.55}
 /* 긴 원고는 접어 둔다. 눌러야 펼쳐진다 — 화면을 덮으면 아무것도 안 보인다. */
+/* 조각 보기 */
+#amRoot .dnav{display:flex;gap:5px;flex-wrap:wrap;margin:2px 0 9px}
+#amRoot .dchip{font-size:10.5px;padding:4px 9px;border-radius:14px;cursor:pointer;
+  background:rgba(28,43,39,.07);color:var(--ink);border:1px solid rgba(28,43,39,.14)}
+#amRoot .dchip.code{background:rgba(62,122,155,.14);color:#2b5f7d;border-color:rgba(62,122,155,.3);
+  font-family:'IBM Plex Mono',monospace}
+#amRoot .dsum{font-size:10.5px;color:#6B7A74;margin-bottom:8px}
+#amRoot .dpart{margin-bottom:9px;border:1px solid rgba(28,43,39,.13);border-radius:8px;overflow:hidden}
+#amRoot .dhead{display:flex;align-items:center;gap:7px;padding:8px 11px;font-size:11.5px;
+  background:rgba(28,43,39,.05);cursor:pointer}
+#amRoot .dhead.code{background:rgba(62,122,155,.1);font-family:'IBM Plex Mono',monospace}
+#amRoot .dmeta{font-size:10px;color:#6B7A74;font-weight:400}
+#amRoot .dcopy{margin-left:auto;border:1px solid rgba(28,43,39,.2);background:var(--card2);
+  color:var(--ink);border-radius:5px;padding:4px 10px;font-size:10.5px;cursor:pointer;font-family:inherit}
+#amRoot .dbody{padding:10px 12px;font-size:12.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word}
+#amRoot .dbody.fold{max-height:150px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(#000 60%,transparent);mask-image:linear-gradient(#000 60%,transparent)}
+#amRoot .dcode{margin:0;padding:11px 12px;font-family:'IBM Plex Mono',monospace;font-size:11px;
+  line-height:1.6;overflow-x:auto;white-space:pre;background:rgba(18,33,30,.055);color:#243830}
+#amRoot .dpart.hi{box-shadow:0 0 0 2px var(--idle)}
 #amRoot .body.fold{max-height:210px;overflow:hidden;
   -webkit-mask-image:linear-gradient(#000 62%,transparent);
   mask-image:linear-gradient(#000 62%,transparent)}
@@ -1171,7 +1191,7 @@ html[data-device]{}
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v312</span>
+    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v313</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -10555,16 +10575,24 @@ async function loadAndApplyPatches(){
   render();
   // v229: 앱을 껐다 켜도 진행 중이던 백그라운드 작업을 이어서 추적
   try{ renderJobBar(); if(STATE.jobs && Object.keys(STATE.jobs).length) startJobWatcher(); }catch(e){}
-  // v246: 서버 버전 확인 — 앱만 올리고 서버를 안 올리면 기능이 반쪽으로 돌아간다.
-  //   "배포했는데 왜 안 바뀌지?"를 없애기 위해 앱 버전과 서버 버전을 나란히 보여주고, 다르면 경고한다.
+  /* 서버 버전 확인 (v312에서 고침)
+     예전에는 앱과 서버 번호가 '똑같아야' ✓ 를 줬다. 그런데 화면만 고친 판(v311·v312)에서는
+     서버를 올릴 이유가 없어 번호가 벌어지고, 멀쩡한데도 경고가 떴다.
+     이제 앱이 '필요한 최소 서버 번호'를 적어 두고, 그보다 낮을 때만 경고한다. */
+  var NEED_SERVER = 310;      // ← 서버 기능을 새로 쓰는 판에서만 이 숫자를 올린다
   (function(){
     var el=document.getElementById("srvver"); if(!el) return;
     if(!useBackend()){ el.innerHTML='<span style="color:#c0b6a0">서버 미연결</span>'; return; }
     fetch(backendOrigin()+"/api/version").then(function(r){ return r.json(); }).then(function(d){
-      var app=(document.getElementById("appver")||{}).textContent||"";
       var srv=d.version||"?";
-      if(srv===app){ el.innerHTML='<span style="color:#7bc9a8">· 서버 '+esc(srv)+' ✓</span>'; }
-      else { el.innerHTML='<span style="color:#e0a92b;font-weight:700" title="서버를 다시 배포하세요">· 서버 '+esc(srv)+' ⚠️ 앱과 다름</span>'; }
+      var n=parseInt(String(srv).replace(/[^0-9]/g,""),10);
+      if(isNaN(n)){ el.innerHTML='<span style="color:#c0b6a0">· 서버 '+esc(srv)+'</span>'; return; }
+      if(n >= NEED_SERVER){
+        el.innerHTML='<span style="color:#7bc9a8">· 서버 '+esc(srv)+' ✓</span>';
+      } else {
+        el.innerHTML='<span style="color:#e0a92b;font-weight:700" title="서버를 다시 배포하세요 (v'
+          +NEED_SERVER+' 이상 필요)">· 서버 '+esc(srv)+' ⚠️ 서버가 낮음</span>';
+      }
     }).catch(function(){ el.innerHTML='<span style="color:#c0b6a0">· 서버 버전 확인 불가</span>'; });
   })();
   applyUiScale();
@@ -10925,6 +10953,65 @@ function chiefFold(t, key, last){
   const head = lines.slice(0,3).join("\n").slice(0,160);
   return esc(head) + `<span class="cmore" data-cfold="${key}">… 더 보기 (${lines.length}줄)</span>`;
 }
+/* ══ 결과물 조각내기 (v313) ══
+   설계서 같은 긴 결과물이 통째로 흘러내려 아무것도 못 찾았다.
+   ## 제목으로 잘라 접고, 코드는 따로 떼어 조각마다 복사 버튼을 붙인다.
+   — 통째 복사만 있으면 필요한 한 조각을 쓰려고 전부를 긁어야 한다. */
+function cutDoc(text){
+  const src = String(text||"");
+  const parts = [];
+  let buf = [], title = "", fence = null, code = [];
+  const flush = ()=>{ if(buf.join("\n").trim()){ parts.push({kind:"text", title, body:buf.join("\n")}); } buf=[]; };
+  for (const line of src.split("\n")){
+    const f = line.match(/^\s*```+\s*([A-Za-z0-9+#-]*)\s*$/);
+    if (f){
+      if (fence === null){ flush(); fence = f[1] || "코드"; code = []; }
+      else { parts.push({kind:"code", lang:fence, title:title, body:code.join("\n")}); fence = null; }
+      continue;
+    }
+    if (fence !== null){ code.push(line); continue; }
+    const h = line.match(/^(#{1,4})\s+(.+)$/);
+    if (h){ flush(); title = h[2].replace(/[*`]/g,"").trim(); continue; }
+    buf.push(line);
+  }
+  if (fence !== null && code.length) parts.push({kind:"code", lang:fence||"코드", title:title, body:code.join("\n")});
+  flush();
+  return parts;
+}
+window.__DOCPARTS = [];
+function docHtml(text, idBase){
+  const parts = cutDoc(text);
+  if (parts.length <= 1) return null;              // 나눌 게 없으면 그냥 두는 게 낫다
+  window.__DOCPARTS = parts;
+  const codeN = parts.filter(p=>p.kind==="code").length;
+  const nav = parts.map((p,i)=> p.kind==="code"
+      ? `<span class="dchip code" data-djump="${i}">&lt;/&gt; ${esc(p.title? p.title.slice(0,12)+" · " : "")}${esc(p.lang)}</span>`
+      : (p.title ? `<span class="dchip" data-djump="${i}">${esc(p.title.slice(0,18))}</span>` : "")
+    ).join("");
+  const body = parts.map((p,i)=>{
+    if (p.kind === "code"){
+      const lines = p.body.split("\n").length;
+      return `<div class="dpart" id="${idBase}-${i}">
+        <div class="dhead code"><b>&lt;/&gt; ${esc(p.lang)}</b>
+          ${p.title?`<span class="dmeta">${esc(p.title.slice(0,20))}</span>`:""}
+          <span class="dmeta">${lines}줄</span>
+          <button class="dcopy" data-dcopy="${i}">복사</button></div>
+        <pre class="dcode">${esc(p.body)}</pre></div>`;
+    }
+    const chars = p.body.replace(/\s/g,"").length;
+    const long = chars > 260;
+    return `<div class="dpart" id="${idBase}-${i}">
+      <div class="dhead" data-dtoggle="${i}"><b>${esc(p.title||"본문")}</b>
+        <span class="dmeta">${chars}자</span>
+        <button class="dcopy" data-dcopy="${i}">복사</button></div>
+      <div class="dbody${long?" fold":""}" id="${idBase}-b-${i}">${esc(p.body.trim())}</div>
+      ${long?`<span class="cmore" data-unfold="${idBase}-b-${i}">… 더 보기</span>`:""}</div>`;
+  }).join("");
+  return `<div class="dnav">${nav}</div>
+    <div class="dsum">조각 ${parts.length}개${codeN?` · 코드 ${codeN}개`:""} — 조각마다 따로 복사됩니다</div>
+    ${body}`;
+}
+
 function renderChief(){
   chiefHead();
   const ms = CHIEF.msgs.slice(-8);
@@ -11047,8 +11134,9 @@ function viewSheet(r){
            font-family:inherit;color:var(--ink);background:var(--card);border:1px solid rgba(28,43,39,.2);
            border-radius:6px;padding:11px;resize:vertical">${esc(body)}</textarea>
          <div class="vmeta" style="color:#6B7A74">여기서 고친 뒤 결재하면, 무엇을 왜 고쳤는지가 배움으로 올라간다.</div>`
-      : `<div class="body${(body||"").length>700?" fold":""}" id="cp-main">${esc(body||"(비어 있음)")}</div>`
-        + ((body||"").length>700 ? `<span class="cmore" data-unfold="cp-main">… 전문 보기 (${Math.round(body.length/100)/10}천자)</span>` : "")}
+      : (docHtml(body, "dp") ||
+         (`<div class="body${(body||"").length>700?" fold":""}" id="cp-main">${esc(body||"(비어 있음)")}</div>`
+          + ((body||"").length>700 ? `<span class="cmore" data-unfold="cp-main">… 전문 보기 (${Math.round(body.length/100)/10}천자)</span>` : "")))}
     </div>`;
   if(pend){
     h += `<div class="sheet" style="background:rgba(237,233,223,.94)">
@@ -11230,7 +11318,7 @@ function render(){
 
 /* ── 조작 ── */
 ROOT.addEventListener("click", async (e)=>{
-  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-pcancel],[data-pdel],[data-rttoggle],[data-rtrun],[data-cfold],[data-unfold],#rtHead,#rpHead,#rpDigest,[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#njPhotoBtn,#cfGo,[data-chn]");
+  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-pcancel],[data-pdel],[data-rttoggle],[data-rtrun],[data-cfold],[data-unfold],[data-dcopy],[data-djump],[data-dtoggle],#rtHead,#rpHead,#rpDigest,[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#njPhotoBtn,#cfGo,[data-chn]");
   if(!t) return;
 
   if(t.dataset.chn!=null){ t.classList.toggle("on"); return; }
@@ -11354,6 +11442,23 @@ ROOT.addEventListener("click", async (e)=>{
       body:JSON.stringify({generation_id:t.dataset.retry})});
     if(d.ok){ toast("다시 돌리는 중입니다"); await load(true); }
     else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.dataset.dcopy != null){
+    const p = (window.__DOCPARTS||[])[+t.dataset.dcopy];
+    if(p){ try{ await navigator.clipboard.writeText(p.body); toast("이 조각을 복사했습니다"); }
+           catch(e){ toast("복사 실패"); } }
+    return;
+  }
+  if(t.dataset.djump != null){
+    const el = ROOT.querySelector("#dp-"+t.dataset.djump);
+    if(el){ el.scrollIntoView({behavior:"smooth",block:"start"});
+            el.classList.add("hi"); setTimeout(()=>el.classList.remove("hi"), 1200); }
+    return;
+  }
+  if(t.dataset.dtoggle != null){
+    const b = ROOT.querySelector("#dp-b-"+t.dataset.dtoggle);
+    if(b) b.classList.toggle("fold");
     return;
   }
   if(t.dataset.unfold){
