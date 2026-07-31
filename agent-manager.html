@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="app-version" content="v297">
+<meta name="app-version" content="v305">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#12211E">
 <title>에이전트 매니저</title>
@@ -434,6 +434,50 @@ function typingNow(){
   return !!(a && /INPUT|TEXTAREA/.test(a.tagName||""));
 }
 
+/* ── 사진 (v305) ──
+   원본은 서버에 쌓지 않는다. 1024px·JPEG 로 줄여 한 번만 보내고,
+   AI가 본 내용을 글로 적어 그것만 남긴다. 예전 대역폭 사고를 되풀이하지 않기 위해. */
+let PHOTOS = [];   // [{data(base64), media_type, url(미리보기)}]
+function shrinkPhoto(file){
+  return new Promise(resolve=>{
+    if(!/^image\//.test(file.type||"")) return resolve(null);
+    const img = new Image();
+    img.onload = ()=>{
+      const max=1024; let w=img.width, h=img.height;
+      if(w>max||h>max){ if(w>=h){ h=Math.round(h*max/w); w=max; } else { w=Math.round(w*max/h); h=max; } }
+      const c=document.createElement("canvas"); c.width=w; c.height=h;
+      c.getContext("2d").drawImage(img,0,0,w,h);
+      const url=c.toDataURL("image/jpeg",0.8);
+      resolve({ data:url.split(",")[1], media_type:"image/jpeg", url:url });
+    };
+    img.onerror = ()=>resolve(null);
+    img.src = URL.createObjectURL(file);
+  });
+}
+async function addPhotos(files){
+  for(let i=0; i<files.length && PHOTOS.length<3; i++){
+    const p = await shrinkPhoto(files[i]);
+    if(p) PHOTOS.push(p);
+  }
+  paintPhotos();
+}
+function paintPhotos(){
+  const bar = document.getElementById("njPhotoBar");
+  if(!bar) return;
+  bar.innerHTML = PHOTOS.map((p,i)=>
+    `<span style="position:relative;display:inline-block">
+       <img src="${p.url}" style="width:52px;height:52px;object-fit:cover;border-radius:7px">
+       <b data-px="${i}" style="position:absolute;top:-5px;right:-5px;background:#8A5A44;color:#fff;
+         width:17px;height:17px;border-radius:50%;font-size:11px;line-height:17px;text-align:center;cursor:pointer">×</b>
+     </span>`).join("");
+  bar.querySelectorAll("[data-px]").forEach(b=>{
+    b.onclick = ()=>{ PHOTOS.splice(+b.dataset.px,1); paintPhotos(); };
+  });
+}
+document.addEventListener("change",(e)=>{
+  if(e.target && e.target.id==="njPhoto"){ addPhotos(e.target.files||[]); e.target.value=""; }
+});
+
 /* ── 조각들 ── */
 function sealBig(r){
   const k=whoOf(r), p=TEAM[k];
@@ -481,7 +525,9 @@ function runRow(r){
     <span style="flex:1;font-size:11.5px;min-width:0">
       <span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.topic)}</span>
       <span style="font-size:9.5px;color:#8FA79E">${esc(STAGE_KR[r.stage]||r.stage||"진행 중")}</span></span>
-    <span class="pips">${pips}</span></div>`;
+    <span class="pips">${pips}</span>
+    <button class="press" style="padding:5px 10px;font-size:10.5px;background:#EDE3D6;color:#8A5A44"
+      data-pcancel="${r.generation_id}">중단</button></div>`;
 }
 function failRow(r){
   const k=whoOf(r);
@@ -490,9 +536,11 @@ function failRow(r){
     <div style="display:flex;align-items:center;gap:9px">
       ${faceOf(k,"s32")}
       <span style="font-size:12.5px;font-weight:600;flex:1">${esc(r.topic)}</span>
-      <span style="font-size:10px;color:var(--seal)">중단</span>
+      <span style="font-size:10px;color:var(--seal)">${r.approval_status==="cancelled"?"내가 멈춤":"중단"}</span>
       <button class="press p-blue" style="padding:6px 13px;font-size:11px"
-        data-retry="${r.generation_id}">다시</button></div>
+        data-retry="${r.generation_id}">다시</button>
+      <button class="press" style="padding:6px 11px;font-size:11px;background:#E9E2D4;color:#7A6A55"
+        data-pdel="${r.generation_id}">지움</button></div>
     ${why?`<div style="font-size:10.5px;color:#6B7A74;line-height:1.6;margin-top:8px">${esc(why.slice(0,160))}</div>`:""}
   </div>`;
 }
@@ -679,7 +727,7 @@ function render(){
   const seal = live.filter(r=>r.approval_status==="pending");
   const ask  = live.filter(r=>r.approval_status==="needs_input");
   const run  = live.filter(r=>r.approval_status==="processing");
-  const fail = live.filter(r=>r.approval_status==="failed");
+  const fail = live.filter(r=>r.approval_status==="failed"||r.approval_status==="cancelled");
   const busy = new Set([...seal,...ask,...run].map(whoOf));
   const free = BENCH.filter(k=>!busy.has(k));
 
@@ -784,6 +832,10 @@ function render(){
       <div class="newjob">
         <input id="njTopic" placeholder="무엇을 만들까요">
         <textarea id="njRef" rows="2" placeholder="참고 URL (선택 · 한 줄에 하나)"></textarea>
+        <input type="file" id="njPhoto" accept="image/*" multiple style="display:none">
+        <button class="press p-ghost" id="njPhotoBtn"
+          style="margin-top:8px;width:100%;padding:9px 0;font-size:12px">📷 사진 넣기 (최대 3장)</button>
+        <div id="njPhotoBar" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div>
         <div class="chans" id="njChans">
           ${["인스타그램","네이버 블로그/카페","유튜브","상품 상세페이지","스레드(Threads)","홈페이지"]
             .map((c,i)=>`<span class="chn${i===0?" on":""}" data-chn="${c}">${c}</span>`).join("")}
@@ -797,7 +849,7 @@ function render(){
 
 /* ── 조작 ── */
 document.addEventListener("click", async (e)=>{
-  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#cfGo,[data-chn]");
+  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-pcancel],[data-pdel],[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#njPhotoBtn,#cfGo,[data-chn]");
   if(!t) return;
 
   if(t.dataset.chn!=null){ t.classList.toggle("on"); return; }
@@ -923,6 +975,32 @@ document.addEventListener("click", async (e)=>{
     else { toast(d.error||"실패"); t.disabled=false; }
     return;
   }
+  /* v305: 하던 일을 멈춘다 — 다음 단계 경계에서 실제로 선다 */
+  if(t.dataset.pcancel){
+    if(!confirm("이 일을 멈출까요? 나중에 '다시'로 이어서 할 수 있어요.")) return;
+    t.disabled=true; toast("멈추는 중…");
+    const d = await api("/api/pipeline/cancel",{method:"POST",
+      body:JSON.stringify({generation_id:t.dataset.pcancel})});
+    if(d.ok){ toast("멈췄습니다"); await load(true); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  /* v305: 목록에서 지운다 — 되돌릴 수 없다 */
+  if(t.dataset.pdel){
+    if(!confirm("이 기록을 아주 지울까요? 되돌릴 수 없어요.")) return;
+    t.disabled=true; toast("지우는 중…");
+    const d = await api("/api/pipeline/delete",{method:"POST",
+      body:JSON.stringify({generation_id:t.dataset.pdel})});
+    if(d.ok){ toast("지웠습니다"); await load(true); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+
+  if(t.id==="njPhotoBtn"){
+    if(PHOTOS.length>=3){ toast("사진은 3장까지예요"); return; }
+    const f=$("#njPhoto"); if(f) f.click();
+    return;
+  }
 
   if(t.id==="njGo"){
     const topic=$("#njTopic").value.trim();
@@ -932,8 +1010,11 @@ document.addEventListener("click", async (e)=>{
     const refs=$("#njRef").value.split("\n").map(s=>s.trim()).filter(s=>/^https?:\/\//.test(s)).slice(0,3);
     t.disabled=true; toast("시작합니다…");
     const d = await api("/api/pipeline/run",{method:"POST",
-      body:JSON.stringify({topic, channels:chans, refUrls:refs})});
-    if(d.ok){ $("#njTopic").value=""; $("#njRef").value=""; toast("작업이 시작되었습니다"); await load(); }
+      body:JSON.stringify({topic, channels:chans, refUrls:refs,
+        photos: PHOTOS.map(p=>({data:p.data, media_type:p.media_type}))})});
+    if(d.ok){ const np=PHOTOS.length;
+      $("#njTopic").value=""; $("#njRef").value=""; PHOTOS=[]; paintPhotos();
+      toast(np?("사진 "+np+"장과 함께 시작했습니다"):"작업이 시작되었습니다"); await load(); }
     else { toast(d.error||"실패"); }
     t.disabled=false;
     return;
