@@ -48,7 +48,7 @@
   .sb-row .sb-k{flex:none}
   .sb-cap{font-weight:700;color:#111}
   .sb-prompt{color:#7a869a;font-size:10.5px;font-style:italic}
-  @media(max-width:420px){ .sb-frame{width:96px} }
+  @media (max-width:479px){ .sb-frame{width:96px} }
   .blogbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
   .bb{background:#eef1f7;color:#2c3744;border:none;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
   .bb-go{background:#e7f0ff;color:#2b5b9e}
@@ -265,7 +265,7 @@
   .vn-stand.talking img{animation:talkBob .42s ease-in-out infinite;transform-origin:bottom center;border-color:var(--dc,#fff)}
   .vn-box{animation:vnRise .45s ease both}
   .vn-text{font-size:13px;line-height:1.65;color:#3a3140;white-space:pre-wrap;word-break:break-word}
-  @media (min-width:900px){
+  @media (min-width:1024px){
     .vn-stand{width:150px;margin-right:-18px}
     .vn-stand img{width:150px;height:200px}
     .vn-stand video{height:200px}
@@ -276,7 +276,7 @@
   .vtabs,.c-hd,.composer{box-shadow:0 1px 2px rgba(30,55,100,.04)}
   ::-webkit-scrollbar{width:9px;height:9px} ::-webkit-scrollbar-thumb{background:#c7cfdd;border-radius:9px}
   /* ===== 데스크탑(윈도우) — 넓고 크게, 스크롤 최소화 ===== */
-  @media (min-width:900px){
+  @media (min-width:1024px){
     #root{max-width:1180px}
     .c-log{padding:22px 30px}
     .opb{max-width:62%;font-size:13.5px;padding:12px 16px}
@@ -300,12 +300,12 @@
     .pj-list, .pjwrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
     .pj-list > .note, .pjwrap > .pj-create, .pjwrap > .note{grid-column:1/-1}
   }
-  @media (min-width:1500px){
+  @media (min-width:1440px){
     #root{max-width:1400px}
     .s-wrap{column-count:3}
   }
   /* ===== 태블릿 (601~899px) — 폰보다 크고 여유롭게 ===== */
-  @media (min-width:601px) and (max-width:899px){
+  @media (min-width:768px) and (max-width:1023px){
     #root{max-width:780px}
     .c-log{padding:16px 22px}
     .opb{max-width:74%;font-size:13.5px;padding:11px 15px}
@@ -344,7 +344,7 @@
   .ob-mem{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
   .ob-spacer{flex:1 1 auto}
   @media (min-width:1280px){ .ob-grid{grid-template-columns:repeat(3,1fr)} }
-  @media (min-width:1700px){ .ob-grid{grid-template-columns:repeat(4,1fr)} }
+  @media (min-width:1440px){ .ob-grid{grid-template-columns:repeat(4,1fr)} }
   .ob-card{background:#fff;border:1px solid #e6eaf2;border-radius:13px;padding:12px 13px;box-shadow:0 1px 3px rgba(30,55,100,.06);display:flex;flex-direction:column}
   .ob-card.lead{border-color:#f5c97f;background:#fffdf6}
   .ob-hd{display:flex;align-items:center;gap:7px;margin-bottom:5px}
@@ -407,10 +407,10 @@
 .jb-x{border:none;background:transparent;color:#a03028;font-size:13px;cursor:pointer;padding:2px 4px}
 .jb-spin{animation:jbspin 1.6s linear infinite;display:inline-block}
 @keyframes jbspin{to{transform:rotate(360deg)}}
-@media (max-width:520px){ .jb-note{display:none} }
+@media (max-width:479px){ .jb-note{display:none} }
   #view{flex:1;min-height:0;display:flex;flex-direction:column}
   #siderail{display:none}
-  @media (min-width:900px){
+  @media (min-width:1024px){
     #siderail{display:flex;flex-direction:column;width:316px;flex:0 0 316px;border-left:1px solid #e2e7f0;background:#f4f6fb;overflow-y:auto;gap:10px;padding:12px}
     #root.nodock #siderail{display:none}
     .dock-toggle{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #d4dae6;border-radius:8px;padding:4px 9px;font-size:11px;color:#34465e;cursor:pointer;font-family:'JetBrains Mono',monospace;margin-left:6px}
@@ -445,7 +445,7 @@
     .sr-mini{font-size:10.5px;color:#56627a;line-height:1.5}
     .sr-time{font-size:9.5px;color:#9aa3b2}
   }
-  @media (min-width:1500px){
+  @media (min-width:1440px){
     #siderail{width:360px;flex-basis:360px}
   }
   .composer.k{background:#dfe6ec;border-top:1px solid #c4d0da}
@@ -852,6 +852,19 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
 .cttopic{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#5a6677}
 </style>
 <style>
+/* ══ 화면 크기 기준 (v305에서 통일) ══
+   그동안 420·520·600·601·900·1024·1280·1500·1700 이 뒤섞여 있었다.
+   기기가 어느 칸에 드는지 아무도 몰랐다. 이제 넷으로만 나눈다.
+
+     📱 모바일   ~767px      한 줄로 세운다
+     📲 태블릿   768~1023    여백을 넓힌다
+     💻 PC       1024~       사이드바가 나온다
+     🖥 큰 화면  1440~       더 벌린다
+     (479px 이하는 작은 폰 미세조정)
+
+   업계 표준(768/1024/1280)에 맞췄다. 예전 900px 기준에서는
+   폰을 가로로 눕히면(915px) PC 화면이 나와 사이드바가 튀어나왔다. */
+html[data-device]{}
 /* ── 🖋 결재 화면 (v305: agent-manager.html 을 이 파일 안으로 들여왔다) ──
    모든 규칙을 #amRoot 아래로 묶었다. 바깥 화면과 이름이 겹쳐도 서로 물들지 않는다. */
 
@@ -865,8 +878,17 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
 #amRoot{margin:0;padding:0 0 40px;
   background:radial-gradient(1100px 460px at 50% -8%,#1A2E29 0%,transparent 62%),var(--desk);
   color:var(--paper);font-family:'IBM Plex Sans KR',system-ui,sans-serif;
-  -webkit-font-smoothing:antialiased;min-height:100vh}
-#amRoot .wrap{max-width:760px;margin:0 auto;padding:0 13px}
+  -webkit-font-smoothing:antialiased;
+  /* .work 가 가로 배치라 그냥 두면 사이드바와 나란히 서서 화면 밖으로 밀린다.
+     혼자 다 쓰고, 세로로만 넘치게 한다. */
+  flex:1 1 100%; width:100%; min-width:0; min-height:0;
+  overflow-y:auto; overflow-x:hidden}
+#root.amon #siderail{display:none}          /* 결재 볼 땐 사이드바를 접는다 */
+#root.amon .dock-toggle{display:none}
+#amRoot .wrap{max-width:100%;margin:0 auto;padding:0 13px}
+@media (min-width:768px){ #amRoot .wrap{max-width:720px;padding:0 20px} }
+@media (min-width:1024px){ #amRoot .wrap{max-width:860px} }
+@media (min-width:1440px){ #amRoot .wrap{max-width:1040px} }
 #amRoot /* 머리 */
 .hd{padding:20px 0 13px;display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
 #amRoot .hd .eb{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:#7E9A90}
@@ -1062,7 +1084,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
    PC: 마우스. 두 단으로 벌리고 글자를 줄인다. */
 
 /* 태블릿 — 600px 이상 */
-@media (min-width:600px){
+@media (min-width:768px){
   .wrap{max-width:860px;padding:0 20px}
   body{font-size:15px}
   .press{min-height:44px}                 /* 손가락 기준 최소 크기 */
@@ -1081,7 +1103,7 @@ textarea.mr-ta{width:100%;box-sizing:border-box;min-height:54px;background:#fff;
   .two > *{min-width:0}
 }
 #amRoot /* 아주 넓은 화면 — 1500px 이상 */
-@media (min-width:1500px){
+@media (min-width:1440px){
   .wrap{max-width:1320px}
   .hscroll{grid-template-columns:repeat(4,1fr)}
 }
@@ -6924,6 +6946,7 @@ function renderApprove(){
   var a = document.getElementById("amRoot");
   if (!a) return;
   if (v) v.style.display = "none";
+  var rt = document.getElementById("root"); if (rt) rt.classList.add("amon");
   a.hidden = false;
   if (!renderApprove._on){ renderApprove._on = true; try{ amBoot(); }catch(e){ console.warn("결재 화면 시작 실패", e); } }
 }
@@ -6933,8 +6956,23 @@ function hideApprove(){
   var a = document.getElementById("amRoot");
   if (a) a.hidden = true;
   if (v) v.style.display = "";
+  var rt = document.getElementById("root"); if (rt) rt.classList.remove("amon");
   return true;
 }
+/* 지금 어느 칸인지 html 에 적어 둔다. 눈으로 확인할 수 있어야 고치기도 쉽다. */
+function markDevice(){
+  var w = window.innerWidth || document.documentElement.clientWidth;
+  var d = w < 768 ? "mobile" : (w < 1024 ? "tablet" : (w < 1440 ? "pc" : "wide"));
+  var el = document.documentElement;
+  if (el.getAttribute("data-device") !== d){
+    el.setAttribute("data-device", d);
+    el.setAttribute("data-vw", String(w));
+  }
+}
+markDevice();
+window.addEventListener("resize", markDevice);
+window.addEventListener("orientationchange", markDevice);
+
 var VIEW_GROUP={console:"make",content:"make",approve:"approve",learn:"grow",record:"grow",cycle:"grow",results:"grow",analytics:"grow",office:"dept",project:"dept",meeting:"dept",settings:"settings"};
 var GROUP_VIEWS={make:["console","content"],approve:["approve"],grow:["cycle","learn","record"],dept:["office"],settings:["settings"]};
 var GROUP_DEFAULT={make:"console",approve:"approve",grow:"cycle",dept:"office",settings:"settings"};
