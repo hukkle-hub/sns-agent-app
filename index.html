@@ -990,6 +990,48 @@ html[data-device]{}
   -webkit-mask-image:linear-gradient(#000 60%,transparent);mask-image:linear-gradient(#000 60%,transparent)}
 #amRoot .dcode{margin:0;padding:11px 12px;font-family:'IBM Plex Mono',monospace;font-size:11px;
   line-height:1.6;overflow-x:auto;white-space:pre;background:rgba(18,33,30,.055);color:#243830}
+/* 그려 보기 판 — 기기마다 놓는 자리가 다르다 (v315)
+   폰: 화면을 덮는다 / 태블릿: 아래서 올라온다 / PC: 오른쪽에 나란히 */
+/* 대조 상자 — 지운 데 분홍, 새 데 초록 (v318) */
+#amRoot .dfbox{font-size:12px;line-height:1.75;white-space:pre-wrap;word-break:break-word;
+  max-height:230px;overflow:auto;padding:10px 11px;border-radius:7px;
+  background:var(--card2);border:1px solid rgba(28,43,39,.16)}
+#amRoot .dfsame{color:var(--ink3)}
+#amRoot .dfdel{background:rgba(178,58,50,.18);color:#8d2b25;text-decoration:line-through;
+  text-decoration-thickness:1px;border-radius:3px}
+#amRoot .dfins{background:rgba(46,125,91,.2);color:#1d5c40;border-radius:3px;font-weight:600}
+#undoBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));
+  z-index:72;display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:26px;
+  background:var(--bg2);border:1px solid var(--line);box-shadow:0 6px 22px rgba(0,0,0,.35);
+  color:var(--on-bg2);font-size:11.5px}
+#undoBar button{background:var(--card2);color:var(--ink);border:0;border-radius:18px;
+  padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+#selBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));
+  z-index:70;display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:26px;
+  background:var(--bg2);border:1px solid var(--line);box-shadow:0 6px 22px rgba(0,0,0,.35);
+  color:var(--on-bg2);font-size:11px}
+#selBar button{background:var(--seal);color:#fff;border:0;border-radius:18px;
+  padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+#amRoot .dcode::selection,#amRoot .dbody::selection{background:rgba(201,162,39,.45)}
+#amRoot .dcode *::selection,#amRoot .dbody *::selection{background:rgba(201,162,39,.45)}
+.pv{background:var(--bg2);border:1px solid var(--line);display:flex;flex-direction:column;z-index:60}
+.pv-m{position:fixed;inset:0;border:0}
+.pv-t{position:fixed;left:0;right:0;bottom:0;height:62vh;border-radius:14px 14px 0 0;
+  box-shadow:0 -8px 30px rgba(0,0,0,.35)}
+.pv-d{position:fixed;right:0;top:0;bottom:0;width:min(52vw,720px);
+  box-shadow:-8px 0 30px rgba(0,0,0,.3)}
+.pvbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px 12px;
+  border-bottom:1px solid var(--line);color:var(--on-bg);font-size:12px}
+.pvw{font-size:10.5px;padding:4px 9px;border-radius:14px;cursor:pointer;
+  background:rgba(255,255,255,.07);color:var(--on-bg2);border:1px solid var(--line)}
+.pvw.on{background:rgba(62,122,155,.3);color:#cfe6f4;border-color:#3E7A9B}
+.pvx{margin-left:auto;background:var(--card2);color:var(--ink);border:0;border-radius:6px;
+  padding:6px 13px;font-size:11px;cursor:pointer;font-family:inherit}
+.pvstage{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;
+  padding:12px;background:rgba(0,0,0,.18)}
+.pvstage iframe{border:0;background:#fff;border-radius:8px;height:100%;min-height:420px;
+  max-width:100%;box-shadow:0 4px 18px rgba(0,0,0,.28)}
+#amRoot .dcopy.redo{background:rgba(178,58,50,.12);color:var(--seal);border-color:rgba(178,58,50,.3)}
 #amRoot .dpart.hi{box-shadow:0 0 0 2px var(--idle)}
 #amRoot .body.fold{max-height:210px;overflow:hidden;
   -webkit-mask-image:linear-gradient(#000 62%,transparent);
@@ -1191,7 +1233,7 @@ html[data-device]{}
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v313</span>
+    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v318</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -10579,7 +10621,7 @@ async function loadAndApplyPatches(){
      예전에는 앱과 서버 번호가 '똑같아야' ✓ 를 줬다. 그런데 화면만 고친 판(v311·v312)에서는
      서버를 올릴 이유가 없어 번호가 벌어지고, 멀쩡한데도 경고가 떴다.
      이제 앱이 '필요한 최소 서버 번호'를 적어 두고, 그보다 낮을 때만 경고한다. */
-  var NEED_SERVER = 310;      // ← 서버 기능을 새로 쓰는 판에서만 이 숫자를 올린다
+  var NEED_SERVER = 317;      // ← 서버 기능을 새로 쓰는 판에서만 이 숫자를 올린다
   (function(){
     var el=document.getElementById("srvver"); if(!el) return;
     if(!useBackend()){ el.innerHTML='<span style="color:#c0b6a0">서버 미연결</span>'; return; }
@@ -10979,10 +11021,166 @@ function cutDoc(text){
   return parts;
 }
 window.__DOCPARTS = [];
+window.__DOCID = "";
+/* ══ 대조해 보여주기 (v318) ══
+   AI 결과를 곧바로 덮어쓰면 무엇이 바뀌었는지 모르고, 잘못돼도 되돌릴 수 없다.
+   업계 표준은 '덮어쓰지 말고 제안으로 보여라'다. 사람이 받아들일지 정한다.
+   지운 데는 분홍, 새로 든 데는 초록으로 칠한다. */
+function diffWords(a, b){
+  const A = String(a||"").split(/(\s+)/), B = String(b||"").split(/(\s+)/);
+  // 앞뒤로 같은 부분을 걷어내고 가운데만 다른 것으로 본다 — 가볍고 충분히 정확하다
+  let h = 0;
+  while (h < A.length && h < B.length && A[h] === B[h]) h++;
+  let t = 0;
+  while (t < A.length-h && t < B.length-h && A[A.length-1-t] === B[B.length-1-t]) t++;
+  return {
+    same1: A.slice(0, h).join(""),
+    del:   A.slice(h, A.length-t).join(""),
+    ins:   B.slice(h, B.length-t).join(""),
+    same2: A.slice(A.length-t).join("")
+  };
+}
+function diffHtml(a, b){
+  const d = diffWords(a, b);
+  if (!d.del && !d.ins) return '<span class="dfsame">' + esc(String(b||"")) + "</span>";
+  return '<span class="dfsame">' + esc(d.same1) + "</span>"
+       + (d.del ? '<span class="dfdel">' + esc(d.del) + "</span>" : "")
+       + (d.ins ? '<span class="dfins">' + esc(d.ins) + "</span>" : "")
+       + '<span class="dfsame">' + esc(d.same2) + "</span>";
+}
+/* 되돌리기 — 받아들인 뒤에도 직전으로 돌아갈 수 있어야 한다 */
+window.__UNDO = null;    // {n, body, full}
+function pushUndo(n, body){
+  window.__UNDO = { n:n, body:body, full: joinDoc(window.__DOCPARTS) };
+}
+async function undoLast(){
+  const u = window.__UNDO;
+  if (!u){ toast("되돌릴 것이 없어요"); return; }
+  const p = (window.__DOCPARTS||[])[u.n];
+  if (p) p.body = u.body;
+  const host = ROOT.querySelector("#dp-"+u.n);
+  if (host){ const el = host.querySelector(".dcode, .dbody"); if (el) el.textContent = u.body; }
+  await api("/api/content/patch",{method:"POST",
+    body:JSON.stringify({ generation_id: window.__DOCID, text: joinDoc(window.__DOCPARTS) })});
+  window.__UNDO = null;
+  const b = document.getElementById("undoBar"); if (b) b.remove();
+  toast("되돌렸습니다");
+}
+function showUndoBar(){
+  let b = document.getElementById("undoBar");
+  if (b) b.remove();
+  b = document.createElement("div");
+  b.id = "undoBar";
+  b.innerHTML = '<span>바꿨습니다</span><button data-undo="1">되돌리기</button>';
+  document.body.appendChild(b);
+  setTimeout(()=>{ const x=document.getElementById("undoBar"); if(x) x.remove(); }, 12000);
+}
+
+/* ══ 집어서 고치기 (v317) ══
+   본문이나 코드에서 마음에 안 드는 데를 손가락으로 긁으면,
+   그 자리만 다시 쓴다. 글자를 찾아 바꾸지 않고 '몇 번째 글자부터 몇 번째까지'를
+   기억한다 — 같은 문구가 두 번 나와도 엉뚱한 데가 바뀌지 않는다. */
+window.__SEL = null;      // {n, start, end, text}
+function selOffset(root, node, off){
+  let n = 0, done = false;
+  (function walk(el){
+    if (done) return;
+    if (el.nodeType === 3){
+      if (el === node){ n += off; done = true; return; }
+      n += el.nodeValue.length; return;
+    }
+    for (const c of el.childNodes){ walk(c); if (done) return; }
+  })(root);
+  return n;
+}
+function catchSelection(){
+  const sel = window.getSelection();
+  const bar = document.getElementById("selBar");
+  if (!sel || sel.isCollapsed || !sel.rangeCount){ if(bar) bar.remove(); window.__SEL=null; return; }
+  const r = sel.getRangeAt(0);
+  const host = r.startContainer.parentElement &&
+               r.startContainer.parentElement.closest(".dcode, .dbody");
+  if (!host || !host.id){ if(bar) bar.remove(); window.__SEL=null; return; }
+  const m = host.id.match(/^dp-(?:b-)?(\d+)$/);
+  if (!m){ if(bar) bar.remove(); window.__SEL=null; return; }
+  const text = String(sel.toString());
+  if (text.trim().length < 2){ if(bar) bar.remove(); window.__SEL=null; return; }
+  const start = selOffset(host, r.startContainer, r.startOffset);
+  window.__SEL = { n:+m[1], start:start, end:start+text.length, text:text };
+  if (bar) bar.remove();
+  const b = document.createElement("div");
+  b.id = "selBar";
+  b.innerHTML = `<span>집어낸 ${text.trim().length}자</span>
+    <button data-selredo="1">↩ 이 부분만 다시</button>`;
+  document.body.appendChild(b);
+}
+document.addEventListener("selectionchange", ()=>{ setTimeout(catchSelection, 60); });
+/* 조각을 원래 모양으로 되붙인다. 고친 코드가 그대로 문서에 들어가야 한다. */
+function joinDoc(parts){
+  let last = null;                       // 같은 절 제목을 두 번 쓰지 않는다
+  const out = [];
+  for (const p of (parts||[])){
+    if (p.title && p.title !== last){ out.push("## " + p.title); last = p.title; }
+    out.push(p.kind==="code"
+      ? "```" + (p.lang==="코드"?"":p.lang) + "\n" + p.body + "\n```"
+      : p.body);
+  }
+  return out.join("\n\n").replace(/\n{4,}/g,"\n\n\n");
+}
+/* ══ 그려 보기 (v315) ══
+   예전에는 새 창을 띄웠다. PC 에서는 두 화면을 나란히 볼 수 있지만
+   폰에서는 창이 갈리면 코드와 결과를 오갈 수 없고, 팝업이 막히기도 한다.
+   그래서 화면 안에서 그린다. 기기마다 놓는 자리를 달리한다.
+
+     📱 폰    — 화면을 덮는 판. 코드↔화면을 단추로 오간다
+     📲 태블릿 — 아래에서 올라오는 판. 위로 코드가 보인다
+     💻 PC    — 오른쪽에 나란히. 고치면서 바로 본다  */
+function devNow(){
+  return document.documentElement.getAttribute("data-device") || "mobile";
+}
+var PREV_W = 390;                       // 어느 폭으로 그려 볼지 (내 기기와 별개)
+function buildPreview(){
+  const ps = window.__DOCPARTS||[];
+  const html = ps.filter(p=>p.kind==="code" && /html/i.test(p.lang)).map(p=>p.body).join("\n");
+  const css  = ps.filter(p=>p.kind==="code" && /css/i.test(p.lang)).map(p=>p.body).join("\n");
+  if (!html) return null;
+  return "<!doctype html><html><head><meta charset=utf-8>"
+    + "<meta name=viewport content='width=device-width,initial-scale=1'>"
+    + "<style>body{margin:0;font-family:system-ui,'Apple SD Gothic Neo',sans-serif}"
+    + css + "</style></head><body>" + html + "</body></html>";
+}
+function previewDoc(){
+  const doc = buildPreview();
+  if (!doc){ toast("그려 볼 HTML 조각이 없어요"); return; }
+  const dev = devNow();
+  let box = document.getElementById("pvBox");
+  if (box) box.remove();
+  box = document.createElement("div");
+  box.id = "pvBox";
+  box.className = "pv pv-" + (dev==="mobile" ? "m" : (dev==="tablet" ? "t" : "d"));
+  const widths = [[390,"📱 폰"],[820,"📲 태블릿"],[1280,"💻 PC"]];
+  box.innerHTML = `<div class="pvbar">
+      <b>👁 그려 보기</b>
+      ${widths.map(w=>`<span class="pvw${w[0]===PREV_W?" on":""}" data-pvw="${w[0]}">${w[1]}</span>`).join("")}
+      <button class="pvx" id="pvClose">닫기</button>
+    </div>
+    <div class="pvstage"><iframe id="pvFrame" sandbox="allow-same-origin"
+      style="width:${PREV_W}px" title="미리보기"></iframe></div>`;
+  (dev==="pc"||dev==="wide" ? ROOT : document.body).appendChild(box);
+  const f = box.querySelector("#pvFrame");
+  f.srcdoc = doc;
+  if (dev==="mobile") document.body.style.overflow = "hidden";
+}
+function closePreview(){
+  const b = document.getElementById("pvBox");
+  if (b) b.remove();
+  document.body.style.overflow = "";
+}
 function docHtml(text, idBase){
   const parts = cutDoc(text);
   if (parts.length <= 1) return null;              // 나눌 게 없으면 그냥 두는 게 낫다
   window.__DOCPARTS = parts;
+
   const codeN = parts.filter(p=>p.kind==="code").length;
   const nav = parts.map((p,i)=> p.kind==="code"
       ? `<span class="dchip code" data-djump="${i}">&lt;/&gt; ${esc(p.title? p.title.slice(0,12)+" · " : "")}${esc(p.lang)}</span>`
@@ -10993,22 +11191,26 @@ function docHtml(text, idBase){
       const lines = p.body.split("\n").length;
       return `<div class="dpart" id="${idBase}-${i}">
         <div class="dhead code"><b>&lt;/&gt; ${esc(p.lang)}</b>
-          ${p.title?`<span class="dmeta">${esc(p.title.slice(0,20))}</span>`:""}
+          ${p.title?`<span class="dmeta">${esc(p.title.slice(0,16))}</span>`:""}
           <span class="dmeta">${lines}줄</span>
+          <button class="dcopy redo" data-dredo="${i}">↩ 다시</button>
           <button class="dcopy" data-dcopy="${i}">복사</button></div>
-        <pre class="dcode">${esc(p.body)}</pre></div>`;
+        <pre class="dcode" id="${idBase}-c-${i}">${esc(p.body)}</pre></div>`;
     }
     const chars = p.body.replace(/\s/g,"").length;
     const long = chars > 260;
     return `<div class="dpart" id="${idBase}-${i}">
-      <div class="dhead" data-dtoggle="${i}"><b>${esc(p.title||"본문")}</b>
+      <div class="dhead"><b data-dtoggle="${i}" style="cursor:pointer">${esc(p.title||"본문")}</b>
         <span class="dmeta">${chars}자</span>
+        <button class="dcopy redo" data-dredo="${i}">↩ 다시</button>
         <button class="dcopy" data-dcopy="${i}">복사</button></div>
       <div class="dbody${long?" fold":""}" id="${idBase}-b-${i}">${esc(p.body.trim())}</div>
       ${long?`<span class="cmore" data-unfold="${idBase}-b-${i}">… 더 보기</span>`:""}</div>`;
   }).join("");
+  const hasHtml = parts.some(p=>p.kind==="code" && /html/i.test(p.lang));
   return `<div class="dnav">${nav}</div>
-    <div class="dsum">조각 ${parts.length}개${codeN?` · 코드 ${codeN}개`:""} — 조각마다 따로 복사됩니다</div>
+    <div class="dsum">조각 ${parts.length}개${codeN?` · 코드 ${codeN}개`:""} — 조각마다 따로 고치고 복사합니다</div>
+    ${hasHtml?`<button class="press p-blue" id="dPrev" style="width:100%;padding:9px 0;font-size:11.5px;margin-bottom:10px">👁 그려 보기 — 실제 화면으로 확인</button>`:""}
     ${body}`;
 }
 
@@ -11127,6 +11329,7 @@ function viewSheet(r){
 
   const body = textOf(r);
   const pend = r.approval_status === "pending";
+  window.__DOCID = r.generation_id || "";      // 조각을 고쳐 저장할 때 쓴다
   h += `<div class="sheet"><h4>원고
     <button class="cp" data-copy="main">복사</button></h4>
     ${pend
@@ -11318,7 +11521,7 @@ function render(){
 
 /* ── 조작 ── */
 ROOT.addEventListener("click", async (e)=>{
-  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-pcancel],[data-pdel],[data-rttoggle],[data-rtrun],[data-cfold],[data-unfold],[data-dcopy],[data-djump],[data-dtoggle],#rtHead,#rpHead,#rpDigest,[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#njPhotoBtn,#cfGo,[data-chn]");
+  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-pcancel],[data-pdel],[data-rttoggle],[data-rtrun],[data-cfold],[data-unfold],[data-dcopy],[data-djump],[data-dtoggle],[data-dedit],[data-dsave],[data-dcancel],[data-dredo],[data-dgo],[data-selredo],[data-sgo],[data-scancel],[data-pacc],[data-prej],[data-pagain],[data-undo],#dPrev,#pvClose,[data-pvw],#rtHead,#rpHead,#rpDigest,[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#njPhotoBtn,#cfGo,[data-chn]");
   if(!t) return;
 
   if(t.dataset.chn!=null){ t.classList.toggle("on"); return; }
@@ -11442,6 +11645,221 @@ ROOT.addEventListener("click", async (e)=>{
       body:JSON.stringify({generation_id:t.dataset.retry})});
     if(d.ok){ toast("다시 돌리는 중입니다"); await load(true); }
     else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.id==="dPrev"){ previewDoc(); return; }
+  if(t.id==="pvClose"){ closePreview(); return; }
+  if(t.dataset.pvw){
+    PREV_W = +t.dataset.pvw;
+    const f = document.getElementById("pvFrame");
+    if(f) f.style.width = PREV_W + "px";
+    document.querySelectorAll(".pvw").forEach(x=>x.classList.toggle("on", +x.dataset.pvw===PREV_W));
+    return;
+  }
+  if(t.dataset.selredo){
+    const S = window.__SEL;
+    if(!S){ toast("먼저 고칠 부분을 긁어 주세요"); return; }
+    const host = ROOT.querySelector("#dp-"+S.n);
+    if(!host) return;
+    const bar = document.getElementById("selBar"); if(bar) bar.remove();
+    if(host.querySelector("[data-sgo]")) return;
+    const box = document.createElement("div");
+    box.style.cssText = "padding:9px 10px;border-top:1px solid rgba(28,43,39,.12)";
+    box.innerHTML = `<div style="font-size:10.5px;color:#6B7A74;margin-bottom:5px">
+        집어낸 부분만 다시 씁니다 — 나머지는 그대로 둡니다.</div>
+      <div style="font-size:11px;background:rgba(201,162,39,.16);border-radius:5px;
+        padding:7px 9px;margin-bottom:7px;max-height:70px;overflow:auto;white-space:pre-wrap"
+        >${esc(S.text.slice(0,220))}</div>
+      <textarea data-snote rows="2" placeholder="예) 이 문구를 더 짧고 부드럽게"
+        style="width:100%;box-sizing:border-box;font-family:inherit;font-size:12px;line-height:1.6;
+        color:var(--ink);background:var(--card);border:1px solid rgba(28,43,39,.25);
+        border-radius:6px;padding:9px"></textarea>
+      <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">
+        <button class="press p-blue" style="padding:7px 13px;font-size:11px" data-sgo="1" data-by="claude">다시 쓰기</button>
+        <button class="dcopy" data-sgo="1" data-by="gemini">제미나이에게</button>
+        <button class="dcopy" data-scancel="1">그만</button></div>`;
+    host.appendChild(box);
+    box.querySelector("textarea").focus();
+    return;
+  }
+  if(t.dataset.scancel){
+    const b = ROOT.querySelector("[data-snote]"); if(b) b.parentElement.remove();
+    window.__SEL = null; return;
+  }
+  if(t.dataset.sgo){
+    const S = window.__SEL;
+    const ta = ROOT.querySelector("[data-snote]");
+    const note = (ta && ta.value || "").trim();
+    if(!S){ toast("집어낸 자리를 잃었어요. 다시 긁어 주세요"); return; }
+    if(!note){ toast("무엇이 마음에 안 드는지 적어 주세요"); if(ta) ta.focus(); return; }
+    const p = (window.__DOCPARTS||[])[S.n];
+    if(!p) return;
+    t.disabled = true; toast("그 부분만 다시 쓰는 중…");
+    const d = await api("/api/content/redo-part",{method:"POST", body:JSON.stringify({
+      generation_id: window.__DOCID, part: S.text, context: p.body, note: note,
+      lang: p.kind==="code" ? p.lang : "본문", by: t.dataset.by || "claude" })});
+    if(!d.ok){ toast(d.error||"실패"); t.disabled = false; return; }
+    /* v318: 바로 덮어쓰지 않는다. 무엇이 바뀌는지 보여주고 사장님이 정한다. */
+    window.__PROP = { n:S.n, start:S.start, end:S.end, old:S.text, next:d.text,
+                      note:note, by:t.dataset.by||"claude" };
+    const host = ROOT.querySelector("#dp-"+S.n);
+    const box  = host && host.querySelector("[data-snote]");
+    if(box){
+      box.parentElement.innerHTML = `
+        <div style="font-size:10.5px;color:#6B7A74;margin-bottom:6px">
+          ${esc(d.who||"담당")}이(가) 이렇게 고쳤습니다${d.via==="gemini"?" · 제미나이":""} — 넣을까요?</div>
+        <div class="dfbox">${diffHtml(S.text, d.text)}</div>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button class="press p-blue" style="padding:7px 14px;font-size:11px" data-pacc="1">받아들이기</button>
+          <button class="dcopy" data-pagain="1">다시</button>
+          <button class="dcopy" data-prej="1">물리치기</button></div>`;
+    }
+    return;
+  }
+  if(t.dataset.prej){
+    const host = ROOT.querySelector("#dp-"+(window.__PROP||{}).n);
+    const b = host && host.querySelector(".dfbox");
+    if(b) b.parentElement.remove();
+    window.__PROP = null; window.__SEL = null;
+    toast("그대로 두었습니다");
+    return;
+  }
+  if(t.dataset.pagain){
+    const P = window.__PROP;
+    if(!P) return;
+    t.disabled = true; toast("다시 써 보는 중…");
+    const p = (window.__DOCPARTS||[])[P.n];
+    const d = await api("/api/content/redo-part",{method:"POST", body:JSON.stringify({
+      generation_id: window.__DOCID, part: P.old, context: p.body,
+      note: P.note + "\n(앞서 낸 안은 이랬다: " + String(P.next).slice(0,200) + " — 다른 방향으로.)",
+      lang: p.kind==="code" ? p.lang : "본문", by: P.by })});
+    if(!d.ok){ toast(d.error||"실패"); t.disabled=false; return; }
+    P.next = d.text;
+    const host = ROOT.querySelector("#dp-"+P.n);
+    const bx = host && host.querySelector(".dfbox");
+    if(bx) bx.innerHTML = diffHtml(P.old, d.text);
+    t.disabled = false;
+    return;
+  }
+  if(t.dataset.pacc){
+    const P = window.__PROP;
+    if(!P) return;
+    const p = (window.__DOCPARTS||[])[P.n];
+    if(!p) return;
+    pushUndo(P.n, p.body);                                  // 되돌릴 자리를 남겨 둔다
+    p.body = p.body.slice(0, P.start) + P.next + p.body.slice(P.end);
+    const w = await api("/api/content/patch",{method:"POST",
+      body:JSON.stringify({ generation_id: window.__DOCID, text: joinDoc(window.__DOCPARTS) })});
+    const host = ROOT.querySelector("#dp-"+P.n);
+    if(host){
+      const el = host.querySelector(".dcode, .dbody");
+      if(el){ el.textContent = p.body; el.classList.remove("fold"); }
+      const bx = host.querySelector(".dfbox"); if(bx) bx.parentElement.remove();
+      host.classList.add("hi"); setTimeout(()=>host.classList.remove("hi"), 1500);
+    }
+    window.__PROP = null; window.__SEL = null;
+    showUndoBar();
+    if(!w.ok) toast("화면엔 넣었지만 저장은 실패했어요");
+    return;
+  }
+  if(t.dataset.undo){ await undoLast(); return; }
+  if(t.dataset.dredo != null){
+    const n = +t.dataset.dredo;
+    const p = (window.__DOCPARTS||[])[n];
+    const host = ROOT.querySelector("#dp-"+n);
+    if(!p || !host || host.querySelector("[data-dgo]")) return;
+    const box = document.createElement("div");
+    box.style.cssText = "padding:9px 10px;border-top:1px solid rgba(28,43,39,.12)";
+    box.innerHTML = `<div style="font-size:10.5px;color:#6B7A74;margin-bottom:5px">
+        이 조각만 다시 씁니다. 무엇이 마음에 안 드는지 적어 주세요.</div>
+      <textarea data-dnote="${n}" rows="2" placeholder="예) 문구가 딱딱해요. 더 짧고 사람 말처럼."
+        style="width:100%;box-sizing:border-box;font-family:inherit;font-size:12px;line-height:1.6;
+        color:var(--ink);background:var(--card);border:1px solid rgba(28,43,39,.25);
+        border-radius:6px;padding:9px"></textarea>
+      <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">
+        <button class="press p-blue" style="padding:7px 13px;font-size:11px" data-dgo="${n}" data-by="claude">다시 쓰기</button>
+        <button class="dcopy" data-dgo="${n}" data-by="gemini">제미나이에게</button>
+        <button class="dcopy" data-dedit="${n}">직접 고치기</button>
+        <button class="dcopy" data-dcancel="${n}">그만</button></div>`;
+    host.appendChild(box);
+    box.querySelector("textarea").focus();
+    return;
+  }
+  if(t.dataset.dgo != null){
+    const n = +t.dataset.dgo;
+    const ta = ROOT.querySelector(`[data-dnote="${n}"]`);
+    const p  = (window.__DOCPARTS||[])[n];
+    const note = (ta && ta.value || "").trim();
+    if(!note){ toast("무엇이 마음에 안 드는지 적어 주세요"); if(ta) ta.focus(); return; }
+    const by = t.dataset.by || "claude";
+    t.disabled = true;
+    toast(by==="gemini" ? "제미나이에게 맡겼습니다…" : "다시 쓰는 중…");
+    const d = await api("/api/content/redo-part",{method:"POST", body:JSON.stringify({
+      generation_id: window.__DOCID, part: p.body, note: note,
+      lang: p.kind==="code" ? p.lang : "본문", by: by })});
+    if(!d.ok){ toast(d.error||"실패"); t.disabled = false; return; }
+    /* v318: 조각 통째로 다시 쓴 것도 제안으로 보여준다 — 덮어쓰지 않는다 */
+    window.__PROP = { n:n, start:0, end:p.body.length, old:p.body, next:d.text,
+                      note:note, by:by, whole:true };
+    const host = ROOT.querySelector("#dp-"+n);
+    const box  = host && host.querySelector("[data-dnote]");
+    if(box){
+      box.parentElement.innerHTML = `
+        <div style="font-size:10.5px;color:#6B7A74;margin-bottom:6px">
+          ${esc(d.who||"담당")}이(가) 이렇게 고쳤습니다${d.via==="gemini"?" · 제미나이":""} — 넣을까요?</div>
+        <div class="dfbox">${diffHtml(p.body, d.text)}</div>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button class="press p-blue" style="padding:7px 14px;font-size:11px" data-pacc="1">받아들이기</button>
+          <button class="dcopy" data-pagain="1">다시</button>
+          <button class="dcopy" data-prej="1">물리치기</button></div>`;
+    }
+    return;
+  }
+  if(t.dataset.dedit != null){
+    const n = +t.dataset.dedit;
+    const p = (window.__DOCPARTS||[])[n];
+    const host = ROOT.querySelector("#dp-"+n);
+    if(!p || !host) return;
+    if(host.querySelector("[data-dsave]")) return;          // 이미 열려 있다
+    const old = host.querySelector(".dcode, .dbody");
+    if(old) old.style.display = "none";
+    const box = document.createElement("div");
+    box.style.cssText = "padding:9px 10px";
+    box.innerHTML = `<textarea data-dbox="${n}" rows="${Math.min(22, Math.max(5, p.body.split("\n").length+1))}"
+        style="width:100%;box-sizing:border-box;font-family:${p.kind==="code"?"'IBM Plex Mono',monospace":"inherit"};
+        font-size:${p.kind==="code"?"11px":"12.5px"};line-height:1.6;color:var(--ink);background:var(--card);
+        border:1px solid rgba(28,43,39,.25);border-radius:6px;padding:9px"></textarea>
+      <div style="display:flex;gap:7px;margin-top:7px">
+        <button class="press p-blue" style="padding:7px 14px;font-size:11px" data-dsave="${n}">저장</button>
+        <button class="dcopy" data-dcancel="${n}">그만</button></div>`;
+    box.querySelector("textarea").value = p.body;
+    host.appendChild(box);
+    box.querySelector("textarea").focus();
+    return;
+  }
+  if(t.dataset.dcancel != null){
+    const n = +t.dataset.dcancel, host = ROOT.querySelector("#dp-"+n);
+    if(host){ const old = host.querySelector(".dcode, .dbody"); if(old) old.style.display="";
+              const box = host.querySelector("[data-dbox]"); if(box) box.parentElement.remove(); }
+    return;
+  }
+  if(t.dataset.dsave != null){
+    const n = +t.dataset.dsave;
+    const ta = ROOT.querySelector(`[data-dbox="${n}"]`);
+    const p  = (window.__DOCPARTS||[])[n];
+    if(!ta || !p) return;
+    p.body = ta.value;                                   // 조각을 고친다
+    const full = joinDoc(window.__DOCPARTS);             // 문서로 되붙인다
+    t.disabled = true; toast("저장하는 중…");
+    const d = await api("/api/content/patch",{method:"POST",
+      body:JSON.stringify({ generation_id: window.__DOCID, text: full })});
+    if(d.ok){
+      toast("고친 내용을 저장했습니다" + (d.edit_distance!=null?` · 수정률 ${Math.round(d.edit_distance*100)}%`:""));
+      const host = ROOT.querySelector("#dp-"+n);
+      if(host){ const old = host.querySelector(".dcode, .dbody");
+                if(old){ old.textContent = p.body; old.style.display=""; }
+                const box = host.querySelector("[data-dbox]"); if(box) box.parentElement.remove(); }
+    } else { toast(d.error||"실패"); t.disabled = false; }
     return;
   }
   if(t.dataset.dcopy != null){
