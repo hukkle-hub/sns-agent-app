@@ -1290,7 +1290,7 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v323</span>
+    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v324</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -11773,7 +11773,7 @@ function render(){
 
 /* ── 조작 ── */
 ROOT.addEventListener("click", async (e)=>{
-  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-pcancel],[data-pdel],[data-rttoggle],[data-rtrun],[data-cfold],[data-unfold],[data-dcopy],[data-djump],[data-dtoggle],[data-dedit],[data-dsave],[data-dcancel],[data-dredo],[data-dgo],[data-selredo],[data-sgo],[data-scancel],[data-pacc],[data-prej],[data-pagain],[data-undo],#dMode,#splitBtn,#dShip,#dPrev,#pvClose,[data-pvw],#rtHead,#rpHead,#rpDigest,[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#njPhotoBtn,#cfGo,[data-chn]");
+  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-pcancel],[data-pdel],[data-rttoggle],[data-rtrun],[data-cfold],[data-unfold],[data-dcopy],[data-djump],[data-dtoggle],[data-dedit],[data-dsave],[data-dcancel],[data-dredo],[data-dgo],[data-selredo],[data-sgo],[data-scancel],[data-pacc],[data-prej],[data-pagain],[data-undo],#dMode,#splitBtn,#dShip,#dPrev,#pvClose,[data-pvw],#rtHead,#rpHead,[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#njPhotoBtn,#cfGo,[data-chn]");
   if(!t) return;
 
   if(t.dataset.chn!=null){ t.classList.toggle("on"); return; }
@@ -12172,12 +12172,6 @@ ROOT.addEventListener("click", async (e)=>{
   if(t.id==="rpHead" || (t.closest && t.closest("#rpHead"))){
     RP_OPEN = !RP_OPEN; paintReports(); return;
   }
-  if(t.id==="rpDigest"){
-    t.disabled=true; toast("보내는 중…");
-    const d = await api("/api/reports/digest",{method:"POST",body:"{}"});
-    toast(d.ok ? (d.sent?"카톡으로 보냈습니다":"보낼 내용이 없어요") : (d.error||"실패"));
-    t.disabled=false; return;
-  }
   if(t.id==="rtHead" || (t.closest && t.closest("#rtHead"))){
     RT_OPEN = !RT_OPEN; paintRoutines(); return;
   }
@@ -12334,7 +12328,9 @@ function paintReports(){
         <span style="font-size:9.5px;color:var(--ink3);white-space:nowrap">${esc(who)} ${esc(t)}</span>
       </div></div>`;
   }).join("")
-  + '<button class="press" id="rpDigest" style="width:100%;padding:9px 0;font-size:11.5px;margin-top:4px">📨 지금 카톡으로 마감 보고 받기</button>';
+  ;   /* v324: 앱 안에서 '카톡으로 받기'는 앞뒤가 안 맞는다.
+         이미 여기서 다 보고 있는데 같은 것을 다시 보낼 이유가 없다.
+         카톡은 앱 밖에 있을 때 불러들이는 용도다. */
 }
 
 /* ── 정기 일감 (v306) ──
