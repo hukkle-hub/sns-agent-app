@@ -972,6 +972,60 @@ html[data-device]{}
 #amRoot .cfold{opacity:.55}
 /* 긴 원고는 접어 둔다. 눌러야 펼쳐진다 — 화면을 덮으면 아무것도 안 보인다. */
 /* 조각 보기 */
+/* ══ 읽기 · 손보기 (v321) ══
+   읽을 땐 단추를 감춰 본문만 남긴다. 손볼 땐 다 나온다.
+   판을 여닫지 않는다 — 사소한 수정마다 열고 닫으면 결국 아무도 안 고친다. */
+/* 떼어 놓았을 때 — 본 화면 왼쪽, 결재 오른쪽 */
+#root.split .work{gap:0}
+#root.split #view{flex:1 1 55%;min-width:0;overflow:auto}
+#root.split #siderail{display:none}
+#amRoot.aside{flex:0 0 45%;max-width:620px;min-width:340px;border-left:1px solid var(--line);
+  overflow-y:auto;height:auto}
+#splitBtn.on{background:rgba(94,212,226,.16);border-color:#5ed4e2;color:#5ed4e2}
+html[data-lay="stack"] #splitBtn{display:none}
+/* ══ 갤럭시탭 S11 울트라 맞춤 (v323) ══
+   14.6" 2960×1848(16:10) → 브라우저 기준 가로 약 1480×924, 세로 약 924×1480.
+
+   세로 924px 는 지금까지 820px 로 잘려 100px 를 버리고 있었다.
+   가로 1480px 는 폭은 넉넉한데 높이가 924px 로 낮아, 머리쪽 줄을 줄여야
+   본문이 제대로 보인다. 화면이 낮을 때만 줄인다 — PC 에서는 그대로 둔다. */
+@media (min-width:900px) and (max-width:1023px){
+  #root{max-width:100%;padding:0 10px}      /* 세로로 세운 울트라 — 폭을 다 쓴다 */
+  #amRoot .wrap{max-width:100%}
+}
+@media (min-width:1440px){
+  #root{max-width:1460px}                   /* 1480 에서 좌우 여백만 남긴다 */
+}
+@media (max-height:960px) and (min-width:1024px){
+  /* 눕힌 태블릿처럼 낮고 넓은 화면 — 머리쪽을 얇게 해 본문을 넓힌다 */
+  .vtabs{padding:5px 10px;gap:4px}
+  .vtab{padding:6px 9px;font-size:10.5px}
+  .topbar{padding:3px 10px;font-size:8.5px}
+  #amRoot{padding-bottom:16px}
+  #amRoot .hd{padding:11px 0 8px}
+  #amRoot .hd h1{font-size:17px}
+  #amRoot .summary{margin:0 0 9px}
+}
+/* 떼어 놓았을 때 — 넓을수록 오른쪽에 여유를 준다 */
+@media (min-width:1440px){
+  #root.split #view{flex:1 1 58%}
+  #amRoot.aside{flex:0 0 42%;max-width:680px}
+}
+#amRoot .dtop{display:flex;align-items:center;gap:8px;margin:2px 0 8px}
+#amRoot .dmode{margin-left:auto;border:1px solid rgba(28,43,39,.2);background:var(--card2);
+  color:var(--ink);border-radius:16px;padding:5px 12px;font-size:10.5px;cursor:pointer;font-family:inherit}
+#amRoot[data-work="0"] .dcopy.redo{display:none}
+#amRoot[data-work="0"] .dhead{cursor:default}
+#amRoot[data-work="1"] .dmode{background:rgba(62,122,155,.18);border-color:#3E7A9B;color:#2b5f7d}
+
+/* 눕히면 좌우로 나란히 — 태블릿의 장점을 막지 않는다.
+   세우면 위아래로 쌓는다. 좁은 데서 좌우로 가르면 둘 다 못 본다. */
+html[data-lay="side"] .pv-t,
+html[data-lay="side"] .pv-m{position:fixed;right:0;top:0;bottom:0;left:auto;height:auto;
+  width:min(46vw,640px);border-radius:0;box-shadow:-8px 0 30px rgba(0,0,0,.3)}
+html[data-lay="side"] #amRoot{padding-right:0}
+html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;
+  height:62vh;border-radius:14px 14px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.35)}
 #amRoot .dnav{display:flex;gap:5px;flex-wrap:wrap;margin:2px 0 9px}
 #amRoot .dchip{font-size:10.5px;padding:4px 9px;border-radius:14px;cursor:pointer;
   background:rgba(28,43,39,.07);color:var(--ink);border:1px solid rgba(28,43,39,.14)}
@@ -1006,6 +1060,8 @@ html[data-device]{}
   color:var(--on-bg2);font-size:11.5px}
 #undoBar button{background:var(--card2);color:var(--ink);border:0;border-radius:18px;
   padding:7px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+#dsStage .dsw{background:rgba(255,255,255,.07);color:var(--on-bg2);border:1px solid var(--line)}
+#dsStage .dsw.on{background:rgba(62,122,155,.3);color:#cfe6f4;border-color:#3E7A9B}
 #selBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));
   z-index:70;display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:26px;
   background:var(--bg2);border:1px solid var(--line);box-shadow:0 6px 22px rgba(0,0,0,.35);
@@ -1227,13 +1283,14 @@ html[data-device]{}
     <button class="vtab" data-group="approve">🖋 내 차례<span class="vtab-n" id="amBadge" hidden>0</span></button>
     <button class="vtab" data-group="grow">📚 기록</button>
     <button class="vtab" data-group="dept">🏢 팀</button>
+    <button class="vtab vtab-gear" id="splitBtn" title="내 차례를 옆에 띄워 두기 (가로·넓은 화면)">🪟</button>
     <button class="vtab vtab-gear" data-group="settings" title="설정">⚙️</button>
   </div>
   <div class="vsubtabs" id="vsubtabs" style="display:none"></div>
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v318</span>
+    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v323</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -5083,14 +5140,51 @@ function loadDesignList(){
       apiFetch("/api/design/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:b.getAttribute("data-id")})}).then(function(){ loadDesignList(); }).catch(function(){ b.disabled=false; }); }); });
   }).catch(function(){ box.innerHTML='<div class="note" style="color:#c0392b;font-size:12px">목록을 불러오지 못했어요.</div>'; });
 }
+/* 완성된 HTML 한 장은 통째로는 못 다룬다. 사람이 알아볼 덩어리로 자른다.
+   <style> 는 따로 떼고, 본문은 <section>·<header> 같은 큰 칸 단위로 나눈다. */
+function dsCut(html){
+  var src=String(html||""), parts=[];
+  src.replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, function(all, css){
+    parts.push({ name:"CSS", body:css.trim() }); return all;
+  });
+  var body=src.replace(/<style[^>]*>[\s\S]*?<\/style>/gi,"");
+  var re=/<(section|header|footer|nav|main|article)\b[^>]*>[\s\S]*?<\/\1>/gi, m, hit=[];
+  while((m=re.exec(body))!==null){
+    var cls=(m[0].match(/class="([^"]{0,40})"/)||[])[1]||"";
+    hit.push({ name:"<"+m[1]+">"+(cls?" ."+cls.split(" ")[0]:""), body:m[0] });
+  }
+  if(hit.length) parts=parts.concat(hit);
+  else if(body.trim()) parts.push({ name:"HTML", body:body.trim() });
+  if(!parts.length) parts=[{ name:"전체", body:src }];
+  return parts;
+}
 function dsResultModal(id){
   apiFetch("/api/design/get?id="+encodeURIComponent(id)).then(function(r){ return r.json(); }).then(function(d){
     if(!d.ok) return;
     var content=d.output||""; var isHtml=!!d.isHtml;
     var m=document.createElement("div");
     m.style.cssText="position:fixed;inset:0;background:rgba(20,30,45,.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center";
+    /* v319: 디자인 결과도 결재 화면과 같게 다룬다.
+       예전에는 HTML 이면 '새 창으로 열기' 뿐이라 폰에서는 오갈 수가 없었고,
+       코드를 조각내 보거나 일부만 고칠 방법도 없었다. */
     var body = isHtml
-      ? '<button id="dsOpen" class="cbtn conn" style="width:100%;justify-content:center;padding:12px">🔍 새 창으로 열기</button>'
+      ? '<div id="dsPrevWrap" style="margin-bottom:10px">'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'
+        +   '<button class="cbtn conn" id="dsPrevIn" style="flex:1;justify-content:center;padding:10px">👁 여기서 보기</button>'
+        +   '<button class="cbtn" id="dsOpen" style="flex:1;justify-content:center;padding:10px">🔍 새 창</button>'
+        + '</div>'
+        + '<div id="dsStage" hidden style="border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff">'
+        +   '<div style="display:flex;gap:5px;padding:7px 9px;background:var(--bg2);align-items:center">'
+        +     '<span style="font-size:10.5px;color:var(--on-bg2)">폭</span>'
+        +     '<span class="dsw on" data-dsw="390" style="font-size:10.5px;padding:3px 8px;border-radius:12px;cursor:pointer">📱</span>'
+        +     '<span class="dsw" data-dsw="820" style="font-size:10.5px;padding:3px 8px;border-radius:12px;cursor:pointer">📲</span>'
+        +     '<span class="dsw" data-dsw="1280" style="font-size:10.5px;padding:3px 8px;border-radius:12px;cursor:pointer">💻</span>'
+        +   '</div>'
+        +   '<div style="overflow:auto;display:flex;justify-content:center;padding:10px;background:#eceff4">'
+        +     '<iframe id="dsFrame" sandbox="allow-same-origin" style="width:390px;height:460px;border:0;background:#fff;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.15)"></iframe>'
+        +   '</div>'
+        + '</div></div>'
+        + '<div id="dsCode"></div>'
       : '<div style="white-space:pre-wrap;font-size:13.5px;line-height:1.65;color:#2b3543">'+esc(content)+'</div>';
     m.innerHTML='<div style="background:var(--card);width:100%;max-width:640px;max-height:86vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column">'
       +'<div style="display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid #eef1f6"><div style="flex:1;font-weight:800;font-size:14px;color:var(--ink)">'+esc(d.kindLabel||"디자인")+'</div>'
@@ -5112,6 +5206,105 @@ function dsResultModal(id){
     m.addEventListener("click", function(e){ if(e.target===m) close(); });
     m.querySelector("#dsClose").addEventListener("click", close);
     var openBtn=m.querySelector("#dsOpen"); if(openBtn) openBtn.addEventListener("click", function(){ openHtml(content); });
+    /* 여기서 보기 — 창을 갈지 않는다. 폰에서는 그게 유일한 길이다. */
+    var inBtn=m.querySelector("#dsPrevIn");
+    if(inBtn) inBtn.addEventListener("click", function(){
+      var st=m.querySelector("#dsStage"), fr=m.querySelector("#dsFrame");
+      if(!st||!fr) return;
+      st.hidden = !st.hidden;
+      inBtn.textContent = st.hidden ? "👁 여기서 보기" : "🙈 접기";
+      if(!st.hidden && !fr.srcdoc) fr.srcdoc = content;
+    });
+    m.querySelectorAll(".dsw").forEach(function(w){
+      w.addEventListener("click", function(){
+        var fr=m.querySelector("#dsFrame"); if(fr) fr.style.width=w.getAttribute("data-dsw")+"px";
+        m.querySelectorAll(".dsw").forEach(function(x){ x.classList.toggle("on", x===w); });
+      });
+    });
+    /* 코드를 조각으로 — 부분마다 복사할 수 있게 */
+    var codeBox=m.querySelector("#dsCode");
+    if(codeBox && isHtml){
+      var parts=dsCut(content);
+      codeBox.innerHTML = '<div style="font-size:11.5px;font-weight:800;color:var(--ink);margin:4px 0 7px">'
+        + '📄 코드 ' + parts.length + '조각 <span style="font-weight:600;color:#8a94a6">— 조각마다 복사됩니다</span></div>'
+        + parts.map(function(p,i){
+            return '<div style="border:1px solid var(--line);border-radius:8px;margin-bottom:7px;overflow:hidden">'
+              + '<div style="display:flex;align-items:center;gap:7px;padding:7px 10px;background:var(--bg2);font-size:11px;color:var(--on-bg)">'
+              +   '<b>' + esc(p.name) + '</b>'
+              +   '<span style="font-size:10px;color:var(--on-bg2)">' + p.body.split("\n").length + '줄</span>'
+              +   '<button class="dsrd" data-i="' + i + '" style="margin-left:auto;border:1px solid rgba(178,58,50,.35);background:rgba(178,58,50,.12);color:#c0392b;border-radius:5px;padding:4px 10px;font-size:10.5px;cursor:pointer;font-family:inherit">↩ 다시</button>'
+              +   '<button class="dscp" data-i="' + i + '" style="border:0;background:var(--card2);color:var(--ink);border-radius:5px;padding:4px 10px;font-size:10.5px;cursor:pointer;font-family:inherit">복사</button>'
+              + '</div>'
+              + '<pre class="dspre" data-i="' + i + '" style="margin:0;padding:10px;font-family:\'IBM Plex Mono\',monospace;font-size:10.5px;line-height:1.55;overflow-x:auto;white-space:pre;max-height:230px;background:rgba(18,33,30,.05)">' + esc(p.body) + '</pre>'
+              + '<div class="dsedit" data-i="' + i + '"></div></div>';
+          }).join("");
+      codeBox.querySelectorAll(".dscp").forEach(function(b){
+        b.addEventListener("click", function(){ copyText(parts[+b.getAttribute("data-i")].body, b); });
+      });
+      /* v320: 이 칸만 다시 만들기 — 덮어쓰지 않고 제안으로 보여준다 */
+      codeBox.querySelectorAll(".dsrd").forEach(function(b){
+        b.addEventListener("click", function(){
+          var n=+b.getAttribute("data-i");
+          var slot=codeBox.querySelector('.dsedit[data-i="'+n+'"]');
+          if(!slot || slot.innerHTML) return;
+          slot.innerHTML='<div style="padding:9px 10px;border-top:1px solid var(--line)">'
+            +'<div style="font-size:10.5px;color:#8a94a6;margin-bottom:5px">이 칸만 다시 만듭니다 — 나머지는 그대로 둡니다.</div>'
+            +'<textarea class="dsnote" rows="2" placeholder="예) 버튼을 더 크게, 색은 지금 톤 유지" style="width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:12px"></textarea>'
+            +'<div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">'
+            +'<button class="cbtn conn dsgo" data-by="claude" style="padding:7px 13px;font-size:11px">다시 만들기</button>'
+            +'<button class="cbtn dsgo" data-by="gemini" style="padding:7px 13px;font-size:11px">제미나이에게</button>'
+            +'<button class="cbtn dscn" style="padding:7px 13px;font-size:11px">그만</button></div></div>';
+          slot.querySelector("textarea").focus();
+          slot.querySelector(".dscn").addEventListener("click", function(){ slot.innerHTML=""; });
+          slot.querySelectorAll(".dsgo").forEach(function(g){
+            g.addEventListener("click", function(){
+              var note=(slot.querySelector(".dsnote")||{}).value||"";
+              if(!note.trim()){ slot.querySelector(".dsnote").focus(); return; }
+              g.disabled=true; g.textContent="만드는 중…";
+              apiFetch("/api/design/redo-part",{method:"POST",headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({ id:id, part:parts[n].body, context:content, note:note, by:g.getAttribute("data-by") })})
+                .then(function(r){ return r.json(); }).then(function(d){
+                  if(!d.ok) throw new Error(d.error||"실패");
+                  slot.innerHTML='<div style="padding:9px 10px;border-top:1px solid var(--line)">'
+                    +'<div style="font-size:10.5px;color:#8a94a6;margin-bottom:6px">'+esc(d.who||"담당")
+                    +'이(가) 이렇게 고쳤습니다'+(d.via==="gemini"?" · 제미나이":"")+' — 넣을까요?</div>'
+                    +'<pre style="margin:0;padding:10px;border-radius:6px;background:rgba(46,125,91,.12);'
+                    +'font-family:\'IBM Plex Mono\',monospace;font-size:10.5px;line-height:1.55;'
+                    +'max-height:220px;overflow:auto;white-space:pre">'+esc(d.text)+'</pre>'
+                    +'<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'
+                    +'<button class="cbtn conn dsacc" style="padding:7px 14px;font-size:11px">받아들이기</button>'
+                    +'<button class="cbtn dsrej" style="padding:7px 13px;font-size:11px">물리치기</button></div></div>';
+                  slot.querySelector(".dsrej").addEventListener("click", function(){ slot.innerHTML=""; });
+                  slot.querySelector(".dsacc").addEventListener("click", function(){
+                    var before = content;
+                    var at = content.indexOf(parts[n].body);
+                    if(at < 0){ alert("자리를 찾지 못했어요. 새로 열어 다시 시도해 주세요."); return; }
+                    content = content.slice(0,at) + d.text + content.slice(at + parts[n].body.length);
+                    parts[n].body = d.text;
+                    var pre = codeBox.querySelector('.dspre[data-i="'+n+'"]');
+                    if(pre) pre.textContent = d.text;
+                    var fr = m.querySelector("#dsFrame"); if(fr && fr.srcdoc) fr.srcdoc = content;
+                    slot.innerHTML='<div style="padding:8px 10px;font-size:10.5px;color:#0e7a52">'
+                      +'✓ 넣었습니다 <button class="cbtn dsundo" style="padding:5px 11px;font-size:10.5px;margin-left:6px">되돌리기</button></div>';
+                    slot.querySelector(".dsundo").addEventListener("click", function(){
+                      content = before; parts[n].body = before.slice(at, at + parts[n].body.length);
+                      if(pre) pre.textContent = parts[n].body;
+                      if(fr && fr.srcdoc) fr.srcdoc = content;
+                      slot.innerHTML="";
+                      apiFetch("/api/design/save",{method:"POST",headers:{"Content-Type":"application/json"},
+                        body:JSON.stringify({ id:id, output:content })});
+                    });
+                    apiFetch("/api/design/save",{method:"POST",headers:{"Content-Type":"application/json"},
+                      body:JSON.stringify({ id:id, output:content })})
+                      .then(function(r){ return r.json(); })
+                      .then(function(w){ if(!w.ok) alert("화면엔 넣었지만 저장은 실패했어요"); });
+                  });
+                }).catch(function(e){ g.disabled=false; g.textContent="다시 만들기"; alert(e.message||"실패"); });
+            });
+          });
+        });
+      });
+    }
     var copyBtn=m.querySelector("#dsCopy"); if(copyBtn) copyBtn.addEventListener("click", function(){ copyText(content, copyBtn); });
     function sendFb(remember){
       var fb=(m.querySelector("#dsFb")||{}).value||""; var fs=m.querySelector("#dsFbStat");
@@ -7127,33 +7320,83 @@ function bindOffice(){
    결재 보드는 따로 만든 화면이다. 통째로 옮기면 이름이 겹쳐 서로를 망가뜨리고,
    고칠 때마다 본체를 다시 올려야 한다. 그래서 자리만 내주고 그대로 싣는다.
    운영자에게는 탭 하나로 보이고, 실제로는 각자 따로 고칠 수 있다. */
+/* ══ 따로 보기 (v322) ══
+   넓은 화면에서는 탭 하나를 옆으로 떼어 두고 본 화면으로 다른 탭을 볼 수 있다.
+   결재를 옆에 띄워 두고 콘텐츠를 보거나, 고치면서 지시를 내리는 식이다.
+   좁은 화면(세로 폰·태블릿)에서는 켜지지 않는다 — 둘 다 못 보게 된다. */
+function canSplit(){
+  return document.documentElement.getAttribute("data-lay") === "side";
+}
+function isSplit(){ return !!window.__SPLIT && canSplit(); }
 function renderApprove(){
   var v = document.getElementById("view");
   var a = document.getElementById("amRoot");
   if (!a) return;
+  if (isSplit()){
+    /* 떼어 놓은 상태에서 결재 탭을 다시 누르면 본 화면으로 되돌린다 */
+    window.__SPLIT = false;
+  }
   if (v) v.style.display = "none";
-  var rt = document.getElementById("root"); if (rt) rt.classList.add("amon");
+  var rt = document.getElementById("root");
+  if (rt){ rt.classList.add("amon"); rt.classList.remove("split"); }
   a.hidden = false;
+  a.classList.remove("aside");
   if (!renderApprove._on){ renderApprove._on = true; try{ amBoot(); }catch(e){ console.warn("결재 화면 시작 실패", e); } }
 }
-/* 다른 탭으로 갈 때 결재 화면을 접는다 */
+/* 다른 탭으로 갈 때 — 떼어 놓았으면 옆에 남기고, 아니면 접는다 */
 function hideApprove(){
   var v = document.getElementById("view");
   var a = document.getElementById("amRoot");
-  if (a) a.hidden = true;
+  var rt = document.getElementById("root");
+  if (isSplit()){
+    if (a){ a.hidden = false; a.classList.add("aside"); }
+    if (v) v.style.display = "";
+    if (rt){ rt.classList.remove("amon"); rt.classList.add("split"); }
+    return true;
+  }
+  if (a){ a.hidden = true; a.classList.remove("aside"); }
   if (v) v.style.display = "";
-  var rt = document.getElementById("root"); if (rt) rt.classList.remove("amon");
+  if (rt){ rt.classList.remove("amon"); rt.classList.remove("split"); }
   return true;
 }
+/* 떼기·붙이기 */
+function toggleSplit(){
+  if (!canSplit()){ toast("가로로 눕히거나 넓은 화면에서 쓸 수 있어요"); return; }
+  window.__SPLIT = !window.__SPLIT;
+  if (window.__SPLIT){
+    if (!renderApprove._on){ renderApprove._on = true; try{ amBoot(); }catch(e){} }
+    if (STATE.view === "approve"){ STATE.view = "content"; saveState(); }
+  }
+  render();
+  var b = document.getElementById("splitBtn");
+  if (b) b.classList.toggle("on", !!window.__SPLIT);
+}
 /* 지금 어느 칸인지 html 에 적어 둔다. 눈으로 확인할 수 있어야 고치기도 쉽다. */
+/* 읽는 중이면 고치는 단추를 숨긴다. 읽을 때 방해가 없어야 한다. */
+function paintWork(){
+  const r = document.getElementById("amRoot");
+  if (r) r.setAttribute("data-work", (window.__WORK==null ? workDefault() : window.__WORK) ? "1" : "0");
+}
 function markDevice(){
   var w = window.innerWidth || document.documentElement.clientWidth;
+  var h = window.innerHeight || document.documentElement.clientHeight;
   var d = w < 768 ? "mobile" : (w < 1024 ? "tablet" : (w < 1440 ? "pc" : "wide"));
+  /* v321: 태블릿을 눕히면 PC 만큼 넓어진다. 그 장점을 막으면 안 된다.
+     세로면 위아래로 쌓고, 가로면 좌우로 나란히 놓는다. */
+  var lay = (w >= 1024) ? "side" : (w >= 768 && w > h ? "side" : "stack");
   var el = document.documentElement;
-  if (el.getAttribute("data-device") !== d){
+  if (el.getAttribute("data-device") !== d || el.getAttribute("data-lay") !== lay){
     el.setAttribute("data-device", d);
+    el.setAttribute("data-lay", lay);
     el.setAttribute("data-vw", String(w));
+    try{ if (typeof paintWork === "function") paintWork(); }catch(e){}
   }
+}
+/* 폰은 읽기가 기본, 태블릿·PC 는 손보기가 기본.
+   폰에서도 켤 수는 있다 — 밖에서 급할 때가 있다. */
+function workDefault(){
+  var w = window.innerWidth || document.documentElement.clientWidth;
+  return w >= 768;
 }
 markDevice();
 window.addEventListener("resize", markDevice);
@@ -10621,7 +10864,7 @@ async function loadAndApplyPatches(){
      예전에는 앱과 서버 번호가 '똑같아야' ✓ 를 줬다. 그런데 화면만 고친 판(v311·v312)에서는
      서버를 올릴 이유가 없어 번호가 벌어지고, 멀쩡한데도 경고가 떴다.
      이제 앱이 '필요한 최소 서버 번호'를 적어 두고, 그보다 낮을 때만 경고한다. */
-  var NEED_SERVER = 317;      // ← 서버 기능을 새로 쓰는 판에서만 이 숫자를 올린다
+  var NEED_SERVER = 320;      // ← 서버 기능을 새로 쓰는 판에서만 이 숫자를 올린다
   (function(){
     var el=document.getElementById("srvver"); if(!el) return;
     if(!useBackend()){ el.innerHTML='<span style="color:#c0b6a0">서버 미연결</span>'; return; }
@@ -11094,6 +11337,7 @@ function selOffset(root, node, off){
   return n;
 }
 function catchSelection(){
+  if (window.__WORK === false) return;      // 읽는 중에는 방해하지 않는다
   const sel = window.getSelection();
   const bar = document.getElementById("selBar");
   if (!sel || sel.isCollapsed || !sel.rangeCount){ if(bar) bar.remove(); window.__SEL=null; return; }
@@ -11180,6 +11424,7 @@ function docHtml(text, idBase){
   const parts = cutDoc(text);
   if (parts.length <= 1) return null;              // 나눌 게 없으면 그냥 두는 게 낫다
   window.__DOCPARTS = parts;
+  setTimeout(paintWork, 0);
 
   const codeN = parts.filter(p=>p.kind==="code").length;
   const nav = parts.map((p,i)=> p.kind==="code"
@@ -11208,9 +11453,16 @@ function docHtml(text, idBase){
       ${long?`<span class="cmore" data-unfold="${idBase}-b-${i}">… 더 보기</span>`:""}</div>`;
   }).join("");
   const hasHtml = parts.some(p=>p.kind==="code" && /html/i.test(p.lang));
-  return `<div class="dnav">${nav}</div>
-    <div class="dsum">조각 ${parts.length}개${codeN?` · 코드 ${codeN}개`:""} — 조각마다 따로 고치고 복사합니다</div>
-    ${hasHtml?`<button class="press p-blue" id="dPrev" style="width:100%;padding:9px 0;font-size:11.5px;margin-bottom:10px">👁 그려 보기 — 실제 화면으로 확인</button>`:""}
+  if (window.__WORK == null) window.__WORK = workDefault();
+  return `<div class="dtop">
+      <span class="dsum">조각 ${parts.length}개${codeN?` · 코드 ${codeN}개`:""}</span>
+      <button class="dmode" id="dMode">${window.__WORK ? "🔧 손보는 중" : "📖 읽는 중"}</button>
+    </div>
+    <div class="dnav">${nav}</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      ${hasHtml?`<button class="press p-blue" id="dPrev" style="flex:1;padding:9px 0;font-size:11.5px">👁 그려 보기</button>`:""}
+      <button class="press p-ghost" id="dShip" style="flex:1;padding:9px 0;font-size:11.5px">📦 다 됐어요 — 콘텐츠로</button>
+    </div>
     ${body}`;
 }
 
@@ -11521,7 +11773,7 @@ function render(){
 
 /* ── 조작 ── */
 ROOT.addEventListener("click", async (e)=>{
-  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-pcancel],[data-pdel],[data-rttoggle],[data-rtrun],[data-cfold],[data-unfold],[data-dcopy],[data-djump],[data-dtoggle],[data-dedit],[data-dsave],[data-dcancel],[data-dredo],[data-dgo],[data-selredo],[data-sgo],[data-scancel],[data-pacc],[data-prej],[data-pagain],[data-undo],#dPrev,#pvClose,[data-pvw],#rtHead,#rpHead,#rpDigest,[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#njPhotoBtn,#cfGo,[data-chn]");
+  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-pcancel],[data-pdel],[data-rttoggle],[data-rtrun],[data-cfold],[data-unfold],[data-dcopy],[data-djump],[data-dtoggle],[data-dedit],[data-dsave],[data-dcancel],[data-dredo],[data-dgo],[data-selredo],[data-sgo],[data-scancel],[data-pacc],[data-prej],[data-pagain],[data-undo],#dMode,#splitBtn,#dShip,#dPrev,#pvClose,[data-pvw],#rtHead,#rpHead,#rpDigest,[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#njPhotoBtn,#cfGo,[data-chn]");
   if(!t) return;
 
   if(t.dataset.chn!=null){ t.classList.toggle("on"); return; }
@@ -11645,6 +11897,33 @@ ROOT.addEventListener("click", async (e)=>{
       body:JSON.stringify({generation_id:t.dataset.retry})});
     if(d.ok){ toast("다시 돌리는 중입니다"); await load(true); }
     else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.id==="dMode"){
+    window.__WORK = !window.__WORK;
+    t.textContent = window.__WORK ? "🔧 손보는 중" : "📖 읽는 중";
+    paintWork();
+    if(!window.__WORK){ const b=document.getElementById("selBar"); if(b) b.remove(); window.__SEL=null; }
+    return;
+  }
+  if(t.id==="dShip"){
+    /* 손질이 끝난 것을 콘텐츠 탭으로 옮긴다. 거기서 바로 복사해 쓴다.
+       원본은 그대로 두고 사본을 보낸다 — 되돌아와 다시 볼 수 있어야 한다. */
+    const txt = joinDoc(window.__DOCPARTS||[]);
+    if(!txt.trim()){ toast("보낼 내용이 없어요"); return; }
+    const r = (typeof VIEW==="object" && VIEW) || {};
+    try{
+      STATE.messages.push({
+        role:"agent",
+        deptId: (r.assigned_dept && TEAM[r.assigned_dept]) ? r.assigned_dept : "creation",
+        text: txt, time: nowTime(),
+        _jid: "ship"+Date.now(), _forceContent: true,
+        _inst: "손질 완료: " + String(r.topic || "결과물").slice(0,50)
+      });
+      saveState();
+      toast("콘텐츠 탭으로 옮겼습니다");
+      setTimeout(()=>{ STATE.view="content"; saveState(); render(); }, 500);
+    }catch(e){ toast("옮기지 못했어요"); }
     return;
   }
   if(t.id==="dPrev"){ previewDoc(); return; }
@@ -11889,6 +12168,7 @@ ROOT.addEventListener("click", async (e)=>{
     if (CHIEF_OPEN.has(k)) CHIEF_OPEN.delete(k); else CHIEF_OPEN.add(k);
     renderChief(); return;
   }
+  if(t.id==="splitBtn"){ toggleSplit(); return; }
   if(t.id==="rpHead" || (t.closest && t.closest("#rpHead"))){
     RP_OPEN = !RP_OPEN; paintReports(); return;
   }
