@@ -1297,7 +1297,7 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v327</span>
+    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v330</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -1319,6 +1319,8 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
       <input id="cfin" placeholder="총괄에게 시킬 일" autocomplete="off">
       <button class="send press" id="cfGo">▶</button></div>
   </div>
+  <div class="sect" id="lrHead" style="cursor:pointer">🧠 <b>배운 것 검토</b> <span id="lrSum" style="opacity:.6"></span> <span id="lrCaret" style="float:right;opacity:.5">▾</span></div>
+  <div id="lrBox" hidden></div>
   <div class="sect" id="rpHead" style="cursor:pointer">📋 <b>오늘 보고</b> <span id="rpSum" style="opacity:.6"></span> <span id="rpCaret" style="float:right;opacity:.5">▾</span></div>
   <div id="rpBox" hidden></div>
   <div class="sect" id="rtHead" style="cursor:pointer">🔁 <b>정기 일감</b> <span id="rtSum" style="opacity:.6"></span> <span id="rtCaret" style="float:right;opacity:.5">▾</span></div>
@@ -11781,7 +11783,7 @@ function render(){
 
 /* ── 조작 ── */
 ROOT.addEventListener("click", async (e)=>{
-  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-pcancel],[data-pdel],[data-rttoggle],[data-rtrun],[data-cfold],[data-unfold],[data-dcopy],[data-djump],[data-dtoggle],[data-dedit],[data-dsave],[data-dcancel],[data-dredo],[data-dgo],[data-selredo],[data-sgo],[data-scancel],[data-pacc],[data-prej],[data-pagain],[data-undo],#dMode,#splitBtn,#dShip,#dPrev,#pvClose,[data-pvw],#rtHead,#rpHead,[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#njPhotoBtn,#cfGo,[data-chn]");
+  const t = e.target.closest("[data-approve],[data-answer],[data-call],[data-toggle],[data-say],[data-retry],[data-pcancel],[data-pdel],[data-rttoggle],[data-rtrun],[data-cfold],[data-unfold],[data-dcopy],[data-djump],[data-dtoggle],[data-dedit],[data-dsave],[data-dcancel],[data-dredo],[data-dgo],[data-selredo],[data-sgo],[data-scancel],[data-pacc],[data-prej],[data-pagain],[data-undo],#dMode,#splitBtn,#dShip,#dPrev,#pvClose,[data-pvw],#rtHead,#rpHead,#lrHead,[data-lrok],[data-lrno],[data-open],[data-copy],[data-appredit],[data-reject],#vback,#njGo,#njPhotoBtn,#cfGo,[data-chn]");
   if(!t) return;
 
   if(t.dataset.chn!=null){ t.classList.toggle("on"); return; }
@@ -12177,6 +12179,29 @@ ROOT.addEventListener("click", async (e)=>{
     renderChief(); return;
   }
   if(t.id==="splitBtn"){ toggleSplit(); return; }
+  if(t.id==="lrHead" || (t.closest && t.closest("#lrHead"))){
+    LR_OPEN = !LR_OPEN; paintReviews(); return;
+  }
+  if(t.dataset.lrok){
+    const ta = ROOT.querySelector(`[data-lrtxt="${t.dataset.lrok}"]`);
+    const txt = (ta && ta.value || "").trim();
+    if(!txt){ toast("내용이 비어 있어요"); return; }
+    t.disabled = true; toast("넣는 중…");
+    const d = await api("/api/learning/review",{method:"POST",
+      body:JSON.stringify({ review_id:t.dataset.lrok, action:"approve", edited:txt })});
+    if(d.ok){ toast("부서 지식에 넣었습니다"); await loadReviews(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
+  if(t.dataset.lrno){
+    if(!confirm("이 배움을 버릴까요?")) return;
+    t.disabled = true;
+    const d = await api("/api/learning/review",{method:"POST",
+      body:JSON.stringify({ review_id:t.dataset.lrno, action:"reject" })});
+    if(d.ok){ toast("버렸습니다"); await loadReviews(); }
+    else { toast(d.error||"실패"); t.disabled=false; }
+    return;
+  }
   if(t.id==="rpHead" || (t.closest && t.closest("#rpHead"))){
     RP_OPEN = !RP_OPEN; paintReports(); return;
   }
@@ -12261,6 +12286,7 @@ renderChief();
 load();
 loadRoutines();
 loadReports();
+loadReviews();
 /* 새로고침 전에 돌리던 분담이 있으면 다시 붙는다 */
 if(CHIEF.running && CHIEF.jobId) watchChief(CHIEF.jobId);
 else if(CHIEF.running){ CHIEF.running=false; saveChief(); renderChief(); }
@@ -12272,6 +12298,46 @@ setInterval(()=>{
   if(typingNow()) return;          // 손이 자판에 있으면 건드리지 않는다
   if(running) load();
 }, 20000);
+
+/* ── 배운 것 검토 (v330) ──
+   서버에는 승인 문이 있는데 화면에 단추가 없어 13건이 쌓여만 있었다.
+   사람이 확인해야 부서 지식이 되는데, 확인할 방법이 없었으니 학습이 멈춰 있었다. */
+let LRS = [], LR_OPEN = false;
+async function loadReviews(){
+  try{ const d = await api("/api/learning/pending"); LRS = (d && d.rows) || []; }
+  catch(e){ LRS = []; }
+  paintReviews();
+}
+function paintReviews(){
+  const sum = ROOT.querySelector("#lrSum"), box = ROOT.querySelector("#lrBox"), car = ROOT.querySelector("#lrCaret");
+  if(!box) return;
+  if (sum) sum.textContent = LRS.length ? ("· " + LRS.length + "건 기다림") : "· 없음";
+  if (car) car.textContent = LR_OPEN ? "▴" : "▾";
+  box.hidden = !LR_OPEN;
+  if (!LR_OPEN) return;
+  if (!LRS.length){ box.innerHTML = '<div class="empty">검토할 것이 없어요.</div>'; return; }
+  box.innerHTML = LRS.map(r=>{
+    const who = (TEAM[r.dept] && TEAM[r.dept].nm) || r.dept_name || r.dept || "";
+    const src = r.source==="reject" ? "반려에서" : (r.source==="instruct" ? "지시에서" : (r.source||""));
+    return `<div class="slip" style="padding:12px 13px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+        ${faceOf(r.dept,"s32")}
+        <span style="flex:1;min-width:0">
+          <b style="font-size:12px">${esc(who)}</b>
+          <span style="display:block;font-size:10px;color:var(--ink3)">${esc(src)} · ${esc(String(r.trigger||"").slice(0,28))}</span>
+        </span>
+      </div>
+      <textarea data-lrtxt="${r.review_id}" rows="4"
+        style="width:100%;box-sizing:border-box;font-family:inherit;font-size:12px;line-height:1.7;
+        color:var(--ink);background:var(--card);border:1px solid rgba(28,43,39,.22);
+        border-radius:6px;padding:9px">${esc(r.ai_learned||"")}</textarea>
+      <div style="font-size:10px;color:var(--ink3);margin-top:5px">고쳐서 넣으면 그 자체가 가르침이 됩니다.</div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <button class="press p-blue" style="padding:7px 14px;font-size:11px" data-lrok="${r.review_id}">넣기</button>
+        <button class="dcopy" data-lrno="${r.review_id}">버리기</button>
+      </div></div>`;
+  }).join("");
+}
 
 /* ── 오늘 보고 (v307) ──
    무엇을 했든 여기에 남는다. 성공도 실패도.
