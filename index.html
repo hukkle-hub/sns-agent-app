@@ -1281,7 +1281,7 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
 #amRoot .newver button{font-family:inherit;font-weight:700;font-size:12px;border:0;border-radius:6px;
   padding:9px 15px;background:#3E7A9B;color:#fff;cursor:pointer}
 
-/* v340: 말맞춤 — 같은 탭에서 대본·영상·다운로드·일일 자동 제작 */
+/* v360: 말맞춤·동심파괴 — 탭 안 제작·가져오기·내보내기 */
 .kn-wrap{height:100%;overflow:auto;padding:14px 12px 28px;box-sizing:border-box;background:linear-gradient(180deg,#f7fbff 0,#f8fafc 45%,#f3f6f9 100%);color:#18212f}
 .kn-shell{max-width:980px;margin:0 auto}
 .kn-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#123e68,#176b79 58%,#1b8b78);color:#fff;border-radius:18px;padding:20px;box-shadow:0 10px 28px rgba(26,72,99,.2)}
@@ -1299,9 +1299,16 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
 .kn-pipe{display:grid;gap:7px}.kn-step{display:grid;grid-template-columns:25px 1fr auto;align-items:center;gap:8px;padding:9px;border:1px solid #e1e7ed;border-radius:10px;background:#fafcfd}.kn-step-i{width:25px;height:25px;display:grid;place-items:center;border-radius:8px;background:#e9f4f3;font-size:12px}.kn-step b{font-size:11px;color:#273345}.kn-step small{display:block;font-size:9.5px;color:#8893a4;margin-top:2px}.kn-state{font-size:9px;font-weight:800;border-radius:999px;padding:4px 7px;background:#edf1f5;color:#6e7888}.kn-state.on{background:#e3f5ec;color:#137548}
 .kn-list{display:grid;gap:8px}.kn-empty{padding:18px 10px;text-align:center;color:#8a96a7;font-size:11px;border:1px dashed #d5dee7;border-radius:11px}.kn-draft{border:1px solid #e0e7ee;border-radius:11px;padding:10px;background:#fff}.kn-draft-h{display:flex;align-items:flex-start;gap:8px}.kn-draft-h strong{font-size:11.5px;flex:1}.kn-badge{font-size:9px;border-radius:999px;padding:4px 7px;background:#fff2d8;color:#9a6400;font-weight:800}.kn-draft p{font-size:10.5px;color:#667286;line-height:1.5;margin:6px 0 0}.kn-mini{border:0;background:none;color:#16746f;font-family:inherit;font-size:10px;font-weight:800;padding:5px 5px 0;cursor:pointer}
 .kn-auto{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;margin:10px 0;border:1px solid #cfe1df;border-radius:11px;background:#f0f8f7}.kn-auto strong{font-size:11px;color:#165f5b}.kn-auto-note{font-size:9.5px;color:#708091;line-height:1.45;flex:1 1 210px}.kn-toggle{border:0;border-radius:999px;padding:7px 10px;font-family:inherit;font-size:10px;font-weight:800;cursor:pointer;background:#dce5e8;color:#596675}.kn-toggle.on{background:#1b8078;color:#fff}.kn-count{border:1px solid #c9d8dc;border-radius:8px;background:#fff;padding:6px 8px;font-family:inherit;font-size:10px;font-weight:800;color:#27404a}
+.kn-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0;padding:10px;border:1px solid #d8e3eb;border-radius:11px;background:#f8fafc}.kn-setting{display:grid;gap:4px}.kn-setting label{font-size:9.5px;font-weight:800;color:#536174}.kn-setting select{width:100%;border:1px solid #cbd7e0;border-radius:8px;background:#fff;color:#273746;padding:7px 8px;font-family:inherit;font-size:10px;font-weight:700}.kn-setting-note{grid-column:1/-1;font-size:9px;color:#7c8796;line-height:1.45}
 .kn-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:10px}.kn-result{border:1px solid #dce5ed;border-radius:12px;background:#fff;overflow:hidden}.kn-video{aspect-ratio:9/16;background:linear-gradient(160deg,#123e68,#1b8b78);display:grid;place-items:center;color:#fff;font-size:10px;text-align:center;position:relative}.kn-video video{width:100%;height:100%;object-fit:cover;background:#102f46}.kn-video-msg{padding:12px;line-height:1.55}.kn-result-info{padding:9px}.kn-result-info strong{display:block;font-size:11px;color:#263546;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.kn-result-info small{display:block;font-size:9px;color:#7b8798;margin-top:3px}.kn-download{width:100%;margin-top:7px;border:0;border-radius:8px;padding:8px;background:#176f75;color:#fff;font-family:inherit;font-size:10.5px;font-weight:800;cursor:pointer}.kn-download:disabled{opacity:.45}.kn-progress{height:5px;border-radius:999px;background:#dce7e9;overflow:hidden;margin-top:8px}.kn-progress i{display:block;height:100%;background:#1b8b78;transition:width .25s}.kn-warn{font-size:9.5px;color:#8a6540;background:#fff7e8;border:1px solid #f0dfbf;border-radius:9px;padding:8px 9px;line-height:1.45;margin-top:9px}
+.kn-io{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.kn-io .kn-btn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.dp-wrap{background:linear-gradient(180deg,#fbf7f4 0,#faf7f7 45%,#f4f2f5 100%)}
+.dp-wrap .kn-hero{background:linear-gradient(135deg,#25182f,#5b263d 58%,#8c3b31);box-shadow:0 10px 28px rgba(79,35,54,.22)}
+.dp-wrap .kn-hero:after{content:"?";font-size:126px;right:22px;bottom:-46px;letter-spacing:0}.dp-wrap .kn-eyebrow{color:#ffd4bf}.dp-wrap .kn-desc{color:#f8ded8}
+.dp-wrap .kn-topic.on{background:#f8e9e6;border-color:#a54f43;color:#7e302c}.dp-wrap .kn-btn.pri,.dp-wrap .kn-download{background:#8c3b31}.dp-wrap .kn-toggle.on,.dp-wrap .kn-progress i{background:#8c3b31}.dp-wrap .kn-time{color:#8c3b31}.dp-wrap .kn-line em{color:#8c3b31}
 @media(max-width:720px){.kn-grid{grid-template-columns:1fr}.kn-kpis{grid-template-columns:repeat(2,1fr)}.kn-hero{padding:17px}.kn-title{font-size:21px}.kn-wrap{padding:10px 9px 24px}}
-@media(max-width:430px){.kn-results{grid-template-columns:1fr}.kn-result{display:grid;grid-template-columns:112px 1fr}.kn-video{aspect-ratio:9/16}.kn-result-info{align-self:center}}
+@media(max-width:600px){.vtabs .vtab{flex:0 0 auto;min-width:64px}.vtabs .vtab-gear{min-width:42px;flex-basis:42px}}
+@media(max-width:430px){.kn-results{grid-template-columns:1fr}.kn-result{display:grid;grid-template-columns:112px 1fr}.kn-video{aspect-ratio:9/16}.kn-result-info{align-self:center}.kn-settings{grid-template-columns:1fr 1fr}}
 
 </style>
 </head>
@@ -1311,7 +1318,7 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
     <button class="vtab on" data-group="make">✍️ 지시</button>
     <button class="vtab" data-group="approve">🖋 내 차례<span class="vtab-n" id="amBadge" hidden>0</span></button>
     <button class="vtab" data-group="korean">말맞춤</button>
-    <button class="vtab" data-group="grow">📚 기록</button>
+    <button class="vtab" data-group="dark">동심파괴</button>
     <button class="vtab" data-group="dept">🏢 팀</button>
     <button class="vtab vtab-gear" id="splitBtn" title="내 차례를 옆에 띄워 두기 (가로·넓은 화면)">🪟</button>
     <button class="vtab vtab-gear" data-group="settings" title="설정">⚙️</button>
@@ -1320,7 +1327,7 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v340</span>
+    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v360</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -1569,6 +1576,7 @@ var STATE = {
   videoAuto:false,
   collections:[],
   koreanTrip:{ selected:"웬일/왠일", customTopic:"", dailyTarget:3, autoEnabled:true, lastAutoDay:"", autoCursor:0, drafts:[] },
+  darkFairy:{ selected:"빨간 모자", customTopic:"", dailyTarget:3, autoEnabled:true, lastAutoDay:"", autoCursor:0, drafts:[], canvasSize:"540x960", duration:15, fps:24, quality:"standard" },
   authToken:"", authed:false,
   metrics:null, calendar:null,
   backendUrl:"",
@@ -1864,7 +1872,7 @@ var STORE_KEY = "agentPlatformState";
 var STORE_KEY_BAK = "agentPlatformState_bak";
 function stateSnapshot(){
   return { v:2, savedAt:Date.now(), messages:STATE.messages, deptMemory:STATE.deptMemory, deptKnowledge:STATE.deptKnowledge, deptExp:STATE.deptExp, meetings:STATE.meetings, meetingRooms:STATE.meetingRooms, meetingAlways:STATE.meetingAlways, meetingEngine:STATE.meetingEngine, workEngine:STATE.workEngine, freeLLMFirst:STATE.freeLLMFirst, nvidiaModel:STATE.nvidiaModel, designReviewLoops:STATE.designReviewLoops,
-    platforms:STATE.platforms, autoPublish:STATE.autoPublish, autoBackup:STATE.autoBackup, lastSync:STATE.lastSync, schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, deliberate:STATE.deliberate, voiceAuto:STATE.voiceAuto, voiceMode:STATE.voiceMode, typeFx:STATE.typeFx, deptClips:STATE.deptClips, blog:STATE.blog, customTargets:STATE.customTargets, activityLog:STATE.activityLog, profile:STATE.profile, deptDirective:STATE.deptDirective, videoAuto:STATE.videoAuto, collections:(STATE.collections||[]).slice(-60), koreanTrip:STATE.koreanTrip, authToken:STATE.authToken, backendUrl:STATE.backendUrl, seenJobIds:STATE.seenJobIds.slice(-200) };
+    platforms:STATE.platforms, autoPublish:STATE.autoPublish, autoBackup:STATE.autoBackup, lastSync:STATE.lastSync, schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, deliberate:STATE.deliberate, voiceAuto:STATE.voiceAuto, voiceMode:STATE.voiceMode, typeFx:STATE.typeFx, deptClips:STATE.deptClips, blog:STATE.blog, customTargets:STATE.customTargets, activityLog:STATE.activityLog, profile:STATE.profile, deptDirective:STATE.deptDirective, videoAuto:STATE.videoAuto, collections:(STATE.collections||[]).slice(-60), koreanTrip:STATE.koreanTrip, darkFairy:STATE.darkFairy, authToken:STATE.authToken, backendUrl:STATE.backendUrl, seenJobIds:STATE.seenJobIds.slice(-200) };
 }
 async function saveState(){
   var data = stateSnapshot();
@@ -1945,6 +1953,8 @@ function applyLoadedState(d, isMerge){
     if(Array.isArray(d.collections)){ if(isMerge){ var ids=STATE.collections.map(function(x){return x.id;}); d.collections.forEach(function(c){ if(ids.indexOf(c.id)<0) STATE.collections.push(c); }); } else STATE.collections=d.collections; }
     if(d.koreanTrip && typeof d.koreanTrip==="object") STATE.koreanTrip=Object.assign({selected:"웬일/왠일",customTopic:"",dailyTarget:3,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[]},d.koreanTrip);
     if(!Array.isArray(STATE.koreanTrip.drafts)) STATE.koreanTrip.drafts=[];
+    if(d.darkFairy && typeof d.darkFairy==="object") STATE.darkFairy=Object.assign({selected:"빨간 모자",customTopic:"",dailyTarget:3,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[],canvasSize:"540x960",duration:15,fps:24,quality:"standard"},d.darkFairy);
+    if(!Array.isArray(STATE.darkFairy.drafts)) STATE.darkFairy.drafts=[];
     if(typeof d.backendUrl==="string" && d.backendUrl) STATE.backendUrl=d.backendUrl;
     if(Array.isArray(d.seenJobIds)) STATE.seenJobIds=d.seenJobIds;
 }
@@ -2318,6 +2328,9 @@ async function syncBackend(full){
     if(d.bestTimes && typeof d.bestTimes==="object") STATE.bestTimes = d.bestTimes;
     if(Array.isArray(d.characters)) STATE.characters = d.characters;
     if(Array.isArray(d.blogArchive)) STATE.blogArchive = d.blogArchive;
+    if(Array.isArray(d.studioQueue) && typeof syncStudioQueue==="function"){
+      var studioAdded=syncStudioQueue(d.studioQueue);if(studioAdded){added=true;cnt.studios=studioAdded;}
+    }
     STATE.lastSync = d.updatedAt || Date.now();
     saveState();
     if(added) render();
@@ -2326,7 +2339,7 @@ async function syncBackend(full){
 }
 async function pushState(){
   if(!useBackend()) return;
-  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn, usdKrw:STATE.usdKrw, monthLimitKrw:STATE.monthLimitKrw, geminiMonthLimitKrw:STATE.geminiMonthLimitKrw, paidGeminiOn:STATE.paidGeminiOn, freeLLMFirst:STATE.freeLLMFirst, nvidiaModel:STATE.nvidiaModel, designReviewLoops:STATE.designReviewLoops, designSystem:STATE.designSystem, viralGate:STATE.viralGate, viralMin:STATE.viralMin, oseraGate:STATE.oseraGate, oseraMin:STATE.oseraMin, oseraAxes:STATE.oseraAxes, lessonInject:STATE.lessonInject, expSweep:STATE.expSweep, nightSearchOn:STATE.nightSearchOn, leaderAutoOn:STATE.leaderAutoOn, dailyLearnOn:STATE.dailyLearnOn, contentNotify:STATE.contentNotify, researchMode:STATE.researchMode, appBase:location.href.split("#")[0] }) }); }catch(e){}
+  try{ await fetch(backendOrigin()+"/api/state", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, autoPublish:STATE.autoPublish, platforms:STATE.platforms, deliberate:STATE.deliberate, profile:STATE.profile, deptDirective:STATE.deptDirective, workEngine:STATE.workEngine, meetingEngine:STATE.meetingEngine, briefHour:STATE.briefHour, morningHour:STATE.morningHour, weeklyDow:STATE.weeklyDow, morningBrief:STATE.morningBrief, eveningBrief:STATE.eveningBrief, weeklyBrief:STATE.weeklyBrief, semanticSearch:STATE.semanticSearch, kShareOn:STATE.kShareOn, kShareEveryH:STATE.kShareEveryH, trainOn:STATE.trainOn, trainEveryH:STATE.trainEveryH, dailyGrowthOn:STATE.dailyGrowthOn, usdKrw:STATE.usdKrw, monthLimitKrw:STATE.monthLimitKrw, geminiMonthLimitKrw:STATE.geminiMonthLimitKrw, paidGeminiOn:STATE.paidGeminiOn, freeLLMFirst:STATE.freeLLMFirst, nvidiaModel:STATE.nvidiaModel, designReviewLoops:STATE.designReviewLoops, designSystem:STATE.designSystem, viralGate:STATE.viralGate, viralMin:STATE.viralMin, oseraGate:STATE.oseraGate, oseraMin:STATE.oseraMin, oseraAxes:STATE.oseraAxes, lessonInject:STATE.lessonInject, expSweep:STATE.expSweep, nightSearchOn:STATE.nightSearchOn, leaderAutoOn:STATE.leaderAutoOn, dailyLearnOn:STATE.dailyLearnOn, contentNotify:STATE.contentNotify, researchMode:STATE.researchMode, studios:{korean:{autoEnabled:knData().autoEnabled,dailyTarget:knData().dailyTarget},dark:{autoEnabled:dpData().autoEnabled,dailyTarget:dpData().dailyTarget}}, appBase:location.href.split("#")[0] }) }); }catch(e){}
 }
 // 총괄: 1개 이상 부서 배정 (다중 분배)
 async function route(instruction){
@@ -7438,10 +7451,10 @@ markDevice();
 window.addEventListener("resize", markDevice);
 window.addEventListener("orientationchange", markDevice);
 
-var VIEW_GROUP={console:"make",content:"make",approve:"approve",korean:"korean",learn:"grow",record:"grow",cycle:"grow",results:"grow",analytics:"grow",office:"dept",project:"dept",meeting:"dept",settings:"settings"};
-var GROUP_VIEWS={make:["console","content"],approve:["approve"],korean:["korean"],grow:["cycle","learn","record"],dept:["office"],settings:["settings"]};
-var GROUP_DEFAULT={make:"console",approve:"approve",korean:"korean",grow:"cycle",dept:"office",settings:"settings"};
-var SUBVIEW_LABEL={console:"💬 대화",content:"✍️ 콘텐츠",approve:"🖋 내 차례",korean:"말맞춤",design:"🎨 디자인",shorts:"🎬 쇼츠",cycle:"🔄 선순환",learn:"학습",record:"기록·분석",office:"오피스",project:"프로젝트",settings:"설정"};
+var VIEW_GROUP={console:"make",content:"make",approve:"approve",korean:"korean",dark:"dark",office:"dept",project:"dept",meeting:"dept",settings:"settings"};
+var GROUP_VIEWS={make:["console","content"],approve:["approve"],korean:["korean"],dark:["dark"],dept:["office"],settings:["settings"]};
+var GROUP_DEFAULT={make:"console",approve:"approve",korean:"korean",dark:"dark",dept:"office",settings:"settings"};
+var SUBVIEW_LABEL={console:"💬 대화",content:"✍️ 콘텐츠",approve:"🖋 내 차례",korean:"말맞춤",dark:"동심파괴",design:"🎨 디자인",shorts:"🎬 쇼츠",cycle:"🔄 선순환",learn:"학습",record:"기록·분석",office:"오피스",project:"프로젝트",settings:"설정"};
 function curGroup(){ return VIEW_GROUP[STATE.view]||"make"; }
 function syncNav(){
   var g=curGroup();
@@ -7632,7 +7645,7 @@ function renderSideRail(){
     if(_od && _od.v){ try{ var _o1=el.querySelector("#sr_opDir"); if(_o1){ _o1.value=_od.v; if(_od.foc){ _o1.focus(); try{ _o1.setSelectionRange(_od.s,_od.e); }catch(__){} } } }catch(_){} }
   }catch(e){ el.innerHTML=""; }
 }
-/* ═══════════ v340: 말맞춤 — 탭 안에서 완성 영상까지 ═══════════ */
+/* ═══════════ v350: 말맞춤 — 선택형 제작 규격 + 탭 안에서 완성 영상까지 ═══════════ */
 var KN_TOPICS=[
   {key:"웬일/왠일",wrong:"왠일이야?",right:"웬일이야?",scene:"친구가 갑자기 선물을 건넸어요.",memory:"‘어찌 된 일’은 ‘웬일’, ‘왜인지’는 ‘왠지’로 기억해요."},
   {key:"왠지/웬지",wrong:"오늘 웬지 기분이 좋아.",right:"오늘 왠지 기분이 좋아.",scene:"아침부터 좋은 일이 생길 것 같아요.",memory:"‘왠지’는 ‘왜인지’가 줄어든 말이에요."},
@@ -7644,13 +7657,21 @@ var KN_TOPICS=[
   {key:"어떻게/어떡해",wrong:"이걸 어떻해?",right:"이걸 어떡해?",scene:"갑자기 난처한 일이 생겼어요.",memory:"‘어떻게 해’가 줄어든 말은 ‘어떡해’예요."}
 ];
 var KN_DB_PROMISE=null, KN_RENDER_CHAIN=Promise.resolve(), KN_URLS={};
+var KN_CANVAS_OPTIONS={"540x960":{w:540,h:960,label:"540×960 · 빠른 제작"},"720x1280":{w:720,h:1280,label:"720×1280 · 선명"},"1080x1920":{w:1080,h:1920,label:"1080×1920 · 고화질"}};
+var KN_DURATION_OPTIONS=[10,15,20], KN_FPS_OPTIONS=[24,30], KN_QUALITY_OPTIONS={standard:{label:"표준 · 1.8Mbps",bitrate:1800000},high:{label:"높음 · 3.5Mbps",bitrate:3500000}};
 function knData(){
-  if(!STATE.koreanTrip||typeof STATE.koreanTrip!=="object") STATE.koreanTrip={selected:"웬일/왠일",customTopic:"",dailyTarget:3,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[]};
+  if(!STATE.koreanTrip||typeof STATE.koreanTrip!=="object") STATE.koreanTrip={selected:"웬일/왠일",customTopic:"",dailyTarget:3,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[],canvasSize:"540x960",duration:15,fps:24,quality:"standard"};
   if(!Array.isArray(STATE.koreanTrip.drafts)) STATE.koreanTrip.drafts=[];
   if(STATE.koreanTrip.dailyTarget<3||STATE.koreanTrip.dailyTarget>5) STATE.koreanTrip.dailyTarget=3;
   if(typeof STATE.koreanTrip.autoEnabled!=="boolean") STATE.koreanTrip.autoEnabled=true;
+  if(!KN_CANVAS_OPTIONS[STATE.koreanTrip.canvasSize]) STATE.koreanTrip.canvasSize="540x960";
+  if(KN_DURATION_OPTIONS.indexOf(+STATE.koreanTrip.duration)<0) STATE.koreanTrip.duration=15; else STATE.koreanTrip.duration=+STATE.koreanTrip.duration;
+  if(KN_FPS_OPTIONS.indexOf(+STATE.koreanTrip.fps)<0) STATE.koreanTrip.fps=24; else STATE.koreanTrip.fps=+STATE.koreanTrip.fps;
+  if(!KN_QUALITY_OPTIONS[STATE.koreanTrip.quality]) STATE.koreanTrip.quality="standard";
   return STATE.koreanTrip;
 }
+function knSettings(){var k=knData(),c=KN_CANVAS_OPTIONS[k.canvasSize];return {canvasSize:k.canvasSize,w:c.w,h:c.h,duration:k.duration,fps:k.fps,quality:k.quality,bitrate:KN_QUALITY_OPTIONS[k.quality].bitrate};}
+function knPhaseCuts(duration){duration=+duration||15;return [0,Math.round(duration*3/15),Math.round(duration*6/15),Math.round(duration*11/15),duration];}
 function knTopic(key){
   for(var i=0;i<KN_TOPICS.length;i++) if(KN_TOPICS[i].key===key) return KN_TOPICS[i];
   return null;
@@ -7692,7 +7713,7 @@ function knWrapText(ctx,text,maxWidth){
   for(var i=0;i<src.length;i++){var next=line+src[i];if(line&&ctx.measureText(next).width>maxWidth){out.push(line.trim());line=src[i];}else line=next;}
   if(line.trim()) out.push(line.trim()); return out.slice(0,4);
 }
-function knDrawCharacter(ctx,x,y,t,accent){
+function knDrawCharacter(ctx,x,y,t,accent,label){
   var bob=Math.sin(t*4)*7; ctx.save(); ctx.translate(x,y+bob);
   ctx.fillStyle="rgba(8,36,52,.16)";ctx.beginPath();ctx.ellipse(0,198,102,18,0,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#f5c74f";ctx.beginPath();ctx.roundRect(-84,72,168,128,42);ctx.fill();
@@ -7700,71 +7721,99 @@ function knDrawCharacter(ctx,x,y,t,accent){
   ctx.fillStyle="#23384c";ctx.beginPath();ctx.arc(-33,-4,9,0,Math.PI*2);ctx.arc(33,-4,9,0,Math.PI*2);ctx.fill();
   ctx.strokeStyle="#23384c";ctx.lineWidth=7;ctx.lineCap="round";ctx.beginPath();ctx.arc(0,25,28,.15*Math.PI,.85*Math.PI);ctx.stroke();
   ctx.fillStyle=accent;ctx.beginPath();ctx.moveTo(-91,-35);ctx.quadraticCurveTo(0,-128,91,-35);ctx.quadraticCurveTo(30,-79,-18,-64);ctx.quadraticCurveTo(-55,-42,-91,-35);ctx.fill();
-  ctx.fillStyle="#fff";ctx.beginPath();ctx.roundRect(-45,101,90,45,18);ctx.fill();ctx.fillStyle=accent;ctx.font="900 27px sans-serif";ctx.textAlign="center";ctx.fillText("말맞춤",0,132);ctx.restore();
+  ctx.fillStyle="#fff";ctx.beginPath();ctx.roundRect(-54,101,108,45,18);ctx.fill();ctx.fillStyle=accent;ctx.font="900 23px sans-serif";ctx.textAlign="center";ctx.fillText(label||"말맞춤",0,132);ctx.restore();
 }
-function knPaintFrame(ctx,w,h,d,sec){
-  var phase=sec<3?0:(sec<6?1:(sec<11?2:3)), colors=["#123e68","#6c3b73","#176f75","#c06c2f"], accent=colors[phase];
-  var g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,"#f8fcff");g.addColorStop(1,phase===1?"#f9eef9":"#e8f6f2");ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
-  ctx.fillStyle=accent;ctx.fillRect(0,0,w,120);ctx.fillStyle="#fff";ctx.font="900 34px sans-serif";ctx.textAlign="left";ctx.fillText("15초 말맞춤",32,73);ctx.font="700 18px sans-serif";ctx.textAlign="right";ctx.fillText((phase+1)+" / 4",w-32,72);
-  knDrawCharacter(ctx,w/2,330,sec,accent);
+function knPaintFrame(ctx,w,h,d,sec,settings){
+  var dark=d.studio==="dark",duration=(settings&&settings.duration)||15,cuts=knPhaseCuts(duration),phase=sec<cuts[1]?0:(sec<cuts[2]?1:(sec<cuts[3]?2:3)), colors=dark?["#4a2237","#71313b","#8c3b31","#2e2038"]:["#123e68","#6c3b73","#176f75","#c06c2f"], accent=colors[phase];
+  var g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,dark?"#fff8f5":"#f8fcff");g.addColorStop(1,dark?(phase===1?"#f5e9ef":"#f4e8e3"):(phase===1?"#f9eef9":"#e8f6f2"));ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  ctx.fillStyle=accent;ctx.fillRect(0,0,w,120);ctx.fillStyle="#fff";ctx.font="900 34px sans-serif";ctx.textAlign="left";ctx.fillText(duration+"초 "+(dark?"동심파괴":"말맞춤"),32,73);ctx.font="700 18px sans-serif";ctx.textAlign="right";ctx.fillText((phase+1)+" / 4",w-32,72);
+  knDrawCharacter(ctx,w/2,330,sec,accent,dark?"동심파괴":"말맞춤");
   ctx.fillStyle="#fff";ctx.shadowColor="rgba(25,55,70,.16)";ctx.shadowBlur=24;ctx.beginPath();ctx.roundRect(34,565,w-68,285,28);ctx.fill();ctx.shadowBlur=0;
-  var heading=phase===0?"이 표현, 맞을까요?":(phase===1?"잠깐! 골라 보세요":(phase===2?"정답 공개":"한 번에 기억하기"));ctx.fillStyle=accent;ctx.font="900 24px sans-serif";ctx.textAlign="center";ctx.fillText(heading,w/2,620);
+  var heading=dark?(phase===0?"우리가 놓친 장면":(phase===1?"첫 번째 흔적":(phase===2?"겹치는 증거":"결론은 말하지 않겠습니다"))):(phase===0?"이 표현, 맞을까요?":(phase===1?"잠깐! 골라 보세요":(phase===2?"정답 공개":"한 번에 기억하기")));ctx.fillStyle=accent;ctx.font="900 24px sans-serif";ctx.textAlign="center";ctx.fillText(heading,w/2,620);
   ctx.fillStyle="#1d2b3a";ctx.font="900 34px sans-serif";var lines=knWrapText(ctx,d.scenes[phase].text,w-118);var sy=690-(lines.length-1)*22;lines.forEach(function(line,i){ctx.fillText(line,w/2,sy+i*48);});
-  ctx.fillStyle="#dce8eb";ctx.fillRect(32,h-48,w-64,8);ctx.fillStyle=accent;ctx.fillRect(32,h-48,(w-64)*Math.min(1,sec/15),8);ctx.fillStyle="#56697b";ctx.font="700 16px sans-serif";ctx.textAlign="left";ctx.fillText(d.topic,32,h-78);ctx.textAlign="right";ctx.fillText(Math.min(15,Math.floor(sec)+1)+"초",w-32,h-78);
+  ctx.fillStyle="#dce8eb";ctx.fillRect(32,h-48,w-64,8);ctx.fillStyle=accent;ctx.fillRect(32,h-48,(w-64)*Math.min(1,sec/duration),8);ctx.fillStyle="#56697b";ctx.font="700 16px sans-serif";ctx.textAlign="left";ctx.fillText(d.topic,32,h-78);ctx.textAlign="right";ctx.fillText(Math.min(duration,Math.floor(sec)+1)+"초",w-32,h-78);
 }
-async function knRenderBlob(d,onProgress){
+async function knRenderBlob(d,onProgress,settings){
   if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream) throw new Error("이 브라우저에서는 영상 제작을 지원하지 않습니다. 최신 Chrome 또는 Edge를 사용해 주세요.");
-  var canvas=document.createElement("canvas"),w=540,h=960;canvas.width=w;canvas.height=h;var ctx=canvas.getContext("2d"),stream=canvas.captureStream(24),mime=knMime(),chunks=[];
-  var rec=mime?new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:1800000}):new MediaRecorder(stream);
+  settings=settings||knSettings();var canvas=document.createElement("canvas"),w=settings.w,h=settings.h,duration=settings.duration;canvas.width=w;canvas.height=h;var ctx=canvas.getContext("2d"),stream=canvas.captureStream(settings.fps),mime=knMime(),chunks=[];
+  var rec=mime?new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:settings.bitrate}):new MediaRecorder(stream);
   rec.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data);};
   var stopped=new Promise(function(resolve,reject){rec.onstop=resolve;rec.onerror=function(e){reject((e&&e.error)||new Error("영상 렌더링 오류"));};});
   rec.start(500);var start=performance.now(),last=-1;
-  await new Promise(function(resolve){function frame(now){var sec=Math.min(15,(now-start)/1000);knPaintFrame(ctx,w,h,d,sec);var pct=Math.round(sec/15*100);if(pct!==last){last=pct;if(onProgress)onProgress(pct);}if(sec<15)requestAnimationFrame(frame);else resolve();}requestAnimationFrame(frame);});
+  await new Promise(function(resolve){function frame(now){var sec=Math.min(duration,(now-start)/1000);ctx.setTransform(w/540,0,0,h/960,0,0);knPaintFrame(ctx,540,960,d,sec,settings);var pct=Math.round(sec/duration*100);if(pct!==last){last=pct;if(onProgress)onProgress(pct);}if(sec<duration)requestAnimationFrame(frame);else resolve();}requestAnimationFrame(frame);});
   rec.stop();await stopped;stream.getTracks().forEach(function(t){t.stop();});
   return new Blob(chunks,{type:rec.mimeType||mime||"video/webm"});
 }
+function studioDataForDraft(d){return d&&d.studio==="dark"?dpData():knData();}
+function studioSettingsForDraft(d){return d&&d.studio==="dark"?dpSettings():knSettings();}
+function studioViewForDraft(d){return d&&d.studio==="dark"?"dark":"korean";}
+function studioFindDraft(id){return knData().drafts.concat(dpData().drafts).find(function(x){return x.id===id;});}
 function knQueueVideo(d,automatic){
   if(!d||d.videoStatus==="rendering"||d.videoStatus==="queued") return KN_RENDER_CHAIN;
-  d.videoStatus="queued";d.videoProgress=0;d.videoError="";d.automatic=!!automatic;saveState();if(STATE.view==="korean")render();
+  var targetView=studioViewForDraft(d),renderSettings=studioSettingsForDraft(d);d.renderSettings=renderSettings;d.videoStatus="queued";d.videoProgress=0;d.videoError="";d.automatic=!!automatic;saveState();if(STATE.view===targetView)render();
   KN_RENDER_CHAIN=KN_RENDER_CHAIN.then(async function(){
-    d.videoStatus="rendering";d.videoProgress=0;await saveState();if(STATE.view==="korean")render();
+    d.videoStatus="rendering";d.videoProgress=0;await saveState();if(STATE.view===targetView)render();
     try{
-      var blob=await knRenderBlob(d,function(p){d.videoProgress=p;var el=document.querySelector('[data-kn-progress="'+d.id+'"]');if(el)el.style.width=p+"%";});
+      var blob=await knRenderBlob(d,function(p){d.videoProgress=p;var el=document.querySelector('[data-kn-progress="'+d.id+'"]');if(el)el.style.width=p+"%";},renderSettings);
       await knStoreVideo(d.id,blob);d.videoStatus="done";d.videoProgress=100;d.videoMime=blob.type||"video/webm";d.videoSize=blob.size;d.renderedAt=Date.now();if(d.status==="draft")d.status="review";
     }catch(e){d.videoStatus="error";d.videoError=String(e&&e.message||e);}
-    await saveState();if(STATE.view==="korean")render();
+    await saveState();if(STATE.view===targetView)render();
   });
   return KN_RENDER_CHAIN;
 }
 function knResultHtml(d){
-  var done=d.videoStatus==="done", msg=done?"미리보기 불러오는 중…":(d.videoStatus==="error"?(d.videoError||"제작 오류"):(d.videoStatus==="rendering"?"15초 영상을 만들고 있어요…":"제작 순서를 기다리고 있어요…"));
-  return '<article class="kn-result"><div class="kn-video" data-kn-preview="'+d.id+'"><div class="kn-video-msg">'+escapeHtml(msg)+(d.videoStatus==="rendering"?'<div class="kn-progress"><i data-kn-progress="'+d.id+'" style="width:'+(d.videoProgress||0)+'%"></i></div>':'')+'</div></div><div class="kn-result-info"><strong>'+escapeHtml(d.topic)+'</strong><small>'+knVideoLabel(d.videoStatus)+(done?' · '+Math.max(1,Math.round((d.videoSize||0)/1024/1024*10)/10)+'MB':'')+'</small><button class="kn-download" data-kn-download="'+d.id+'" '+(done?'':'disabled')+'>영상 다운로드</button></div></article>';
+  var rs=d.renderSettings||{canvasSize:"540x960",duration:15},done=d.videoStatus==="done", msg=done?"미리보기 불러오는 중…":(d.videoStatus==="error"?(d.videoError||"제작 오류"):(d.videoStatus==="rendering"?rs.duration+"초 영상을 만들고 있어요…":"제작 순서를 기다리고 있어요…"));
+  return '<article class="kn-result"><div class="kn-video" data-kn-preview="'+d.id+'"><div class="kn-video-msg">'+escapeHtml(msg)+(d.videoStatus==="rendering"?'<div class="kn-progress"><i data-kn-progress="'+d.id+'" style="width:'+(d.videoProgress||0)+'%"></i></div>':'')+'</div></div><div class="kn-result-info"><strong>'+escapeHtml(d.topic)+'</strong><small>'+knVideoLabel(d.videoStatus)+(done?' · '+rs.canvasSize.replace('x','×')+' · '+rs.duration+'초 · '+Math.max(1,Math.round((d.videoSize||0)/1024/1024*10)/10)+'MB':'')+'</small><button class="kn-download" data-studio-copy="'+d.id+'">대본 복사</button><button class="kn-download" data-kn-download="'+d.id+'" '+(done?'':'disabled')+'>영상 다운로드</button></div></article>';
 }
 async function knHydrateResults(){
   var nodes=[].slice.call(document.querySelectorAll("[data-kn-preview]"));
-  nodes.forEach(async function(el){var id=el.getAttribute("data-kn-preview"),d=knData().drafts.find(function(x){return x.id===id;});if(!d||d.videoStatus!=="done")return;var blob=await knGetVideo(id);if(!blob){el.innerHTML='<div class="kn-video-msg">저장된 영상이 없어 다시 제작해야 해요.</div>';return;}if(KN_URLS[id])URL.revokeObjectURL(KN_URLS[id]);var u=URL.createObjectURL(blob);KN_URLS[id]=u;el.innerHTML='<video controls muted playsinline preload="metadata" src="'+u+'"></video>';});
+  nodes.forEach(async function(el){var id=el.getAttribute("data-kn-preview"),d=studioFindDraft(id);if(!d||d.videoStatus!=="done")return;var blob=await knGetVideo(id);if(!blob){el.innerHTML='<div class="kn-video-msg">저장된 영상이 없어 다시 제작해야 해요.</div>';return;}if(KN_URLS[id])URL.revokeObjectURL(KN_URLS[id]);var u=URL.createObjectURL(blob);KN_URLS[id]=u;el.innerHTML='<video controls muted playsinline preload="metadata" src="'+u+'"></video>';});
 }
 async function knDownload(id){
-  var d=knData().drafts.find(function(x){return x.id===id;}),blob=await knGetVideo(id);if(!d||!blob){alert("영상 파일을 찾지 못했어요. 다시 제작해 주세요.");return;}var ext=/mp4/i.test(blob.type)?"mp4":"webm",safe=String(d.topic||"malmatchum").replace(/[\\/:*?"<>|\s]+/g,"_");var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="말맞춤_"+safe+"_15초."+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},5000);
+  var d=studioFindDraft(id),blob=await knGetVideo(id);if(!d||!blob){alert("영상 파일을 찾지 못했어요. 다시 제작해 주세요.");return;}var ext=/mp4/i.test(blob.type)?"mp4":"webm",safe=String(d.topic||"studio").replace(/[\\/:*?"<>|\s]+/g,"_"),duration=(d.renderSettings&&d.renderSettings.duration)||15,prefix=d.studio==="dark"?"동심파괴":"말맞춤";var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=prefix+"_"+safe+"_"+duration+"초."+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},5000);
+}
+function studioDraftText(d){
+  if(!d)return "";var brand=d.studio==="dark"?"동심파괴":"말맞춤",lines=["["+brand+"] "+(d.topic||"제목 없음")];
+  if(d.thesis)lines.push("\n가설: "+d.thesis);
+  (d.scenes||[]).forEach(function(s,i){lines.push("\n"+(i+1)+". "+String(s.text||""));});
+  if(d.memory)lines.push("\n기억법: "+d.memory);if(d.openQuestion)lines.push("\n열린 질문: "+d.openQuestion);return lines.join("");
+}
+async function studioCopy(id){
+  var d=studioFindDraft(id);if(!d){alert("복사할 제작물을 찾지 못했어요.");return;}var txt=studioDraftText(d);
+  try{await navigator.clipboard.writeText(txt);alert("대본을 복사했어요.");}catch(e){var ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();alert("대본을 복사했어요.");}
+}
+function studioSafeDraft(d){var x=JSON.parse(JSON.stringify(d));delete x.videoSize;delete x.videoMime;delete x.videoProgress;if(x.videoStatus==="rendering"||x.videoStatus==="queued")x.videoStatus="";return x;}
+function studioExport(kind){
+  var data=kind==="dark"?dpData():knData(),brand=kind==="dark"?"동심파괴":"말맞춤",pack={format:"hukkle-studio-v1",studio:kind,brand:brand,exportedAt:new Date().toISOString(),settings:{canvasSize:data.canvasSize,duration:data.duration,fps:data.fps,quality:data.quality,dailyTarget:data.dailyTarget,autoEnabled:data.autoEnabled},drafts:data.drafts.map(studioSafeDraft)};
+  var blob=new Blob([JSON.stringify(pack,null,2)],{type:"application/json"}),u=URL.createObjectURL(blob),a=document.createElement("a"),day=knToday().replace(/-/g,"");a.href=u;a.download=brand+"_제작물_"+day+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},1500);
+}
+function studioImport(kind){
+  var fi=document.createElement("input");fi.type="file";fi.accept=".json,application/json";fi.onchange=function(){var file=fi.files&&fi.files[0];if(!file)return;var rd=new FileReader();rd.onload=async function(){try{var p=JSON.parse(String(rd.result||""));if(p.format!=="hukkle-studio-v1"||!Array.isArray(p.drafts))throw new Error("지원하지 않는 제작물 파일입니다.");if(p.studio&&p.studio!==kind&&!confirm("다른 탭에서 저장한 파일입니다. 그래도 이 탭으로 가져올까요?"))return;var data=kind==="dark"?dpData():knData(),ids={};data.drafts.forEach(function(d){ids[d.id]=1;});var added=0;p.drafts.forEach(function(src){var d=JSON.parse(JSON.stringify(src));if(!d||!d.topic||!Array.isArray(d.scenes))return;if(ids[d.id])d.id=(kind==="dark"?"dp_":"kn_")+Date.now()+"_"+Math.random().toString(36).slice(2,7);d.studio=kind;d.videoStatus="";d.videoProgress=0;d.videoError="";data.drafts.push(d);ids[d.id]=1;added++;});if(p.settings&&typeof p.settings==="object"){["canvasSize","duration","fps","quality","dailyTarget","autoEnabled"].forEach(function(k){if(p.settings[k]!==undefined)data[k]=p.settings[k];});}if(added)data.currentDraftId=data.drafts[data.drafts.length-1].id;await saveState();render();alert(added+"개 제작물을 가져왔어요. 영상은 필요할 때 다시 제작하면 됩니다.");}catch(e){alert("가져오기 실패: "+(e.message||e));}};rd.readAsText(file,"utf-8");};fi.click();
+}
+function bindStudioCommon(){
+  document.querySelectorAll("[data-studio-copy]").forEach(function(b){b.addEventListener("click",function(){studioCopy(b.getAttribute("data-studio-copy"));});});
+  var ex=document.getElementById("studioExport"),im=document.getElementById("studioImport"),cp=document.getElementById("studioCopyCurrent");if(ex)ex.onclick=function(){studioExport(ex.getAttribute("data-kind"));};if(im)im.onclick=function(){studioImport(im.getAttribute("data-kind"));};if(cp)cp.onclick=function(){studioCopy(cp.getAttribute("data-id"));};
 }
 async function knEnsureDaily(){
   var k=knData(),today=knToday();if(!k.autoEnabled||k.lastAutoDay===today)return;
+  if(useBackend()){try{var rr=await fetch(backendOrigin()+"/api/studio/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({studio:"korean",dailyTarget:k.dailyTarget})}),remote=await rr.json();if(remote&&remote.ok){syncStudioQueue(remote.queue||[]);k.lastAutoDay=today;await saveState();return;}}catch(e){}}
   k.lastAutoDay=today;var count=Math.max(3,Math.min(5,+k.dailyTarget||3)),made=[];
   for(var i=0;i<count;i++){var t=KN_TOPICS[(k.autoCursor+i)%KN_TOPICS.length],d=knDraftFromTopic(t);d.autoDay=today;d.automatic=true;k.drafts.push(d);made.push(d);}
   k.autoCursor=(k.autoCursor+count)%KN_TOPICS.length;k.currentDraftId=made[made.length-1].id;await saveState();if(STATE.view==="korean")render();made.forEach(function(d){knQueueVideo(d,true);});
 }
 function knSceneHtml(d){
-  if(!d) return '<div class="kn-empty">소재를 고르고 15초 대본을 만들어 보세요.</div>';
+  var duration=knData().duration,cuts=knPhaseCuts(duration);
+  if(!d) return '<div class="kn-empty">소재를 고르고 '+duration+'초 대본을 만들어 보세요.</div>';
   return '<div class="kn-preview">'+d.scenes.map(function(s,i){
     var txt=escapeHtml(s.text);
     if(i===0) txt=txt.replace(escapeHtml(d.wrong),'<b>'+escapeHtml(d.wrong)+'</b>');
     if(i===2) txt=txt.replace(escapeHtml(d.right),'<em>'+escapeHtml(d.right)+'</em>');
-    return '<div class="kn-scene"><span class="kn-time">'+s.time+'</span><span class="kn-line">'+txt+'</span></div>';
+    return '<div class="kn-scene"><span class="kn-time">'+cuts[i]+'–'+cuts[i+1]+'초</span><span class="kn-line">'+txt+'</span></div>';
   }).join("")+'</div>';
 }
 function renderKorean(){
   hideApprove();
-  var k=knData(), drafts=k.drafts.slice().reverse(), cur=null;
+  var k=knData(),cfg=knSettings(), drafts=k.drafts.slice().reverse(), cur=null;
   if(k.currentDraftId) cur=k.drafts.find(function(d){return d.id===k.currentDraftId;});
   if(!cur&&k.drafts.length) cur=k.drafts[k.drafts.length-1];
   var nDraft=k.drafts.filter(function(d){return d.status==="draft";}).length;
@@ -7773,6 +7822,12 @@ function renderKorean(){
   var nPublished=k.drafts.filter(function(d){return d.status==="published";}).length;
   var nVideo=k.drafts.filter(function(d){return d.videoStatus==="done";}).length;
   var topics=KN_TOPICS.map(function(t){return '<button class="kn-topic'+(k.selected===t.key?' on':'')+'" data-kn-topic="'+escapeHtml(t.key)+'">'+escapeHtml(t.key)+'</button>';}).join("");
+  var settingsHtml='<div class="kn-settings">'
+    +'<div class="kn-setting"><label for="knCanvas">캔버스 크기</label><select id="knCanvas"><option value="540x960"'+(k.canvasSize==="540x960"?' selected':'')+'>540×960 · 빠른 제작</option><option value="720x1280"'+(k.canvasSize==="720x1280"?' selected':'')+'>720×1280 · 선명</option><option value="1080x1920"'+(k.canvasSize==="1080x1920"?' selected':'')+'>1080×1920 · 고화질</option></select></div>'
+    +'<div class="kn-setting"><label for="knDuration">영상 길이</label><select id="knDuration"><option value="10"'+(k.duration===10?' selected':'')+'>10초 · 짧게</option><option value="15"'+(k.duration===15?' selected':'')+'>15초 · 기본</option><option value="20"'+(k.duration===20?' selected':'')+'>20초 · 여유 있게</option></select></div>'
+    +'<div class="kn-setting"><label for="knFps">프레임률</label><select id="knFps"><option value="24"'+(k.fps===24?' selected':'')+'>24fps · 기본</option><option value="30"'+(k.fps===30?' selected':'')+'>30fps · 부드럽게</option></select></div>'
+    +'<div class="kn-setting"><label for="knQuality">영상 품질</label><select id="knQuality"><option value="standard"'+(k.quality==="standard"?' selected':'')+'>표준 · 1.8Mbps</option><option value="high"'+(k.quality==="high"?' selected':'')+'>높음 · 3.5Mbps</option></select></div>'
+    +'<div class="kn-setting-note">정해진 선택지 안에서만 바꿀 수 있습니다. 처음 기본값은 540×960 · 15초 · 24fps · 표준입니다.</div></div>';
   var list=drafts.length?drafts.map(function(d){
     var act=d.status==="draft"?'<button class="kn-mini" data-kn-act="review" data-id="'+d.id+'">검수 요청</button>':(d.status==="review"?'<button class="kn-mini" data-kn-act="ready" data-id="'+d.id+'">검수 통과</button>':(d.status==="ready"?'<button class="kn-mini" data-kn-act="published" data-id="'+d.id+'">발행 완료</button>':''));
     var make=d.videoStatus==="done"?'<button class="kn-mini" data-kn-result="'+d.id+'">결과 보기</button>':((d.videoStatus==="rendering"||d.videoStatus==="queued")?'<button class="kn-mini" disabled>'+knVideoLabel(d.videoStatus)+'</button>':'<button class="kn-mini" data-kn-produce="'+d.id+'">완성 영상 만들기</button>');
@@ -7780,38 +7835,74 @@ function renderKorean(){
   }).join(""):'<div class="kn-empty">아직 대본이 없어요.<br>첫 소재를 골라 오늘 영상 1편을 시작하세요.</div>';
   var steps=[
     ["1","소재 선별",k.selected?"1개 선택됨":"대기",!!k.selected],
-    ["2","15초 영상 제작",nVideo?"완성 "+nVideo+"개":"대기",nVideo>0],
+    ["2",k.duration+"초 영상 제작",nVideo?"완성 "+nVideo+"개":"대기",nVideo>0],
     ["3","맞춤법·자막 검수",nReview?"대기 "+nReview+"개":(nReady+nPublished?"통과":"대기"),nReady+nPublished>0],
     ["4","발행 준비",nReady?"준비 "+nReady+"개":(nPublished?"완료":"대기"),nReady+nPublished>0]
   ].map(function(s){return '<div class="kn-step"><span class="kn-step-i">'+s[0]+'</span><span><b>'+s[1]+'</b><small>'+s[2]+'</small></span><span class="kn-state'+(s[3]?' on':'')+'">'+(s[3]?'진행':'대기')+'</span></div>';}).join("");
   var results=drafts.filter(function(d){return d.videoStatus;}).map(knResultHtml).join("")||'<div class="kn-empty">완성 영상이 여기에 나타납니다.</div>';
   viewEl.innerHTML='<div class="kn-wrap"><div class="kn-shell">'
-    +'<section class="kn-hero"><div class="kn-eyebrow">HUKKLE HUB · KOREAN SHORTS LAB</div><h2 class="kn-title">말맞춤</h2><div class="kn-desc">소재 선택부터 15초 영상 제작·미리보기·다운로드까지 이 탭 하나에서 끝냅니다.</div><div class="kn-pills"><span class="kn-pill">9:16 세로</span><span class="kn-pill">15초 완성 영상</span><span class="kn-pill">하루 '+k.dailyTarget+'개 자동 제작</span><span class="kn-pill">자동 발행 꺼짐</span></div><div class="kn-kpis"><div class="kn-kpi"><b>'+nVideo+'</b><span>완성 영상</span></div><div class="kn-kpi"><b>'+nReview+'</b><span>검수 대기</span></div><div class="kn-kpi"><b>'+nReady+'</b><span>발행 준비</span></div><div class="kn-kpi"><b>'+nPublished+'</b><span>발행 완료</span></div></div></section>'
-    +'<div class="kn-grid"><section class="kn-card"><h3>오늘 영상 만들기</h3><div class="kn-sub">소재를 고르고 버튼을 누르면 같은 화면에서 실제 영상 파일을 만듭니다.</div><div class="kn-auto"><strong>매일 자동 제작</strong><button class="kn-toggle'+(k.autoEnabled?' on':'')+'" id="knAuto">'+(k.autoEnabled?'켜짐':'꺼짐')+'</button><select class="kn-count" id="knCount"><option value="3"'+(k.dailyTarget===3?' selected':'')+'>하루 3개</option><option value="4"'+(k.dailyTarget===4?' selected':'')+'>하루 4개</option><option value="5"'+(k.dailyTarget===5?' selected':'')+'>하루 5개</option></select><span class="kn-auto-note">기본값은 켜짐·3개입니다. 앱이 열려 있으면 자동 제작하고, 닫혀 있었다면 다음 실행 때 오늘 분량을 만듭니다.</span></div><div class="kn-topics">'+topics+'</div><input class="kn-field" id="knCustom" value="'+escapeHtml(k.customTopic||"")+'" placeholder="새 소재 입력 · 예: 맞히다 / 맞추다"><div class="kn-actions"><button class="kn-btn ghost" id="knRandom">소재 추천</button><button class="kn-btn ghost" id="knMake">대본만 만들기</button>'+(cur?'<button class="kn-btn pri" id="knProduce">완성 영상 제작</button>':'')+'</div>'+knSceneHtml(cur)+'<div class="kn-warn">무료 기기 내 제작본은 캐릭터 애니메이션과 큰 자막으로 완성됩니다. 자동 게시하지 않으며, 아래 결과를 확인한 뒤 내려받아 사용하세요.</div></section>'
+    +'<section class="kn-hero"><div class="kn-eyebrow">HUKKLE HUB · KOREAN SHORTS LAB</div><h2 class="kn-title">말맞춤</h2><div class="kn-desc">소재 선택부터 영상 규격 설정·제작·미리보기·다운로드까지 이 탭 하나에서 끝냅니다.</div><div class="kn-pills"><span class="kn-pill">'+cfg.canvasSize.replace('x','×')+' · 9:16</span><span class="kn-pill">'+k.duration+'초 · '+k.fps+'fps</span><span class="kn-pill">하루 '+k.dailyTarget+'개 자동 제작</span><span class="kn-pill">자동 발행 꺼짐</span></div><div class="kn-io">'+(cur?'<button class="kn-btn" id="studioCopyCurrent" data-id="'+cur.id+'">현재 대본 복사</button>':'')+'<button class="kn-btn" id="studioExport" data-kind="korean">제작물 따로 저장</button><button class="kn-btn" id="studioImport" data-kind="korean">제작물 가져오기</button></div><div class="kn-kpis"><div class="kn-kpi"><b>'+nVideo+'</b><span>완성 영상</span></div><div class="kn-kpi"><b>'+nReview+'</b><span>검수 대기</span></div><div class="kn-kpi"><b>'+nReady+'</b><span>발행 준비</span></div><div class="kn-kpi"><b>'+nPublished+'</b><span>발행 완료</span></div></div></section>'
+    +'<div class="kn-grid"><section class="kn-card"><h3>오늘 영상 만들기</h3><div class="kn-sub">허용된 규격을 고르고 버튼을 누르면 같은 화면에서 실제 영상 파일을 만듭니다.</div>'+settingsHtml+'<div class="kn-auto"><strong>매일 자동 제작</strong><button class="kn-toggle'+(k.autoEnabled?' on':'')+'" id="knAuto">'+(k.autoEnabled?'켜짐':'꺼짐')+'</button><select class="kn-count" id="knCount"><option value="3"'+(k.dailyTarget===3?' selected':'')+'>하루 3개</option><option value="4"'+(k.dailyTarget===4?' selected':'')+'>하루 4개</option><option value="5"'+(k.dailyTarget===5?' selected':'')+'>하루 5개</option></select><span class="kn-auto-note">기본값은 켜짐·3개입니다. 자동 제작에도 위에서 선택한 규격이 적용됩니다.</span></div><div class="kn-topics">'+topics+'</div><input class="kn-field" id="knCustom" value="'+escapeHtml(k.customTopic||"")+'" placeholder="새 소재 입력 · 예: 맞히다 / 맞추다"><div class="kn-actions"><button class="kn-btn ghost" id="knRandom">소재 추천</button><button class="kn-btn ghost" id="knMake">대본만 만들기</button>'+(cur?'<button class="kn-btn pri" id="knProduce">완성 영상 제작</button>':'')+'</div>'+knSceneHtml(cur)+'<div class="kn-warn">무료 기기 내 제작본은 캐릭터 애니메이션과 큰 자막으로 완성됩니다. 자동 게시하지 않으며, 아래 결과를 확인한 뒤 내려받아 사용하세요.</div></section>'
     +'<aside><section class="kn-card"><h3>제작 흐름</h3><div class="kn-sub">사람의 검수·승인 없이 자동 발행하지 않습니다.</div><div class="kn-pipe">'+steps+'</div></section><section class="kn-card" style="margin-top:12px"><h3>오늘의 대기열</h3><div class="kn-sub">대본별 상태를 직접 확인하고 다음 단계로 넘기세요.</div><div class="kn-list">'+list+'</div></section></aside></div>'
     +'<section class="kn-card" id="knResults" style="margin-top:12px"><h3>완성 영상 · 다운로드</h3><div class="kn-sub">제작이 끝난 영상은 여기서 바로 재생하고 기기에 저장할 수 있습니다.</div><div class="kn-results">'+results+'</div></section>'
     +'</div></div>';
 }
 function bindKorean(){
   var k=knData(), custom=document.getElementById("knCustom");
+  function bindSetting(id,key,allowed,fallback){var el=document.getElementById(id);if(!el)return;el.addEventListener("change",function(){var v=(key==="duration"||key==="fps")?+el.value:el.value;k[key]=allowed.indexOf(v)>=0?v:fallback;saveState();render();});}
+  bindSetting("knCanvas","canvasSize",Object.keys(KN_CANVAS_OPTIONS),"540x960");
+  bindSetting("knDuration","duration",KN_DURATION_OPTIONS,15);
+  bindSetting("knFps","fps",KN_FPS_OPTIONS,24);
+  bindSetting("knQuality","quality",Object.keys(KN_QUALITY_OPTIONS),"standard");
   document.querySelectorAll("[data-kn-topic]").forEach(function(b){b.addEventListener("click",function(){k.selected=b.getAttribute("data-kn-topic");k.customTopic="";saveState();render();});});
   if(custom) custom.addEventListener("input",function(){k.customTopic=custom.value;k.selected="";saveState();document.querySelectorAll("[data-kn-topic]").forEach(function(b){b.classList.remove("on");});});
   var random=document.getElementById("knRandom"); if(random) random.addEventListener("click",function(){var choices=KN_TOPICS.filter(function(t){return t.key!==k.selected;});var t=choices[Math.floor(Math.random()*choices.length)];k.selected=t.key;k.customTopic="";saveState();render();});
   var make=document.getElementById("knMake"); if(make) make.addEventListener("click",function(){var t=knTopic(k.selected);if(!t&&!String(k.customTopic||"").trim()){alert("소재를 고르거나 새 소재를 입력하세요.");return;}var d=knDraftFromTopic(t);if(!t)d.topic=String(k.customTopic).trim();k.drafts.push(d);k.currentDraftId=d.id;saveState();render();});
   var produce=document.getElementById("knProduce"); if(produce) produce.addEventListener("click",function(){var d=k.drafts.find(function(x){return x.id===k.currentDraftId;})||k.drafts[k.drafts.length-1];knQueueVideo(d,false);});
-  var auto=document.getElementById("knAuto");if(auto)auto.addEventListener("click",function(){k.autoEnabled=!k.autoEnabled;saveState();render();if(k.autoEnabled)knEnsureDaily();});
-  var count=document.getElementById("knCount");if(count)count.addEventListener("change",function(){k.dailyTarget=Math.max(3,Math.min(5,+count.value||3));saveState();render();});
+  var auto=document.getElementById("knAuto");if(auto)auto.addEventListener("click",function(){k.autoEnabled=!k.autoEnabled;saveState();pushState();render();if(k.autoEnabled)knEnsureDaily();});
+  var count=document.getElementById("knCount");if(count)count.addEventListener("change",function(){k.dailyTarget=Math.max(3,Math.min(5,+count.value||3));saveState();pushState();render();});
   document.querySelectorAll("[data-kn-open]").forEach(function(b){b.addEventListener("click",function(){k.currentDraftId=b.getAttribute("data-kn-open");saveState();render();});});
   document.querySelectorAll("[data-kn-produce]").forEach(function(b){b.addEventListener("click",function(){knQueueVideo(k.drafts.find(function(x){return x.id===b.getAttribute("data-kn-produce");}),false);});});
   document.querySelectorAll("[data-kn-result]").forEach(function(b){b.addEventListener("click",function(){var box=document.getElementById("knResults");if(box)box.scrollIntoView({behavior:"smooth",block:"start"});});});
   document.querySelectorAll("[data-kn-download]").forEach(function(b){b.addEventListener("click",function(){knDownload(b.getAttribute("data-kn-download"));});});
   document.querySelectorAll("[data-kn-act]").forEach(function(b){b.addEventListener("click",function(){var d=k.drafts.find(function(x){return x.id===b.getAttribute("data-id");});if(d){d.status=b.getAttribute("data-kn-act");saveState();render();}});});
   document.querySelectorAll("[data-kn-del]").forEach(function(b){b.addEventListener("click",function(){var id=b.getAttribute("data-kn-del");if(!confirm("이 대본과 완성 영상을 삭제할까요?"))return;knDeleteVideo(id);k.drafts=k.drafts.filter(function(x){return x.id!==id;});if(k.currentDraftId===id)k.currentDraftId="";saveState();render();});});
+  bindStudioCommon();
   knHydrateResults();
 }
 
+/* ═══════════ v360: 동심파괴 — 증거 누적형 추리 쇼츠 스튜디오 ═══════════ */
+var DP_TOPICS=[
+  {key:"빨간 모자",thesis:"늑대보다 먼저 의심해야 할 사람은 사냥꾼일지도 모릅니다.",evidence:["사냥꾼은 정확히 할머니 집을 찾아옵니다.","그는 늑대의 배를 가르는 데 망설임이 없습니다.","그런데 누구도 그가 이 일을 어떻게 알았는지 묻지 않습니다."],question:"우리가 영웅이라고 부른 사람은 정말 우연히 나타난 걸까요?"},
+  {key:"신데렐라",thesis:"유리구두는 사랑의 증표가 아니라 왕궁의 신원 추적 장치였을 수 있습니다.",evidence:["왕자는 얼굴이 아니라 발에 맞는 물건으로 사람을 찾습니다.","구두는 도망친 주인만 정확히 식별합니다.","자정 이후에도 유일하게 사라지지 않은 물건이 바로 구두입니다."],question:"마법은 왜 추적 가능한 단서 하나만 남겼을까요?"},
+  {key:"백설공주",thesis:"일곱 난쟁이는 백설공주를 구한 것이 아니라 숨기고 있었을지도 모릅니다.",evidence:["숲속 집은 외부와 떨어져 있고 일곱 명이 공동으로 관리합니다.","낯선 사람을 들인 뒤에도 왕실에 알리지 않습니다.","백설공주가 쓰러진 뒤에도 시신을 땅에 묻지 않고 전시합니다."],question:"보호와 감금의 차이는 누가 정하는 걸까요?"},
+  {key:"헨젤과 그레텔",thesis:"부모가 아이들을 버린 것은 한 번의 실수가 아니라 계획된 반복이었습니다.",evidence:["첫 번째 길 잃음 뒤에도 같은 숲으로 다시 데려갑니다.","두 번째에는 아이들이 돌을 준비하지 못하게 문을 막습니다.","먹을 것이 없다는 설명과 달리 귀환한 아이들은 다시 집에 받아들여집니다."],question:"정말 가난만이 이유였다면 왜 방법은 점점 치밀해졌을까요?"},
+  {key:"잠자는 숲속의 공주",thesis:"백 년의 잠은 저주가 아니라 왕국 전체가 합의한 봉쇄였을 수 있습니다.",evidence:["왕은 물레를 없애며 사건의 원인을 감춥니다.","공주 한 명의 저주에 성 안 모든 사람이 함께 잠듭니다.","가시덤불은 내부의 탈출보다 외부의 접근을 막는 벽처럼 자랍니다."],question:"잠든 것은 공주였을까요, 아니면 감춰야 했던 왕국이었을까요?"},
+  {key:"피노키오",thesis:"코가 자라는 벌은 거짓말을 고치는 교육이 아니라 거짓말을 측정하는 실험이었을 수 있습니다.",evidence:["피노키오는 거짓말할 때마다 즉시 눈에 보이는 변화를 겪습니다.","주변 어른들은 이유보다 변화의 크기에 관심을 보입니다.","착한 아이가 되라는 기준은 늘 다른 사람이 정합니다."],question:"진실을 가르친 것일까요, 복종을 학습시킨 것일까요?"}
+];
+function dpData(){
+  if(!STATE.darkFairy||typeof STATE.darkFairy!=="object")STATE.darkFairy={selected:"빨간 모자",customTopic:"",dailyTarget:3,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[],canvasSize:"540x960",duration:15,fps:24,quality:"standard"};
+  var d=STATE.darkFairy;if(!Array.isArray(d.drafts))d.drafts=[];d.dailyTarget=Math.max(3,Math.min(5,+d.dailyTarget||3));if(!KN_CANVAS_OPTIONS[d.canvasSize])d.canvasSize="540x960";if(KN_DURATION_OPTIONS.indexOf(+d.duration)<0)d.duration=15;else d.duration=+d.duration;if(KN_FPS_OPTIONS.indexOf(+d.fps)<0)d.fps=24;else d.fps=+d.fps;if(!KN_QUALITY_OPTIONS[d.quality])d.quality="standard";return d;
+}
+function dpSettings(){var d=dpData(),c=KN_CANVAS_OPTIONS[d.canvasSize];return{canvasSize:d.canvasSize,w:c.w,h:c.h,duration:d.duration,fps:d.fps,quality:d.quality,bitrate:KN_QUALITY_OPTIONS[d.quality].bitrate};}
+function dpTopic(key){return DP_TOPICS.find(function(t){return t.key===key;});}
+function dpDraftFromTopic(t){var d=dpData(),src=t||{key:String(d.customTopic||"새 원작").trim()||"새 원작",thesis:"아직 아무도 의심하지 않은 장면에서 새로운 가설을 세워 보세요.",evidence:["원작의 공통 장면에서 첫 번째 단서를 찾으세요.","행동의 반복이나 설명되지 않은 우연을 두 번째 증거로 놓으세요.","영웅과 악역의 역할을 뒤집어도 성립하는지 확인하세요."],question:"결론을 보여주지 말고 독자가 스스로 도달하게 만들 수 있을까요?"};return{id:"dp_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),studio:"dark",topic:src.key,thesis:src.thesis,openQuestion:src.question,status:"draft",createdAt:Date.now(),videoStatus:"",videoProgress:0,scenes:[{text:src.thesis},{text:src.evidence[0]},{text:src.evidence[1]},{text:src.evidence[2]+" "+src.question}]};}
+async function dpEnsureDaily(){var d=dpData(),today=knToday();if(!d.autoEnabled||d.lastAutoDay===today)return;if(useBackend()){try{var rr=await fetch(backendOrigin()+"/api/studio/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({studio:"dark",dailyTarget:d.dailyTarget})}),remote=await rr.json();if(remote&&remote.ok){syncStudioQueue(remote.queue||[]);d.lastAutoDay=today;await saveState();return;}}catch(e){}}d.lastAutoDay=today;var made=[],count=d.dailyTarget;for(var i=0;i<count;i++){var x=dpDraftFromTopic(DP_TOPICS[(d.autoCursor+i)%DP_TOPICS.length]);x.autoDay=today;x.automatic=true;d.drafts.push(x);made.push(x);}d.autoCursor=(d.autoCursor+count)%DP_TOPICS.length;d.currentDraftId=made[made.length-1].id;await saveState();if(STATE.view==="dark")render();made.forEach(function(x){knQueueVideo(x,true);});}
+function dpSceneHtml(x){var cuts=knPhaseCuts(dpData().duration);if(!x)return'<div class="kn-empty">원작을 고르고, 독자가 스스로 결론에 도달할 증거 순서를 만드세요.</div>';return'<div class="kn-preview">'+x.scenes.map(function(s,i){return'<div class="kn-scene"><span class="kn-time">'+cuts[i]+'–'+cuts[i+1]+'초</span><span class="kn-line">'+(i===0?'<em>'+escapeHtml(s.text)+'</em>':escapeHtml(s.text))+'</span></div>';}).join('')+'</div>';}
+function studioSettingsHtml(prefix,d){return'<div class="kn-settings"><div class="kn-setting"><label>캔버스 크기</label><select id="'+prefix+'Canvas"><option value="540x960"'+(d.canvasSize==="540x960"?' selected':'')+'>540×960 · 빠른 제작</option><option value="720x1280"'+(d.canvasSize==="720x1280"?' selected':'')+'>720×1280 · 선명</option><option value="1080x1920"'+(d.canvasSize==="1080x1920"?' selected':'')+'>1080×1920 · 고화질</option></select></div><div class="kn-setting"><label>영상 길이</label><select id="'+prefix+'Duration"><option value="10"'+(d.duration===10?' selected':'')+'>10초</option><option value="15"'+(d.duration===15?' selected':'')+'>15초 · 기본</option><option value="20"'+(d.duration===20?' selected':'')+'>20초</option></select></div><div class="kn-setting"><label>프레임률</label><select id="'+prefix+'Fps"><option value="24"'+(d.fps===24?' selected':'')+'>24fps</option><option value="30"'+(d.fps===30?' selected':'')+'>30fps</option></select></div><div class="kn-setting"><label>영상 품질</label><select id="'+prefix+'Quality"><option value="standard"'+(d.quality==="standard"?' selected':'')+'>표준</option><option value="high"'+(d.quality==="high"?' selected':'')+'>높음</option></select></div><div class="kn-setting-note">정해진 선택지 안에서만 바꿀 수 있으며 자동 제작에도 그대로 적용됩니다.</div></div>';}
+function renderDark(){
+  hideApprove();var d=dpData(),cfg=dpSettings(),drafts=d.drafts.slice().reverse(),cur=d.drafts.find(function(x){return x.id===d.currentDraftId;})||d.drafts[d.drafts.length-1],done=d.drafts.filter(function(x){return x.videoStatus==="done";}).length,review=d.drafts.filter(function(x){return x.status==="review";}).length,topics=DP_TOPICS.map(function(t){return'<button class="kn-topic'+(d.selected===t.key?' on':'')+'" data-dp-topic="'+escapeHtml(t.key)+'">'+escapeHtml(t.key)+'</button>';}).join('');
+  var list=drafts.length?drafts.map(function(x){return'<div class="kn-draft"><div class="kn-draft-h"><strong>'+escapeHtml(x.topic)+'</strong><span class="kn-badge">'+knVideoLabel(x.videoStatus)+'</span></div><p>'+escapeHtml(x.thesis||"")+'</p><div><button class="kn-mini" data-dp-open="'+x.id+'">구성 보기</button><button class="kn-mini" data-studio-copy="'+x.id+'">복사</button>'+(x.videoStatus==="done"?'<button class="kn-mini" data-dp-result="'+x.id+'">결과 보기</button>':((x.videoStatus==="queued"||x.videoStatus==="rendering")?'<button class="kn-mini" disabled>제작 중</button>':'<button class="kn-mini" data-dp-produce="'+x.id+'">완성 영상 만들기</button>'))+'<button class="kn-mini" data-dp-del="'+x.id+'" style="color:#a34c4c">삭제</button></div></div>';}).join(''):'<div class="kn-empty">아직 제작물이 없습니다.</div>',results=drafts.filter(function(x){return x.videoStatus;}).map(knResultHtml).join('')||'<div class="kn-empty">완성 영상이 이 안에 나타납니다.</div>';
+  viewEl.innerHTML='<div class="kn-wrap dp-wrap"><div class="kn-shell"><section class="kn-hero"><div class="kn-eyebrow">HUKKLE HUB · EVIDENCE STORY LAB</div><h2 class="kn-title">동심파괴</h2><div class="kn-desc">익숙한 원작의 공통 장면을 낯설게 만들고, 결론 대신 증거를 쌓아 독자가 스스로 추리하게 합니다.</div><div class="kn-pills"><span class="kn-pill">'+cfg.canvasSize.replace('x','×')+'</span><span class="kn-pill">'+d.duration+'초 · '+d.fps+'fps</span><span class="kn-pill">하루 '+d.dailyTarget+'개 자동 제작</span></div><div class="kn-io">'+(cur?'<button class="kn-btn" id="studioCopyCurrent" data-id="'+cur.id+'">현재 제작물 복사</button>':'')+'<button class="kn-btn" id="studioExport" data-kind="dark">제작물 따로 저장</button><button class="kn-btn" id="studioImport" data-kind="dark">제작물 가져오기</button></div><div class="kn-kpis"><div class="kn-kpi"><b>'+done+'</b><span>완성 영상</span></div><div class="kn-kpi"><b>'+drafts.length+'</b><span>전체 제작물</span></div><div class="kn-kpi"><b>'+review+'</b><span>검수 대기</span></div><div class="kn-kpi"><b>0</b><span>자동 발행</span></div></div></section><div class="kn-grid"><section class="kn-card"><h3>증거형 쇼츠 만들기</h3><div class="kn-sub">가설을 먼저 던지고 증거를 차례로 쌓되 결론은 화면에 직접 보여주지 않습니다.</div>'+studioSettingsHtml('dp',d)+'<div class="kn-auto"><strong>매일 자동 제작</strong><button class="kn-toggle'+(d.autoEnabled?' on':'')+'" id="dpAuto">'+(d.autoEnabled?'켜짐':'꺼짐')+'</button><select class="kn-count" id="dpCount"><option value="3"'+(d.dailyTarget===3?' selected':'')+'>하루 3개</option><option value="4"'+(d.dailyTarget===4?' selected':'')+'>하루 4개</option><option value="5"'+(d.dailyTarget===5?' selected':'')+'>하루 5개</option></select><span class="kn-auto-note">서버 연결 시 닫힌 동안 제작안이 대기열에 쌓입니다.</span></div><div class="kn-topics">'+topics+'</div><input class="kn-field" id="dpCustom" value="'+escapeHtml(d.customTopic||'')+'" placeholder="새 원작 입력"><div class="kn-actions"><button class="kn-btn ghost" id="dpRandom">원작 추천</button><button class="kn-btn ghost" id="dpMake">증거 구성 만들기</button>'+(cur?'<button class="kn-btn pri" id="dpProduce">완성 영상 제작</button>':'')+'</div>'+dpSceneHtml(cur)+'<div class="kn-warn">가설은 원작의 실제 공통 장면으로 지지되어야 합니다. 허위 사실을 단정하지 말고 해석·추리 콘텐츠임을 유지하세요.</div></section><aside><section class="kn-card"><h3>제작 원칙</h3><div class="kn-pipe"><div class="kn-step"><span class="kn-step-i">1</span><span><b>원작을 낯설게</b><small>익숙한 장면의 의미 뒤집기</small></span></div><div class="kn-step"><span class="kn-step-i">2</span><span><b>증거를 누적</b><small>어거지가 되지 않게 공통 장면 사용</small></span></div><div class="kn-step"><span class="kn-step-i">3</span><span><b>결론은 감추기</b><small>댓글에서 반론과 추리 유도</small></span></div></div></section><section class="kn-card" style="margin-top:12px"><h3>제작 대기열</h3><div class="kn-list">'+list+'</div></section></aside></div><section class="kn-card" id="dpResults" style="margin-top:12px"><h3>완성 영상 · 다운로드</h3><div class="kn-sub">이 탭 안에서 재생·복사·다운로드합니다.</div><div class="kn-results">'+results+'</div></section></div></div>';
+}
+function bindDark(){var d=dpData();function bs(id,key,allowed,fallback){var e=document.getElementById(id);if(e)e.onchange=function(){var v=(key==="duration"||key==="fps")?+e.value:e.value;d[key]=allowed.indexOf(v)>=0?v:fallback;saveState();render();};}bs('dpCanvas','canvasSize',Object.keys(KN_CANVAS_OPTIONS),'540x960');bs('dpDuration','duration',KN_DURATION_OPTIONS,15);bs('dpFps','fps',KN_FPS_OPTIONS,24);bs('dpQuality','quality',Object.keys(KN_QUALITY_OPTIONS),'standard');document.querySelectorAll('[data-dp-topic]').forEach(function(b){b.onclick=function(){d.selected=b.getAttribute('data-dp-topic');d.customTopic='';saveState();render();};});var c=document.getElementById('dpCustom');if(c)c.oninput=function(){d.customTopic=c.value;d.selected='';saveState();};var rnd=document.getElementById('dpRandom');if(rnd)rnd.onclick=function(){var t=DP_TOPICS[Math.floor(Math.random()*DP_TOPICS.length)];d.selected=t.key;d.customTopic='';saveState();render();};var mk=document.getElementById('dpMake');if(mk)mk.onclick=function(){var x=dpDraftFromTopic(dpTopic(d.selected));d.drafts.push(x);d.currentDraftId=x.id;saveState();render();};var pr=document.getElementById('dpProduce');if(pr)pr.onclick=function(){knQueueVideo(d.drafts.find(function(x){return x.id===d.currentDraftId;})||d.drafts[d.drafts.length-1],false);};var au=document.getElementById('dpAuto');if(au)au.onclick=function(){d.autoEnabled=!d.autoEnabled;saveState();pushState();render();if(d.autoEnabled)dpEnsureDaily();};var ct=document.getElementById('dpCount');if(ct)ct.onchange=function(){d.dailyTarget=Math.max(3,Math.min(5,+ct.value||3));saveState();pushState();render();};document.querySelectorAll('[data-dp-open]').forEach(function(b){b.onclick=function(){d.currentDraftId=b.getAttribute('data-dp-open');saveState();render();};});document.querySelectorAll('[data-dp-produce]').forEach(function(b){b.onclick=function(){knQueueVideo(d.drafts.find(function(x){return x.id===b.getAttribute('data-dp-produce');}),false);};});document.querySelectorAll('[data-dp-result]').forEach(function(b){b.onclick=function(){var e=document.getElementById('dpResults');if(e)e.scrollIntoView({behavior:'smooth'});};});document.querySelectorAll('[data-dp-del]').forEach(function(b){b.onclick=function(){var id=b.getAttribute('data-dp-del');if(!confirm('이 제작물과 영상을 삭제할까요?'))return;knDeleteVideo(id);d.drafts=d.drafts.filter(function(x){return x.id!==id;});if(d.currentDraftId===id)d.currentDraftId='';saveState();render();};});document.querySelectorAll('[data-kn-download]').forEach(function(b){b.onclick=function(){knDownload(b.getAttribute('data-kn-download'));};});bindStudioCommon();knHydrateResults();}
+function syncStudioQueue(rows){
+  if(!Array.isArray(rows))return 0;var added=[],seen={};knData().drafts.concat(dpData().drafts).forEach(function(x){if(x.serverQueueId)seen[x.serverQueueId]=1;});
+  rows.forEach(function(q){if(!q||seen[q.id]||!q.studio||!q.key)return;var target=q.studio==="dark"?dpData():knData(),src=q.studio==="dark"?dpDraftFromTopic(dpTopic(q.key)):knDraftFromTopic(knTopic(q.key));src.id="sq_"+q.id;src.serverQueueId=q.id;src.autoDay=q.day;src.automatic=true;target.drafts.push(src);target.currentDraftId=src.id;seen[q.id]=1;added.push(src);});
+  if(added.length){saveState();setTimeout(function(){added.forEach(function(x){knQueueVideo(x,true);});},500);}return added.length;
+}
+
 function render(){
-  if(STATE.view==="results") STATE.view="record"; // 실행 결과 탭은 기록·분석에 통합
   // 입력 중이던 글·커서·포커스 보존 (작업 완료 등으로 재렌더돼도 튕기지 않게)
   var _draft=null;
   try{ var _inp0 = viewEl ? viewEl.querySelector("#inp") : null;
@@ -7827,9 +7918,11 @@ function render(){
     // v255: 없어진 탭이 저장돼 있으면 콘텐츠로 보낸다
     if(STATE.view==="mobile"||STATE.view==="design"||STATE.view==="shorts") STATE.view="content";
     if(STATE.view==="project"||STATE.view==="meeting") STATE.view="office";
-    if(STATE.view==="analytics") STATE.view="record";
+    // v350: 기능하지 않던 기록 탭 제거. 저장된 예전 화면값은 안전하게 지시 탭으로 보낸다.
+    if(STATE.view==="cycle"||STATE.view==="learn"||STATE.view==="record"||STATE.view==="results"||STATE.view==="analytics") STATE.view="console";
     if(STATE.view==="approve") renderApprove();
     else if(STATE.view==="korean") renderKorean();
+    else if(STATE.view==="dark") renderDark();
     else if(hideApprove() && STATE.view==="console") renderConsole();
     else if(STATE.view==="content") renderContent();
     else if(STATE.view==="cycle") renderCycle();
@@ -7845,6 +7938,7 @@ function render(){
     else renderSettings();
     if(STATE.view==="settings") bindSettings();
     else if(STATE.view==="korean") bindKorean();
+    else if(STATE.view==="dark") bindDark();
     else if(STATE.view==="content") bindContent();
     else if(STATE.view==="cycle") bindCycle();
     else if(STATE.view==="design") bindDesign();
@@ -11074,9 +11168,9 @@ async function loadAndApplyPatches(){
 (async function init(){
   await loadState();
   render();
-  // 말맞춤은 별도 설정 없이 기본 하루 3편. 앱을 닫아 놓은 동안의 오늘 분량은 다음 실행 때 채운다.
-  setTimeout(function(){ try{ knEnsureDaily(); }catch(e){} },900);
-  setInterval(function(){ try{ knEnsureDaily(); }catch(e){} },15*60000);
+  // 두 스튜디오는 서버 연결 시 닫힌 동안 제작안을 쌓고, 접속하면 영상 렌더링을 이어간다.
+  setTimeout(function(){ try{ knEnsureDaily();dpEnsureDaily(); }catch(e){} },900);
+  setInterval(function(){ try{ knEnsureDaily();dpEnsureDaily(); }catch(e){} },15*60000);
   // v229: 앱을 껐다 켜도 진행 중이던 백그라운드 작업을 이어서 추적
   try{ renderJobBar(); if(STATE.jobs && Object.keys(STATE.jobs).length) startJobWatcher(); }catch(e){}
   /* 서버 버전 확인 (v312에서 고침)
