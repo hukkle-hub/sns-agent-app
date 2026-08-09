@@ -1281,6 +1281,25 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
 #amRoot .newver button{font-family:inherit;font-weight:700;font-size:12px;border:0;border-radius:6px;
   padding:9px 15px;background:#3E7A9B;color:#fff;cursor:pointer}
 
+/* v332: 말맞춤 — 15초 우리말 쇼츠 전용 운영판 */
+.kn-wrap{height:100%;overflow:auto;padding:14px 12px 28px;box-sizing:border-box;background:linear-gradient(180deg,#f7fbff 0,#f8fafc 45%,#f3f6f9 100%);color:#18212f}
+.kn-shell{max-width:980px;margin:0 auto}
+.kn-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#123e68,#176b79 58%,#1b8b78);color:#fff;border-radius:18px;padding:20px;box-shadow:0 10px 28px rgba(26,72,99,.2)}
+.kn-hero:after{content:"가나다";position:absolute;right:-8px;bottom:-24px;font-weight:900;font-size:76px;letter-spacing:-8px;color:rgba(255,255,255,.09);pointer-events:none}
+.kn-eyebrow{font-size:10px;font-weight:800;letter-spacing:1.8px;color:#aeeadf;margin-bottom:7px}
+.kn-title{font-size:24px;font-weight:900;letter-spacing:-1px;margin:0 0 6px}.kn-desc{font-size:12px;line-height:1.6;color:#d8f1ef;max-width:620px}
+.kn-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:13px}.kn-pill{font-size:10.5px;font-weight:700;padding:6px 9px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);border-radius:999px}
+.kn-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:12px;margin-top:12px}.kn-card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:0 5px 18px rgba(30,55,78,.06)}
+.kn-card h3{font-size:13px;margin:0 0 4px;color:var(--ink)}.kn-sub{font-size:10.5px;color:#748096;line-height:1.55;margin-bottom:10px}
+.kn-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px}.kn-kpi{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:11px;padding:9px}.kn-kpi b{display:block;font-size:18px}.kn-kpi span{font-size:9.5px;color:#cbe5e7}
+.kn-field{width:100%;box-sizing:border-box;border:1px solid #d8e1eb;background:#fff;color:#202a38;border-radius:10px;padding:10px 11px;font:inherit;font-size:12px;outline:none}.kn-field:focus{border-color:#218a84;box-shadow:0 0 0 3px rgba(33,138,132,.1)}
+.kn-topics{display:flex;gap:6px;overflow:auto;padding:2px 0 8px;scrollbar-width:none}.kn-topics::-webkit-scrollbar{display:none}.kn-topic{white-space:nowrap;border:1px solid #d7e0e9;background:#f7fafc;color:#455166;border-radius:999px;padding:7px 10px;font-family:inherit;font-size:10.5px;font-weight:700;cursor:pointer}.kn-topic.on{background:#e4f5f2;border-color:#218a84;color:#11685f}
+.kn-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.kn-btn{border:0;border-radius:9px;padding:9px 12px;font-family:inherit;font-size:11px;font-weight:800;cursor:pointer}.kn-btn.pri{background:#176f75;color:#fff}.kn-btn.ai{background:#342b63;color:#fff}.kn-btn.ghost{background:#edf2f6;color:#3c4a5e;border:1px solid #dce4ec}.kn-btn:disabled{opacity:.45;cursor:not-allowed}
+.kn-preview{margin-top:11px;border:1px solid #dce5ed;border-radius:12px;overflow:hidden}.kn-scene{display:grid;grid-template-columns:50px 1fr;gap:8px;padding:9px 10px;border-bottom:1px solid #e8edf2;font-size:11px;line-height:1.5;background:#fff}.kn-scene:last-child{border-bottom:0}.kn-time{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:800;color:#168078;padding-top:2px}.kn-line b{color:#d44343}.kn-line em{font-style:normal;color:#11735f;font-weight:800}
+.kn-pipe{display:grid;gap:7px}.kn-step{display:grid;grid-template-columns:25px 1fr auto;align-items:center;gap:8px;padding:9px;border:1px solid #e1e7ed;border-radius:10px;background:#fafcfd}.kn-step-i{width:25px;height:25px;display:grid;place-items:center;border-radius:8px;background:#e9f4f3;font-size:12px}.kn-step b{font-size:11px;color:#273345}.kn-step small{display:block;font-size:9.5px;color:#8893a4;margin-top:2px}.kn-state{font-size:9px;font-weight:800;border-radius:999px;padding:4px 7px;background:#edf1f5;color:#6e7888}.kn-state.on{background:#e3f5ec;color:#137548}
+.kn-list{display:grid;gap:8px}.kn-empty{padding:18px 10px;text-align:center;color:#8a96a7;font-size:11px;border:1px dashed #d5dee7;border-radius:11px}.kn-draft{border:1px solid #e0e7ee;border-radius:11px;padding:10px;background:#fff}.kn-draft-h{display:flex;align-items:flex-start;gap:8px}.kn-draft-h strong{font-size:11.5px;flex:1}.kn-badge{font-size:9px;border-radius:999px;padding:4px 7px;background:#fff2d8;color:#9a6400;font-weight:800}.kn-draft p{font-size:10.5px;color:#667286;line-height:1.5;margin:6px 0 0}.kn-mini{border:0;background:none;color:#16746f;font-family:inherit;font-size:10px;font-weight:800;padding:5px 5px 0;cursor:pointer}
+@media(max-width:720px){.kn-grid{grid-template-columns:1fr}.kn-kpis{grid-template-columns:repeat(2,1fr)}.kn-hero{padding:17px}.kn-title{font-size:21px}.kn-wrap{padding:10px 9px 24px}}
+
 </style>
 </head>
 <body>
@@ -1288,6 +1307,7 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
   <div class="vtabs" id="vtabs">
     <button class="vtab on" data-group="make">✍️ 지시</button>
     <button class="vtab" data-group="approve">🖋 내 차례<span class="vtab-n" id="amBadge" hidden>0</span></button>
+    <button class="vtab" data-group="korean">말맞춤</button>
     <button class="vtab" data-group="grow">📚 기록</button>
     <button class="vtab" data-group="dept">🏢 팀</button>
     <button class="vtab vtab-gear" id="splitBtn" title="내 차례를 옆에 띄워 두기 (가로·넓은 화면)">🪟</button>
@@ -1297,7 +1317,7 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v330</span>
+    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v332</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -1545,6 +1565,7 @@ var STATE = {
   deptDirective:{},
   videoAuto:false,
   collections:[],
+  koreanTrip:{ selected:"웬일/왠일", customTopic:"", dailyTarget:1, drafts:[] },
   authToken:"", authed:false,
   metrics:null, calendar:null,
   backendUrl:"",
@@ -1840,7 +1861,7 @@ var STORE_KEY = "agentPlatformState";
 var STORE_KEY_BAK = "agentPlatformState_bak";
 function stateSnapshot(){
   return { v:2, savedAt:Date.now(), messages:STATE.messages, deptMemory:STATE.deptMemory, deptKnowledge:STATE.deptKnowledge, deptExp:STATE.deptExp, meetings:STATE.meetings, meetingRooms:STATE.meetingRooms, meetingAlways:STATE.meetingAlways, meetingEngine:STATE.meetingEngine, workEngine:STATE.workEngine, freeLLMFirst:STATE.freeLLMFirst, nvidiaModel:STATE.nvidiaModel, designReviewLoops:STATE.designReviewLoops,
-    platforms:STATE.platforms, autoPublish:STATE.autoPublish, autoBackup:STATE.autoBackup, lastSync:STATE.lastSync, schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, deliberate:STATE.deliberate, voiceAuto:STATE.voiceAuto, voiceMode:STATE.voiceMode, typeFx:STATE.typeFx, deptClips:STATE.deptClips, blog:STATE.blog, customTargets:STATE.customTargets, activityLog:STATE.activityLog, profile:STATE.profile, deptDirective:STATE.deptDirective, videoAuto:STATE.videoAuto, collections:(STATE.collections||[]).slice(-60), authToken:STATE.authToken, backendUrl:STATE.backendUrl, seenJobIds:STATE.seenJobIds.slice(-200) };
+    platforms:STATE.platforms, autoPublish:STATE.autoPublish, autoBackup:STATE.autoBackup, lastSync:STATE.lastSync, schedule:STATE.schedule, safety:STATE.safety, collect:STATE.collect, deliberate:STATE.deliberate, voiceAuto:STATE.voiceAuto, voiceMode:STATE.voiceMode, typeFx:STATE.typeFx, deptClips:STATE.deptClips, blog:STATE.blog, customTargets:STATE.customTargets, activityLog:STATE.activityLog, profile:STATE.profile, deptDirective:STATE.deptDirective, videoAuto:STATE.videoAuto, collections:(STATE.collections||[]).slice(-60), koreanTrip:STATE.koreanTrip, authToken:STATE.authToken, backendUrl:STATE.backendUrl, seenJobIds:STATE.seenJobIds.slice(-200) };
 }
 async function saveState(){
   var data = stateSnapshot();
@@ -1919,6 +1940,8 @@ function applyLoadedState(d, isMerge){
     if(typeof d.voiceMode==="string") STATE.voiceMode=d.voiceMode;
     if(typeof d.authToken==="string") STATE.authToken=d.authToken;
     if(Array.isArray(d.collections)){ if(isMerge){ var ids=STATE.collections.map(function(x){return x.id;}); d.collections.forEach(function(c){ if(ids.indexOf(c.id)<0) STATE.collections.push(c); }); } else STATE.collections=d.collections; }
+    if(d.koreanTrip && typeof d.koreanTrip==="object") STATE.koreanTrip=Object.assign({selected:"웬일/왠일",customTopic:"",dailyTarget:1,drafts:[]},d.koreanTrip);
+    if(!Array.isArray(STATE.koreanTrip.drafts)) STATE.koreanTrip.drafts=[];
     if(typeof d.backendUrl==="string" && d.backendUrl) STATE.backendUrl=d.backendUrl;
     if(Array.isArray(d.seenJobIds)) STATE.seenJobIds=d.seenJobIds;
 }
@@ -7412,10 +7435,10 @@ markDevice();
 window.addEventListener("resize", markDevice);
 window.addEventListener("orientationchange", markDevice);
 
-var VIEW_GROUP={console:"make",content:"make",approve:"approve",learn:"grow",record:"grow",cycle:"grow",results:"grow",analytics:"grow",office:"dept",project:"dept",meeting:"dept",settings:"settings"};
-var GROUP_VIEWS={make:["console","content"],approve:["approve"],grow:["cycle","learn","record"],dept:["office"],settings:["settings"]};
-var GROUP_DEFAULT={make:"console",approve:"approve",grow:"cycle",dept:"office",settings:"settings"};
-var SUBVIEW_LABEL={console:"💬 대화",content:"✍️ 콘텐츠",approve:"🖋 내 차례",design:"🎨 디자인",shorts:"🎬 쇼츠",cycle:"🔄 선순환",learn:"학습",record:"기록·분석",office:"오피스",project:"프로젝트",settings:"설정"};
+var VIEW_GROUP={console:"make",content:"make",approve:"approve",korean:"korean",learn:"grow",record:"grow",cycle:"grow",results:"grow",analytics:"grow",office:"dept",project:"dept",meeting:"dept",settings:"settings"};
+var GROUP_VIEWS={make:["console","content"],approve:["approve"],korean:["korean"],grow:["cycle","learn","record"],dept:["office"],settings:["settings"]};
+var GROUP_DEFAULT={make:"console",approve:"approve",korean:"korean",grow:"cycle",dept:"office",settings:"settings"};
+var SUBVIEW_LABEL={console:"💬 대화",content:"✍️ 콘텐츠",approve:"🖋 내 차례",korean:"말맞춤",design:"🎨 디자인",shorts:"🎬 쇼츠",cycle:"🔄 선순환",learn:"학습",record:"기록·분석",office:"오피스",project:"프로젝트",settings:"설정"};
 function curGroup(){ return VIEW_GROUP[STATE.view]||"make"; }
 function syncNav(){
   var g=curGroup();
@@ -7606,6 +7629,90 @@ function renderSideRail(){
     if(_od && _od.v){ try{ var _o1=el.querySelector("#sr_opDir"); if(_o1){ _o1.value=_od.v; if(_od.foc){ _o1.focus(); try{ _o1.setSelectionRange(_od.s,_od.e); }catch(__){} } } }catch(_){} }
   }catch(e){ el.innerHTML=""; }
 }
+/* ═══════════ v332: 말맞춤 전용 탭 ═══════════ */
+var KN_TOPICS=[
+  {key:"웬일/왠일",wrong:"왠일이야?",right:"웬일이야?",scene:"친구가 갑자기 선물을 건넸어요.",memory:"‘어찌 된 일’은 ‘웬일’, ‘왜인지’는 ‘왠지’로 기억해요."},
+  {key:"왠지/웬지",wrong:"오늘 웬지 기분이 좋아.",right:"오늘 왠지 기분이 좋아.",scene:"아침부터 좋은 일이 생길 것 같아요.",memory:"‘왠지’는 ‘왜인지’가 줄어든 말이에요."},
+  {key:"돼/되",wrong:"이거 해도 되요?",right:"이거 해도 돼요?",scene:"친구에게 허락을 구하는 순간이에요.",memory:"‘되어요’로 바꿔 자연스러우면 ‘돼요’예요."},
+  {key:"안/않",wrong:"숙제를 않 했어.",right:"숙제를 안 했어.",scene:"친구가 숙제를 깜빡했다고 말해요.",memory:"‘안’은 행동을 부정하고, ‘않다’는 ‘아니하다’가 줄어든 말이에요."},
+  {key:"낫다/낳다",wrong:"감기가 다 낳았어.",right:"감기가 다 나았어.",scene:"감기에서 회복한 친구가 말해요.",memory:"병이 좋아지면 ‘낫다’, 아기를 출산하면 ‘낳다’예요."},
+  {key:"며칠/몇일",wrong:"몇 일 후에 만나?",right:"며칠 후에 만나?",scene:"다음 약속 날짜를 정하고 있어요.",memory:"날짜를 세거나 물을 때는 ‘며칠’로 적어요."},
+  {key:"금세/금새",wrong:"금새 끝났네!",right:"금세 끝났네!",scene:"어려운 일을 순식간에 끝냈어요.",memory:"‘지금 바로’라는 뜻의 ‘금시에’가 줄어 ‘금세’가 됐어요."},
+  {key:"어떻게/어떡해",wrong:"이걸 어떻해?",right:"이걸 어떡해?",scene:"갑자기 난처한 일이 생겼어요.",memory:"‘어떻게 해’가 줄어든 말은 ‘어떡해’예요."}
+];
+function knData(){
+  if(!STATE.koreanTrip||typeof STATE.koreanTrip!=="object") STATE.koreanTrip={selected:"웬일/왠일",customTopic:"",dailyTarget:1,drafts:[]};
+  if(!Array.isArray(STATE.koreanTrip.drafts)) STATE.koreanTrip.drafts=[];
+  return STATE.koreanTrip;
+}
+function knTopic(key){
+  for(var i=0;i<KN_TOPICS.length;i++) if(KN_TOPICS[i].key===key) return KN_TOPICS[i];
+  return null;
+}
+function knStatusLabel(s){ return s==="ready"?"발행 준비":(s==="review"?"검수 대기":(s==="published"?"발행 완료":"대본 초안")); }
+function knDraftFromTopic(t){
+  var custom=!t;
+  var k=knData(), topic=t||{key:(k.customTopic||"새 우리말 소재"),wrong:"오답 표현을 확인해 주세요.",right:"정답 표현을 확인해 주세요.",scene:"일상에서 자주 헷갈리는 표현을 발견했어요.",memory:"국립국어원 등 신뢰할 수 있는 근거로 정답과 기억법을 검수해 주세요."};
+  return {id:"kn_"+Date.now(),topic:topic.key,createdAt:Date.now(),status:custom?"review":"draft",needsFactCheck:custom,wrong:topic.wrong,right:topic.right,scene:topic.scene,memory:topic.memory,
+    scenes:[
+      {time:"0–3초",text:topic.scene+" “"+topic.wrong+"”"},
+      {time:"3–6초",text:"잠깐! 어느 표현이 맞을까요?"},
+      {time:"6–11초",text:"정답은 ‘"+topic.right+"’"},
+      {time:"11–15초",text:topic.memory}
+    ]};
+}
+function knTeamPrompt(d){
+  return "[말맞춤 · 15초 쇼츠 제작]\n소재: "+d.topic+"\n현재 초안: "+d.scenes.map(function(s){return s.time+" "+s.text;}).join(" / ")+"\n\n다음 순서로 완성해줘. 1) 국립국어원·표준국어대사전 등 신뢰 가능한 근거로 맞춤법 검증 2) 0~3초 상황극, 3~6초 퀴즈, 6~11초 정답, 11~15초 기억법 구조 유지 3) 세로 9:16 화면의 장면·자막·나레이션 작성 4) 한글은 이미지에 생성하지 말고 렌더링 자막으로 분리 5) 과장된 설명이나 확인되지 않은 어원 금지 6) 최종 산출물 끝에 맞춤법·자막·15초 길이 검수표 첨부. 실사 AI 아나운서 대신 고정 웹툰풍 우리말 캐릭터 진행자를 화면 한쪽에 사용해.";
+}
+function knSceneHtml(d){
+  if(!d) return '<div class="kn-empty">소재를 고르고 15초 대본을 만들어 보세요.</div>';
+  return '<div class="kn-preview">'+d.scenes.map(function(s,i){
+    var txt=escapeHtml(s.text);
+    if(i===0) txt=txt.replace(escapeHtml(d.wrong),'<b>'+escapeHtml(d.wrong)+'</b>');
+    if(i===2) txt=txt.replace(escapeHtml(d.right),'<em>'+escapeHtml(d.right)+'</em>');
+    return '<div class="kn-scene"><span class="kn-time">'+s.time+'</span><span class="kn-line">'+txt+'</span></div>';
+  }).join("")+'</div>';
+}
+function renderKorean(){
+  hideApprove();
+  var k=knData(), drafts=k.drafts.slice().reverse(), cur=null;
+  if(k.currentDraftId) cur=k.drafts.find(function(d){return d.id===k.currentDraftId;});
+  if(!cur&&k.drafts.length) cur=k.drafts[k.drafts.length-1];
+  var nDraft=k.drafts.filter(function(d){return d.status==="draft";}).length;
+  var nReview=k.drafts.filter(function(d){return d.status==="review";}).length;
+  var nReady=k.drafts.filter(function(d){return d.status==="ready";}).length;
+  var nPublished=k.drafts.filter(function(d){return d.status==="published";}).length;
+  var topics=KN_TOPICS.map(function(t){return '<button class="kn-topic'+(k.selected===t.key?' on':'')+'" data-kn-topic="'+escapeHtml(t.key)+'">'+escapeHtml(t.key)+'</button>';}).join("");
+  var list=drafts.length?drafts.map(function(d){
+    var act=d.status==="draft"?'<button class="kn-mini" data-kn-act="review" data-id="'+d.id+'">검수 요청</button>':(d.status==="review"?'<button class="kn-mini" data-kn-act="ready" data-id="'+d.id+'">검수 통과</button>':(d.status==="ready"?'<button class="kn-mini" data-kn-act="published" data-id="'+d.id+'">발행 완료</button>':''));
+    return '<div class="kn-draft"><div class="kn-draft-h"><strong>'+escapeHtml(d.topic)+'</strong><span class="kn-badge">'+knStatusLabel(d.status)+'</span></div><p>'+escapeHtml(d.right)+(d.needsFactCheck?' · 정답 근거 확인 필요':' · '+escapeHtml(d.memory))+'</p><div><button class="kn-mini" data-kn-open="'+d.id+'">대본 보기</button><button class="kn-mini" data-kn-team="'+d.id+'">AI팀에 제작 지시</button>'+act+'<button class="kn-mini" data-kn-del="'+d.id+'" style="color:#a34c4c">삭제</button></div></div>';
+  }).join(""):'<div class="kn-empty">아직 대본이 없어요.<br>첫 소재를 골라 오늘 영상 1편을 시작하세요.</div>';
+  var steps=[
+    ["1","소재 선별",k.selected?"1개 선택됨":"대기",!!k.selected],
+    ["2","15초 대본",nDraft+nReview+nReady+nPublished?"초안 "+(nDraft+nReview+nReady+nPublished)+"개":"대기",nDraft+nReview+nReady+nPublished>0],
+    ["3","맞춤법·자막 검수",nReview?"대기 "+nReview+"개":(nReady+nPublished?"통과":"대기"),nReady+nPublished>0],
+    ["4","발행 준비",nReady?"준비 "+nReady+"개":(nPublished?"완료":"대기"),nReady+nPublished>0]
+  ].map(function(s){return '<div class="kn-step"><span class="kn-step-i">'+s[0]+'</span><span><b>'+s[1]+'</b><small>'+s[2]+'</small></span><span class="kn-state'+(s[3]?' on':'')+'">'+(s[3]?'진행':'대기')+'</span></div>';}).join("");
+  viewEl.innerHTML='<div class="kn-wrap"><div class="kn-shell">'
+    +'<section class="kn-hero"><div class="kn-eyebrow">HUKKLE HUB · KOREAN SHORTS LAB</div><h2 class="kn-title">말맞춤</h2><div class="kn-desc">일상 속 헷갈리는 우리말을 상황극·퀴즈·정답·기억법으로 전하는 15초 쇼츠 운영판</div><div class="kn-pills"><span class="kn-pill">9:16 세로</span><span class="kn-pill">15초 기본</span><span class="kn-pill">웹툰 캐릭터 진행</span><span class="kn-pill">유료 자동 실행 꺼짐</span></div><div class="kn-kpis"><div class="kn-kpi"><b>'+nDraft+'</b><span>대본 초안</span></div><div class="kn-kpi"><b>'+nReview+'</b><span>검수 대기</span></div><div class="kn-kpi"><b>'+nReady+'</b><span>발행 준비</span></div><div class="kn-kpi"><b>'+nPublished+'</b><span>발행 완료</span></div></div></section>'
+    +'<div class="kn-grid"><section class="kn-card"><h3>오늘 영상 만들기</h3><div class="kn-sub">검증된 기본 소재를 고르거나 새 소재를 직접 적으세요.</div><div class="kn-topics">'+topics+'</div><input class="kn-field" id="knCustom" value="'+escapeHtml(k.customTopic||"")+'" placeholder="새 소재 입력 · 예: 맞히다 / 맞추다"><div class="kn-actions"><button class="kn-btn ghost" id="knRandom">소재 추천</button><button class="kn-btn pri" id="knMake">15초 대본 만들기</button>'+(cur?'<button class="kn-btn ai" id="knTeam">AI팀에 정식 제작 지시</button>':'')+'</div>'+knSceneHtml(cur)+'</section>'
+    +'<aside><section class="kn-card"><h3>제작 흐름</h3><div class="kn-sub">사람의 검수·승인 없이 자동 발행하지 않습니다.</div><div class="kn-pipe">'+steps+'</div></section><section class="kn-card" style="margin-top:12px"><h3>오늘의 대기열</h3><div class="kn-sub">대본별 상태를 직접 확인하고 다음 단계로 넘기세요.</div><div class="kn-list">'+list+'</div></section></aside></div>'
+    +'</div></div>';
+}
+function bindKorean(){
+  var k=knData(), custom=document.getElementById("knCustom");
+  document.querySelectorAll("[data-kn-topic]").forEach(function(b){b.addEventListener("click",function(){k.selected=b.getAttribute("data-kn-topic");k.customTopic="";saveState();render();});});
+  if(custom) custom.addEventListener("input",function(){k.customTopic=custom.value;k.selected="";saveState();document.querySelectorAll("[data-kn-topic]").forEach(function(b){b.classList.remove("on");});});
+  var random=document.getElementById("knRandom"); if(random) random.addEventListener("click",function(){var choices=KN_TOPICS.filter(function(t){return t.key!==k.selected;});var t=choices[Math.floor(Math.random()*choices.length)];k.selected=t.key;k.customTopic="";saveState();render();});
+  var make=document.getElementById("knMake"); if(make) make.addEventListener("click",function(){var t=knTopic(k.selected);if(!t&&!String(k.customTopic||"").trim()){alert("소재를 고르거나 새 소재를 입력하세요.");return;}var d=knDraftFromTopic(t);if(!t)d.topic=String(k.customTopic).trim();k.drafts.push(d);k.currentDraftId=d.id;saveState();render();});
+  function send(d){if(!d)return;var p=knTeamPrompt(d);STATE.view="console";saveState();render();setTimeout(function(){var inp=document.getElementById("inp");if(inp){inp.value=p;inp.dispatchEvent(new Event("input",{bubbles:true}));inp.focus();}},30);}
+  var team=document.getElementById("knTeam"); if(team) team.addEventListener("click",function(){var d=k.drafts.find(function(x){return x.id===k.currentDraftId;})||k.drafts[k.drafts.length-1];send(d);});
+  document.querySelectorAll("[data-kn-open]").forEach(function(b){b.addEventListener("click",function(){k.currentDraftId=b.getAttribute("data-kn-open");saveState();render();});});
+  document.querySelectorAll("[data-kn-team]").forEach(function(b){b.addEventListener("click",function(){send(k.drafts.find(function(x){return x.id===b.getAttribute("data-kn-team");}));});});
+  document.querySelectorAll("[data-kn-act]").forEach(function(b){b.addEventListener("click",function(){var d=k.drafts.find(function(x){return x.id===b.getAttribute("data-id");});if(d){d.status=b.getAttribute("data-kn-act");saveState();render();}});});
+  document.querySelectorAll("[data-kn-del]").forEach(function(b){b.addEventListener("click",function(){var id=b.getAttribute("data-kn-del");if(!confirm("이 대본을 삭제할까요?"))return;k.drafts=k.drafts.filter(function(x){return x.id!==id;});if(k.currentDraftId===id)k.currentDraftId="";saveState();render();});});
+}
+
 function render(){
   if(STATE.view==="results") STATE.view="record"; // 실행 결과 탭은 기록·분석에 통합
   // 입력 중이던 글·커서·포커스 보존 (작업 완료 등으로 재렌더돼도 튕기지 않게)
@@ -7625,6 +7732,7 @@ function render(){
     if(STATE.view==="project"||STATE.view==="meeting") STATE.view="office";
     if(STATE.view==="analytics") STATE.view="record";
     if(STATE.view==="approve") renderApprove();
+    else if(STATE.view==="korean") renderKorean();
     else if(hideApprove() && STATE.view==="console") renderConsole();
     else if(STATE.view==="content") renderContent();
     else if(STATE.view==="cycle") renderCycle();
@@ -7639,6 +7747,7 @@ function render(){
     else if(STATE.view==="project") renderProject();
     else renderSettings();
     if(STATE.view==="settings") bindSettings();
+    else if(STATE.view==="korean") bindKorean();
     else if(STATE.view==="content") bindContent();
     else if(STATE.view==="cycle") bindCycle();
     else if(STATE.view==="design") bindDesign();
