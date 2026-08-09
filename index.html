@@ -1300,6 +1300,20 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
 .kn-list{display:grid;gap:8px}.kn-empty{padding:18px 10px;text-align:center;color:#8a96a7;font-size:11px;border:1px dashed #d5dee7;border-radius:11px}.kn-draft{border:1px solid #e0e7ee;border-radius:11px;padding:10px;background:#fff}.kn-draft-h{display:flex;align-items:flex-start;gap:8px}.kn-draft-h strong{font-size:11.5px;flex:1}.kn-badge{font-size:9px;border-radius:999px;padding:4px 7px;background:#fff2d8;color:#9a6400;font-weight:800}.kn-draft p{font-size:10.5px;color:#667286;line-height:1.5;margin:6px 0 0}.kn-mini{border:0;background:none;color:#16746f;font-family:inherit;font-size:10px;font-weight:800;padding:5px 5px 0;cursor:pointer}
 @media(max-width:720px){.kn-grid{grid-template-columns:1fr}.kn-kpis{grid-template-columns:repeat(2,1fr)}.kn-hero{padding:17px}.kn-title{font-size:21px}.kn-wrap{padding:10px 9px 24px}}
 
+/* v333: 동심파괴 — 원작 증거 기반 추리 콘텐츠 제작실 */
+.dp-wrap{height:100%;overflow:auto;padding:14px 12px 30px;box-sizing:border-box;background:radial-gradient(circle at 80% 0,#251f31 0,#12141b 35%,#0d1016 100%);color:#ece8e1}
+.dp-shell{max-width:1060px;margin:0 auto}.dp-hero{position:relative;overflow:hidden;border:1px solid rgba(210,181,122,.3);border-radius:18px;padding:20px;background:linear-gradient(135deg,rgba(100,29,37,.92),rgba(33,24,42,.96) 60%,rgba(18,20,27,.98));box-shadow:0 12px 34px rgba(0,0,0,.28)}
+.dp-hero:after{content:"?";position:absolute;right:22px;bottom:-45px;font-family:Georgia,serif;font-size:150px;font-weight:900;color:rgba(255,255,255,.045);pointer-events:none}.dp-eyebrow{font-size:10px;font-weight:900;letter-spacing:2px;color:#d6b77c}.dp-title{margin:0 0 7px;font-size:25px;letter-spacing:-1px}.dp-desc{max-width:720px;color:#d8d0ce;font-size:11.5px;line-height:1.7}.dp-rule{margin-top:13px;padding:10px 12px;border-left:3px solid #d6b77c;background:rgba(255,255,255,.055);border-radius:0 9px 9px 0;font-size:11px;line-height:1.65;color:#f2e8d5}.dp-rule b{color:#f4c96f}
+.dp-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:13px}.dp-kpi{border:1px solid rgba(255,255,255,.11);border-radius:10px;background:rgba(255,255,255,.055);padding:9px}.dp-kpi b{display:block;font-size:18px;color:#f2d59d}.dp-kpi span{font-size:9.5px;color:#b9b1ba}
+.dp-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:12px;margin-top:12px}.dp-card{background:#171a22;border:1px solid #2c303b;border-radius:15px;padding:14px;box-shadow:0 6px 18px rgba(0,0,0,.14)}.dp-card h3{font-size:13px;margin:0 0 4px;color:#f2ece4}.dp-sub{font-size:10.5px;color:#9398a7;line-height:1.55;margin-bottom:10px}
+.dp-form{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dp-full{grid-column:1/-1}.dp-label{display:block;font-size:9.5px;color:#b0a99f;font-weight:800;margin:0 0 4px}.dp-in,.dp-ta,.dp-sel{width:100%;box-sizing:border-box;border:1px solid #363b49;background:#101219;color:#eee8df;border-radius:9px;padding:9px 10px;font:inherit;font-size:11px;outline:none}.dp-ta{min-height:66px;resize:vertical;line-height:1.55}.dp-in:focus,.dp-ta:focus,.dp-sel:focus{border-color:#b78b4a;box-shadow:0 0 0 3px rgba(183,139,74,.12)}
+.dp-evidence{display:grid;gap:7px;margin-top:9px}.dp-ev{display:grid;grid-template-columns:25px 1fr;gap:8px;align-items:start}.dp-ev i{width:25px;height:25px;display:grid;place-items:center;border-radius:8px;background:#30283a;color:#e4c483;font-style:normal;font-size:10px;font-weight:900}.dp-ev .dp-ta{min-height:48px}
+.dp-score{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}.dp-score label{border:1px solid #333844;border-radius:9px;background:#11141b;padding:7px 6px;text-align:center;font-size:9px;color:#aeb3bf}.dp-score select{display:block;width:100%;margin-top:5px;background:#20242e;color:#f1e8d8;border:0;border-radius:6px;padding:4px;font:inherit;font-size:10px;text-align:center}.dp-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.dp-btn{border:0;border-radius:9px;padding:9px 11px;font:inherit;font-size:10.5px;font-weight:900;cursor:pointer}.dp-btn.gold{background:#c29a56;color:#17120a}.dp-btn.red{background:#7e3038;color:#fff}.dp-btn.ghost{background:#262b36;color:#d9dce4;border:1px solid #3a404d}.dp-btn:disabled{opacity:.45;cursor:not-allowed}
+.dp-gate{margin-top:10px;border:1px solid #343946;border-radius:10px;padding:9px 10px;font-size:10.5px;line-height:1.6;background:#12151c;color:#b8bdc8}.dp-gate.pass{border-color:#416f5b;background:#14231e;color:#a9dcc5}.dp-gate.hold{border-color:#76543b;background:#251b16;color:#e0b897}.dp-gate b{color:#f2e5cf}
+.dp-pipe{display:grid;gap:6px}.dp-step{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:center;padding:8px;border:1px solid #303540;border-radius:9px;background:#12151c}.dp-step span:first-child{width:24px;height:24px;display:grid;place-items:center;background:#2c2732;border-radius:7px;color:#d7bb82;font-size:10px;font-weight:900}.dp-step b{display:block;font-size:10.5px;color:#e7e1d9}.dp-step small{display:block;font-size:9px;color:#7f8797;margin-top:2px}.dp-state{font-size:8.5px;font-weight:900;padding:4px 6px;border-radius:999px;background:#272c35;color:#8f96a4}.dp-state.on{background:#244b3b;color:#a6e0c4}
+.dp-list{display:grid;gap:8px}.dp-case{border:1px solid #303541;border-radius:11px;background:#11141b;padding:10px}.dp-case-h{display:flex;gap:8px;align-items:flex-start}.dp-case-h strong{flex:1;font-size:11.5px;color:#ece6dd}.dp-badge{font-size:8.5px;font-weight:900;padding:4px 7px;border-radius:999px;background:#34263a;color:#e3c885}.dp-case p{font-size:9.8px;line-height:1.5;color:#9299a8;margin:6px 0 0}.dp-mini{border:0;background:none;color:#d3b16f;font:inherit;font-size:9.5px;font-weight:900;padding:6px 5px 0;cursor:pointer}.dp-empty{padding:18px 9px;border:1px dashed #3a3e49;border-radius:10px;text-align:center;color:#777f8d;font-size:10.5px;line-height:1.6}.dp-warning{margin-top:9px;font-size:9.5px;color:#ae9d91;line-height:1.55}.dp-warning b{color:#d4b57b}
+@media(max-width:760px){.dp-grid{grid-template-columns:1fr}.dp-form{grid-template-columns:1fr}.dp-full{grid-column:auto}.dp-score{grid-template-columns:repeat(2,1fr)}.dp-kpis{grid-template-columns:repeat(2,1fr)}.dp-wrap{padding:10px 9px 25px}.dp-hero{padding:17px}.dp-title{font-size:21px}}
+
 </style>
 </head>
 <body>
@@ -1308,6 +1322,7 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
     <button class="vtab on" data-group="make">✍️ 지시</button>
     <button class="vtab" data-group="approve">🖋 내 차례<span class="vtab-n" id="amBadge" hidden>0</span></button>
     <button class="vtab" data-group="korean">말맞춤</button>
+    <button class="vtab" data-group="destroy">동심파괴</button>
     <button class="vtab" data-group="grow">📚 기록</button>
     <button class="vtab" data-group="dept">🏢 팀</button>
     <button class="vtab vtab-gear" id="splitBtn" title="내 차례를 옆에 띄워 두기 (가로·넓은 화면)">🪟</button>
@@ -7435,10 +7450,10 @@ markDevice();
 window.addEventListener("resize", markDevice);
 window.addEventListener("orientationchange", markDevice);
 
-var VIEW_GROUP={console:"make",content:"make",approve:"approve",korean:"korean",learn:"grow",record:"grow",cycle:"grow",results:"grow",analytics:"grow",office:"dept",project:"dept",meeting:"dept",settings:"settings"};
-var GROUP_VIEWS={make:["console","content"],approve:["approve"],korean:["korean"],grow:["cycle","learn","record"],dept:["office"],settings:["settings"]};
-var GROUP_DEFAULT={make:"console",approve:"approve",korean:"korean",grow:"cycle",dept:"office",settings:"settings"};
-var SUBVIEW_LABEL={console:"💬 대화",content:"✍️ 콘텐츠",approve:"🖋 내 차례",korean:"말맞춤",design:"🎨 디자인",shorts:"🎬 쇼츠",cycle:"🔄 선순환",learn:"학습",record:"기록·분석",office:"오피스",project:"프로젝트",settings:"설정"};
+var VIEW_GROUP={console:"make",content:"make",approve:"approve",korean:"korean",destroy:"destroy",learn:"grow",record:"grow",cycle:"grow",results:"grow",analytics:"grow",office:"dept",project:"dept",meeting:"dept",settings:"settings"};
+var GROUP_VIEWS={make:["console","content"],approve:["approve"],korean:["korean"],destroy:["destroy"],grow:["cycle","learn","record"],dept:["office"],settings:["settings"]};
+var GROUP_DEFAULT={make:"console",approve:"approve",korean:"korean",destroy:"destroy",grow:"cycle",dept:"office",settings:"settings"};
+var SUBVIEW_LABEL={console:"💬 대화",content:"✍️ 콘텐츠",approve:"🖋 내 차례",korean:"말맞춤",destroy:"동심파괴",design:"🎨 디자인",shorts:"🎬 쇼츠",cycle:"🔄 선순환",learn:"학습",record:"기록·분석",office:"오피스",project:"프로젝트",settings:"설정"};
 function curGroup(){ return VIEW_GROUP[STATE.view]||"make"; }
 function syncNav(){
   var g=curGroup();
@@ -7713,6 +7728,86 @@ function bindKorean(){
   document.querySelectorAll("[data-kn-del]").forEach(function(b){b.addEventListener("click",function(){var id=b.getAttribute("data-kn-del");if(!confirm("이 대본을 삭제할까요?"))return;k.drafts=k.drafts.filter(function(x){return x.id!==id;});if(k.currentDraftId===id)k.currentDraftId="";saveState();render();});});
 }
 
+/* ═══════════ v333: 동심파괴 전용 탭 ═══════════ */
+var DP_SEEDS=[
+  {work:"신데렐라",question:"왕자는 왜 얼굴이 아니라 구두를 공식적인 식별 수단으로 삼았을까?"},
+  {work:"흥부전",question:"이 이야기가 정말 벌한 것은 탐욕일까, 부를 혼자 가지려는 태도일까?"},
+  {work:"빨간 모자",question:"늑대는 왜 숲에서 바로 공격하지 않고 먼저 목적지를 물었을까?"},
+  {work:"해와 달이 된 오누이",question:"호랑이는 왜 단번에 속이지 않고 엄마의 흔적을 하나씩 흉내 냈을까?"},
+  {work:"피노키오",question:"거짓말의 대가가 왜 벌이 아니라 정체가 드러나는 방식이었을까?"}
+];
+function dpData(){
+  if(!STATE.childBreak||typeof STATE.childBreak!=="object") STATE.childBreak={cases:[],currentId:"",draft:{}};
+  if(!Array.isArray(STATE.childBreak.cases)) STATE.childBreak.cases=[];
+  if(!STATE.childBreak.draft||typeof STATE.childBreak.draft!=="object") STATE.childBreak.draft={};
+  return STATE.childBreak;
+}
+function dpBlank(){return {id:"",work:"",question:"",format:"auto",common:"",versions:"",e1:"",e2:"",e3:"",counter:"",decisive:"",internal:"",fresh:3,commonScore:3,evidenceScore:3,conflict:3,afterimage:3,status:"idea",createdAt:0,updatedAt:0};}
+function dpCurrent(){var d=dpData();if(d.currentId){var hit=d.cases.find(function(x){return x.id===d.currentId;});if(hit)return hit;}return Object.assign(dpBlank(),d.draft||{});}
+function dpStatusLabel(s){return s==="ready"?"제작 가능":(s==="script"?"대본 제작":(s==="verify"?"판본 검수":(s==="published"?"발행 완료":"소재 후보")));}
+function dpEvidenceCount(x){return [x.e1,x.e2,x.e3].filter(function(v){return String(v||"").trim();}).length;}
+function dpGate(x){
+  var reasons=[], ev=dpEvidenceCount(x);
+  if(!String(x.work||"").trim()) reasons.push("작품명 없음");
+  if(!String(x.question||"").trim()) reasons.push("핵심 질문 없음");
+  if(!String(x.common||"").trim()) reasons.push("공통 기억 없음");
+  if(!String(x.versions||"").trim()) reasons.push("판본 검수 없음");
+  if(ev<2) reasons.push("독립 증거 2개 미만");
+  if(!String(x.counter||"").trim()) reasons.push("최강 반론 없음");
+  if(!String(x.decisive||"").trim()) reasons.push("결정적 단서 없음");
+  if(+x.commonScore<4) reasons.push("공통성 4점 미만");
+  if(+x.evidenceScore<4) reasons.push("근거성 4점 미만");
+  if(+x.fresh<4) reasons.push("신선함 4점 미만");
+  if(+x.conflict<3) reasons.push("충돌성 3점 미만");
+  if(+x.afterimage<4) reasons.push("잔상 4점 미만");
+  return {pass:reasons.length===0,reasons:reasons,ev:ev,total:(+x.commonScore||0)+(+x.evidenceScore||0)+(+x.fresh||0)+(+x.conflict||0)+(+x.afterimage||0)};
+}
+function dpVal(x,k){return escapeHtml(String((x&&x[k])||"")).replace(/"/g,"&quot;");}
+function dpReadForm(){
+  function v(id){var e=document.getElementById(id);return e?String(e.value||"").trim():"";}
+  function n(id){return +(v(id)||3);}
+  var cur=dpCurrent();
+  return Object.assign({},cur,{work:v("dpWork"),question:v("dpQuestion"),format:v("dpFormat")||"auto",common:v("dpCommon"),versions:v("dpVersions"),e1:v("dpE1"),e2:v("dpE2"),e3:v("dpE3"),counter:v("dpCounter"),decisive:v("dpDecisive"),internal:v("dpInternal"),commonScore:n("dpSCommon"),evidenceScore:n("dpSEvidence"),fresh:n("dpSFresh"),conflict:n("dpSConflict"),afterimage:n("dpSAfter")});
+}
+function dpSaveCase(silent){
+  var d=dpData(),x=dpReadForm(),g=dpGate(x),now=Date.now();
+  if(!x.work&&!x.question){if(!silent)alert("작품명이나 핵심 질문을 먼저 적어주세요.");return null;}
+  if(!x.id){x.id="dp_"+now;x.createdAt=now;}
+  x.updatedAt=now;x.status=g.pass?(x.status==="published"?"published":"ready"):(x.status==="script"?"script":"verify");
+  var i=d.cases.findIndex(function(c){return c.id===x.id;});if(i>=0)d.cases[i]=x;else d.cases.push(x);
+  d.currentId=x.id;d.draft={};saveState();if(!silent)render();return x;
+}
+function dpTeamPrompt(x){
+  var g=dpGate(x);
+  return "[동심파괴 · 원작 추리 콘텐츠 정식 조사]\n작품: "+x.work+"\n핵심 질문: "+x.question+"\n형식: "+(x.format==="short"?"30~45초 압축형":(x.format==="main"?"60~90초 본편형":"증거량에 따라 자동 추천"))+"\n공통 기억: "+x.common+"\n판본 검수 메모: "+x.versions+"\n증거 A: "+x.e1+"\n증거 B: "+x.e2+"\n증거 C: "+x.e3+"\n가장 강한 반론: "+x.counter+"\n반론까지 뒤집는 결정적 단서: "+x.decisive+"\n제작진 내부 결론(영상에는 노출 금지): "+(x.internal||"조사 후 별도 제안")+"\n현재 점수: 공통성 "+x.commonScore+" / 근거성 "+x.evidenceScore+" / 신선함 "+x.fresh+" / 충돌성 "+x.conflict+" / 잔상 "+x.afterimage+" (총 "+g.total+"/25)\n\n자료조사·전략·제작·검수 부서가 순서대로 수행해줘. 1) 원전과 주요 판본을 실제 출처로 교차검증하고 공통 사건/판본 한정/현대 각색을 분리 2) 이미 널리 소비된 해석인지 검색해 흔한 논쟁이면 폐기 또는 새 질문으로 교체 3) 독립된 원작 단서 최소 3개와 가장 강한 반대 증거를 함께 제시 4) 원작 밖의 성격·과거·음모를 만들지 말 것 5) 증거 순서를 공통 사실→작은 균열→반복 단서→최강 반론→반론을 재해석하는 결정적 단서로 설계 6) 영상은 내부 결론을 말하거나 재현하지 말고, 시청자가 마지막 문장을 머릿속에서 완성하기 직전에 종료 7) 결과물은 판본 검수표, 흔한 해석 중복검사, 증거 카드, 반론 카드, 선택 형식에 맞는 대본, 장면·자막·나레이션, 사실·어거지 검수표 순서로 작성. 자동 추천이면 증거량에 맞는 길이를 먼저 결정하고 이유를 한 줄로 써줘 8) 근거가 부족하거나 신선하지 않으면 억지로 제작하지 말고 보류 사유와 더 강한 대체 질문 3개를 제안. 결론에 불리한 증거를 숨기지 마.";
+}
+function dpSend(x){if(!x)return;var p=dpTeamPrompt(x);STATE.view="console";saveState();render();setTimeout(function(){var inp=document.getElementById("inp");if(inp){inp.value=p;inp.dispatchEvent(new Event("input",{bubbles:true}));inp.focus();}},30);}
+function renderDestroy(){
+  hideApprove();var d=dpData(),x=dpCurrent(),g=dpGate(x),cases=d.cases.slice().sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0);});
+  var ready=d.cases.filter(function(c){return c.status==="ready"||c.status==="script";}).length,pub=d.cases.filter(function(c){return c.status==="published";}).length,hold=d.cases.filter(function(c){return c.status==="verify"||c.status==="idea";}).length;
+  function score(id,label,val){var opts=[1,2,3,4,5].map(function(n){return '<option value="'+n+'"'+(+val===n?' selected':'')+'>'+n+'</option>';}).join("");return '<label>'+label+'<select id="'+id+'">'+opts+'</select></label>';}
+  var list=cases.length?cases.map(function(c){var cg=dpGate(c);return '<div class="dp-case"><div class="dp-case-h"><strong>'+escapeHtml(c.work||"이름 없는 작품")+' · '+escapeHtml(c.question||"질문 미정")+'</strong><span class="dp-badge">'+dpStatusLabel(c.status)+'</span></div><p>증거 '+cg.ev+'개 · '+cg.total+'/25 · '+(cg.pass?'제작 기준 통과':escapeHtml(cg.reasons.slice(0,2).join(', ')))+'</p><div><button class="dp-mini" data-dp-open="'+c.id+'">열기</button><button class="dp-mini" data-dp-team="'+c.id+'">AI팀 조사</button>'+(cg.pass&&c.status!=="published"?'<button class="dp-mini" data-dp-pub="'+c.id+'">발행 완료</button>':'')+'<button class="dp-mini" data-dp-del="'+c.id+'" style="color:#b46d73">삭제</button></div></div>';}).join(""):'<div class="dp-empty">아직 등록된 사건이 없어요.<br>익숙한 이야기에서 아무도 묻지 않은 첫 질문을 등록하세요.</div>';
+  var steps=[["1","공통 기억","판본이 달라도 남는 사건",!!x.common],["2","균열 질문","이미 알려진 논쟁은 제외",!!x.question],["3","증거 누적","독립 단서 최소 2개",g.ev>=2],["4","반론 공개","가장 강한 반대 증거",!!x.counter],["5","결론 직전 종료","결정적 단서만 남김",!!x.decisive]].map(function(s,i){return '<div class="dp-step"><span>'+s[0]+'</span><span><b>'+s[1]+'</b><small>'+s[2]+'</small></span><em class="dp-state'+(s[3]?' on':'')+'">'+(s[3]?'확보':'대기')+'</em></div>';}).join("");
+  viewEl.innerHTML='<div class="dp-wrap"><div class="dp-shell"><section class="dp-hero"><div class="dp-eyebrow">ORIGINAL STORY INVESTIGATION LAB</div><h2 class="dp-title">동심파괴</h2><div class="dp-desc">모두가 아는 단서로 아무도 하지 않은 질문을 만들고, 결론을 말하지 않은 채 증거만으로 시청자의 머릿속에 마지막 문장을 완성시키는 원작 추리 콘텐츠 제작실</div><div class="dp-rule"><b>제작 원칙</b> · 공통 기억으로 문을 열고, 원전의 단서로 깊이를 만들며, 가장 강한 반론을 공개한 뒤에도 살아남는 해석만 제작한다. 영상은 결론이 보이는 순간, 결론을 보여주기 전에 끝낸다.</div><div class="dp-kpis"><div class="dp-kpi"><b>'+d.cases.length+'</b><span>전체 사건</span></div><div class="dp-kpi"><b>'+hold+'</b><span>검수·보류</span></div><div class="dp-kpi"><b>'+ready+'</b><span>제작 가능</span></div><div class="dp-kpi"><b>'+pub+'</b><span>발행 완료</span></div></div></section>'
+    +'<div class="dp-grid"><section class="dp-card"><h3>사건 설계</h3><div class="dp-sub">내부 결론과 영상에 노출할 증거를 분리해 기록합니다.</div><div class="dp-form"><label><span class="dp-label">작품명</span><input class="dp-in" id="dpWork" value="'+dpVal(x,"work")+'" placeholder="예: 신데렐라"></label><label><span class="dp-label">핵심 질문</span><input class="dp-in" id="dpQuestion" value="'+dpVal(x,"question")+'" placeholder="왜 아무도 이 행동을 이상하게 보지 않았을까?"></label><label class="dp-full"><span class="dp-label">영상 형식</span><select class="dp-sel" id="dpFormat"><option value="auto"'+(x.format==="auto"?' selected':'')+'>증거량에 따라 자동 추천</option><option value="short"'+(x.format==="short"?' selected':'')+'>30~45초 압축형</option><option value="main"'+(x.format==="main"?' selected':'')+'>60~90초 본편형</option></select></label><label class="dp-full"><span class="dp-label">어느 판본에도 남는 공통 기억</span><textarea class="dp-ta" id="dpCommon" placeholder="대부분의 판본과 독자가 공유하는 핵심 사건">'+dpVal(x,"common")+'</textarea></label><label class="dp-full"><span class="dp-label">판본 검수 · 원전/각색/한국 공통 기억 구분</span><textarea class="dp-ta" id="dpVersions" placeholder="판본별 차이, 특정 각색에만 있는 장면, 출처 확인 메모">'+dpVal(x,"versions")+'</textarea></label></div>'
+    +'<div class="dp-evidence"><div class="dp-ev"><i>A</i><textarea class="dp-ta" id="dpE1" placeholder="첫 증거 · 누구도 부정하기 어려운 익숙한 사실">'+dpVal(x,"e1")+'</textarea></div><div class="dp-ev"><i>B</i><textarea class="dp-ta" id="dpE2" placeholder="둘째 증거 · 우연 가능성을 줄이는 반복 행동">'+dpVal(x,"e2")+'</textarea></div><div class="dp-ev"><i>C</i><textarea class="dp-ta" id="dpE3" placeholder="셋째 증거 · 떨어진 장면을 같은 방향으로 연결">'+dpVal(x,"e3")+'</textarea></div></div>'
+    +'<div class="dp-form" style="margin-top:9px"><label class="dp-full"><span class="dp-label">가장 강한 반론 · 숨기지 말 것</span><textarea class="dp-ta" id="dpCounter" placeholder="우리 가설에 가장 불리한 장면과 평범한 설명">'+dpVal(x,"counter")+'</textarea></label><label class="dp-full"><span class="dp-label">반론까지 다르게 보이게 하는 결정적 단서</span><textarea class="dp-ta" id="dpDecisive" placeholder="이 단서를 던진 직후 결론을 말하지 않고 영상 종료">'+dpVal(x,"decisive")+'</textarea></label><label class="dp-full"><span class="dp-label">제작진 내부 결론 · 영상/자막에는 절대 노출 금지</span><textarea class="dp-ta" id="dpInternal" placeholder="증거 배열이 향해야 할 결론을 제작진만 기록">'+dpVal(x,"internal")+'</textarea></label></div>'
+    +'<div class="dp-score">'+score("dpSCommon","공통성",x.commonScore)+score("dpSEvidence","근거성",x.evidenceScore)+score("dpSFresh","신선함",x.fresh)+score("dpSConflict","충돌성",x.conflict)+score("dpSAfter","잔상",x.afterimage)+'</div><div class="dp-gate '+(g.pass?'pass':'hold')+'"><b>'+(g.pass?'제작 기준 통과':'아직 제작 보류')+'</b> · '+(g.pass?'반론을 공개해도 살아남는 사건입니다.':escapeHtml(g.reasons.join(' · ')||'입력 내용을 확인하세요.'))+'</div><div class="dp-actions"><button class="dp-btn ghost" id="dpNew">새 사건</button><button class="dp-btn ghost" id="dpSeed">질문 씨앗</button><button class="dp-btn gold" id="dpSave">사건 저장·검수</button><button class="dp-btn red" id="dpTeam">AI팀에 정식 조사 지시</button></div><div class="dp-warning"><b>금지</b> · 원작에 없는 설정 추가 · 불리한 증거 삭제 · 이미 굳어진 뻔한 논쟁 · 결론 자막/자백/재현 · 근거 없는 자극적 역발상</div></section>'
+    +'<aside><section class="dp-card"><h3>증거 전개</h3><div class="dp-sub">증거 하나마다 시청자의 해석이 한 단계씩 전진해야 합니다.</div><div class="dp-pipe">'+steps+'</div></section><section class="dp-card" style="margin-top:12px"><h3>사건 보관함</h3><div class="dp-sub">통과하지 못한 소재도 삭제하지 않고 보류 사유와 함께 남깁니다.</div><div class="dp-list">'+list+'</div></section></aside></div></div></div>';
+}
+function bindDestroy(){
+  var d=dpData();
+  ["dpWork","dpQuestion","dpFormat","dpCommon","dpVersions","dpE1","dpE2","dpE3","dpCounter","dpDecisive","dpInternal","dpSCommon","dpSEvidence","dpSFresh","dpSConflict","dpSAfter"].forEach(function(id){var e=document.getElementById(id);if(e)e.addEventListener("change",function(){d.draft=dpReadForm();saveState();});});
+  var nw=document.getElementById("dpNew");if(nw)nw.addEventListener("click",function(){d.currentId="";d.draft=dpBlank();saveState();render();});
+  var seed=document.getElementById("dpSeed");if(seed)seed.addEventListener("click",function(){var s=DP_SEEDS[Math.floor(Math.random()*DP_SEEDS.length)];d.currentId="";d.draft=Object.assign(dpBlank(),{work:s.work,question:s.question});saveState();render();});
+  var save=document.getElementById("dpSave");if(save)save.addEventListener("click",function(){dpSaveCase(false);});
+  var team=document.getElementById("dpTeam");if(team)team.addEventListener("click",function(){var x=dpSaveCase(true);if(x)dpSend(x);});
+  document.querySelectorAll("[data-dp-open]").forEach(function(b){b.addEventListener("click",function(){d.currentId=b.getAttribute("data-dp-open");d.draft={};saveState();render();});});
+  document.querySelectorAll("[data-dp-team]").forEach(function(b){b.addEventListener("click",function(){dpSend(d.cases.find(function(x){return x.id===b.getAttribute("data-dp-team");}));});});
+  document.querySelectorAll("[data-dp-pub]").forEach(function(b){b.addEventListener("click",function(){var x=d.cases.find(function(c){return c.id===b.getAttribute("data-dp-pub");});if(x){x.status="published";x.updatedAt=Date.now();saveState();render();}});});
+  document.querySelectorAll("[data-dp-del]").forEach(function(b){b.addEventListener("click",function(){var id=b.getAttribute("data-dp-del");if(!confirm("이 사건 기록을 삭제할까요?"))return;d.cases=d.cases.filter(function(x){return x.id!==id;});if(d.currentId===id){d.currentId="";d.draft={};}saveState();render();});});
+}
+
 function render(){
   if(STATE.view==="results") STATE.view="record"; // 실행 결과 탭은 기록·분석에 통합
   // 입력 중이던 글·커서·포커스 보존 (작업 완료 등으로 재렌더돼도 튕기지 않게)
@@ -7733,6 +7828,7 @@ function render(){
     if(STATE.view==="analytics") STATE.view="record";
     if(STATE.view==="approve") renderApprove();
     else if(STATE.view==="korean") renderKorean();
+    else if(STATE.view==="destroy") renderDestroy();
     else if(hideApprove() && STATE.view==="console") renderConsole();
     else if(STATE.view==="content") renderContent();
     else if(STATE.view==="cycle") renderCycle();
@@ -7748,6 +7844,7 @@ function render(){
     else renderSettings();
     if(STATE.view==="settings") bindSettings();
     else if(STATE.view==="korean") bindKorean();
+    else if(STATE.view==="destroy") bindDestroy();
     else if(STATE.view==="content") bindContent();
     else if(STATE.view==="cycle") bindCycle();
     else if(STATE.view==="design") bindDesign();
