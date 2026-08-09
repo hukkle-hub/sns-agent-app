@@ -1,6 +1,6 @@
 // ===== Service Worker — 항상 최신 유지(캐시 갇힘 근본 차단) =====
-const CACHE = "agent-platform-v360";
-const ASSETS = ["./manifest.json","./icon-192.png","./icon-512.png"]; // HTML/sw는 캐시 목록에서 제외(항상 새로 받음)
+const CACHE = "agent-platform-v370";
+const ASSETS = ["./manifest.json","./icon-192.png","./icon-512.png","./assets/malmatchum-presenter-poses.png"]; // HTML/sw는 캐시 목록에서 제외(항상 새로 받음)
 
 self.addEventListener("install", e => {
   // 새 SW를 즉시 대기 없이 활성화

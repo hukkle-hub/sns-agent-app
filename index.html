@@ -1327,7 +1327,7 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v360</span>
+    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v370</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -7656,7 +7656,8 @@ var KN_TOPICS=[
   {key:"금세/금새",wrong:"금새 끝났네!",right:"금세 끝났네!",scene:"어려운 일을 순식간에 끝냈어요.",memory:"‘지금 바로’라는 뜻의 ‘금시에’가 줄어 ‘금세’가 됐어요."},
   {key:"어떻게/어떡해",wrong:"이걸 어떻해?",right:"이걸 어떡해?",scene:"갑자기 난처한 일이 생겼어요.",memory:"‘어떻게 해’가 줄어든 말은 ‘어떡해’예요."}
 ];
-var KN_DB_PROMISE=null, KN_RENDER_CHAIN=Promise.resolve(), KN_URLS={};
+var KN_DB_PROMISE=null, KN_RENDER_CHAIN=Promise.resolve(), KN_URLS={}, KN_PRESENTER_IMG=null, KN_PRESENTER_PROMISE=null;
+var KN_PRESENTER_SRC="./assets/malmatchum-presenter-poses.png";
 var KN_CANVAS_OPTIONS={"540x960":{w:540,h:960,label:"540×960 · 빠른 제작"},"720x1280":{w:720,h:1280,label:"720×1280 · 선명"},"1080x1920":{w:1080,h:1920,label:"1080×1920 · 고화질"}};
 var KN_DURATION_OPTIONS=[10,15,20], KN_FPS_OPTIONS=[24,30], KN_QUALITY_OPTIONS={standard:{label:"표준 · 1.8Mbps",bitrate:1800000},high:{label:"높음 · 3.5Mbps",bitrate:3500000}};
 function knData(){
@@ -7713,7 +7714,13 @@ function knWrapText(ctx,text,maxWidth){
   for(var i=0;i<src.length;i++){var next=line+src[i];if(line&&ctx.measureText(next).width>maxWidth){out.push(line.trim());line=src[i];}else line=next;}
   if(line.trim()) out.push(line.trim()); return out.slice(0,4);
 }
-function knDrawCharacter(ctx,x,y,t,accent,label){
+function knLoadPresenter(){
+  if(KN_PRESENTER_IMG&&KN_PRESENTER_IMG.complete)return Promise.resolve(KN_PRESENTER_IMG);
+  if(KN_PRESENTER_PROMISE)return KN_PRESENTER_PROMISE;
+  KN_PRESENTER_PROMISE=new Promise(function(resolve,reject){var img=new Image();img.onload=function(){KN_PRESENTER_IMG=img;resolve(img);};img.onerror=function(){reject(new Error("말맞춤 진행자 이미지를 불러오지 못했습니다."));};img.src=KN_PRESENTER_SRC;});
+  return KN_PRESENTER_PROMISE;
+}
+function knDrawPlaceholder(ctx,x,y,t,accent,label){
   var bob=Math.sin(t*4)*7; ctx.save(); ctx.translate(x,y+bob);
   ctx.fillStyle="rgba(8,36,52,.16)";ctx.beginPath();ctx.ellipse(0,198,102,18,0,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#f5c74f";ctx.beginPath();ctx.roundRect(-84,72,168,128,42);ctx.fill();
@@ -7723,18 +7730,57 @@ function knDrawCharacter(ctx,x,y,t,accent,label){
   ctx.fillStyle=accent;ctx.beginPath();ctx.moveTo(-91,-35);ctx.quadraticCurveTo(0,-128,91,-35);ctx.quadraticCurveTo(30,-79,-18,-64);ctx.quadraticCurveTo(-55,-42,-91,-35);ctx.fill();
   ctx.fillStyle="#fff";ctx.beginPath();ctx.roundRect(-54,101,108,45,18);ctx.fill();ctx.fillStyle=accent;ctx.font="900 23px sans-serif";ctx.textAlign="center";ctx.fillText(label||"말맞춤",0,132);ctx.restore();
 }
+function knDrawPresenter(ctx,w,h,phase,sec){
+  var img=KN_PRESENTER_IMG;if(!img)return;
+  var panel=img.width/3,sw=panel-8,sx=Math.min(2,phase)*panel+4,pulse=1+Math.sin(sec*2.4)*.008;
+  var dw=304*pulse,dh=512*pulse,dx=w-dw,dy=432;
+  ctx.save();ctx.shadowColor="rgba(0,0,0,.36)";ctx.shadowBlur=22;ctx.beginPath();ctx.roundRect(dx,dy,dw,dh,28);ctx.clip();ctx.drawImage(img,sx,0,sw,img.height,dx,dy,dw,dh);ctx.restore();
+  ctx.save();ctx.strokeStyle="rgba(217,173,89,.72)";ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(dx,dy,dw,dh,28);ctx.stroke();ctx.restore();
+}
+function knRounded(ctx,x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}}
+function knFitLines(ctx,text,maxWidth,maxLines){
+  var lines=knWrapText(ctx,text,maxWidth);return lines.slice(0,maxLines||3);
+}
 function knPaintFrame(ctx,w,h,d,sec,settings){
   var dark=d.studio==="dark",duration=(settings&&settings.duration)||15,cuts=knPhaseCuts(duration),phase=sec<cuts[1]?0:(sec<cuts[2]?1:(sec<cuts[3]?2:3)), colors=dark?["#4a2237","#71313b","#8c3b31","#2e2038"]:["#123e68","#6c3b73","#176f75","#c06c2f"], accent=colors[phase];
+  if(!dark){knPaintKoreanFrame(ctx,w,h,d,sec,duration,phase);return;}
   var g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,dark?"#fff8f5":"#f8fcff");g.addColorStop(1,dark?(phase===1?"#f5e9ef":"#f4e8e3"):(phase===1?"#f9eef9":"#e8f6f2"));ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
   ctx.fillStyle=accent;ctx.fillRect(0,0,w,120);ctx.fillStyle="#fff";ctx.font="900 34px sans-serif";ctx.textAlign="left";ctx.fillText(duration+"초 "+(dark?"동심파괴":"말맞춤"),32,73);ctx.font="700 18px sans-serif";ctx.textAlign="right";ctx.fillText((phase+1)+" / 4",w-32,72);
-  knDrawCharacter(ctx,w/2,330,sec,accent,dark?"동심파괴":"말맞춤");
+  knDrawPlaceholder(ctx,w/2,330,sec,accent,dark?"동심파괴":"말맞춤");
   ctx.fillStyle="#fff";ctx.shadowColor="rgba(25,55,70,.16)";ctx.shadowBlur=24;ctx.beginPath();ctx.roundRect(34,565,w-68,285,28);ctx.fill();ctx.shadowBlur=0;
   var heading=dark?(phase===0?"우리가 놓친 장면":(phase===1?"첫 번째 흔적":(phase===2?"겹치는 증거":"결론은 말하지 않겠습니다"))):(phase===0?"이 표현, 맞을까요?":(phase===1?"잠깐! 골라 보세요":(phase===2?"정답 공개":"한 번에 기억하기")));ctx.fillStyle=accent;ctx.font="900 24px sans-serif";ctx.textAlign="center";ctx.fillText(heading,w/2,620);
   ctx.fillStyle="#1d2b3a";ctx.font="900 34px sans-serif";var lines=knWrapText(ctx,d.scenes[phase].text,w-118);var sy=690-(lines.length-1)*22;lines.forEach(function(line,i){ctx.fillText(line,w/2,sy+i*48);});
   ctx.fillStyle="#dce8eb";ctx.fillRect(32,h-48,w-64,8);ctx.fillStyle=accent;ctx.fillRect(32,h-48,(w-64)*Math.min(1,sec/duration),8);ctx.fillStyle="#56697b";ctx.font="700 16px sans-serif";ctx.textAlign="left";ctx.fillText(d.topic,32,h-78);ctx.textAlign="right";ctx.fillText(Math.min(duration,Math.floor(sec)+1)+"초",w-32,h-78);
 }
+function knPaintKoreanFrame(ctx,w,h,d,sec,duration,phase){
+  var navy="#07162d",navy2="#10294a",cream="#f7f0df",gold="#d9ad59",coral="#ef6d61",ink="#101c30";
+  var g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,"#061327");g.addColorStop(.62,"#0b2240");g.addColorStop(1,"#07162d");ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  ctx.globalAlpha=.13;ctx.strokeStyle=gold;ctx.lineWidth=1;for(var i=0;i<7;i++){ctx.beginPath();ctx.arc(w+20,120,i*34,Math.PI*.72,Math.PI*1.5);ctx.stroke();}ctx.globalAlpha=1;
+  ctx.strokeStyle=gold;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(28,48);ctx.lineTo(174,48);ctx.moveTo(366,48);ctx.lineTo(512,48);ctx.stroke();
+  knRounded(ctx,184,25,172,53,12,navy2,gold);ctx.fillStyle=cream;ctx.font="900 25px sans-serif";ctx.textAlign="center";ctx.fillText(phase>=2?"정답 공개":"말맞춤",270,60);
+  ctx.fillStyle=phase===3?cream:"#fff";ctx.font="900 30px sans-serif";ctx.fillText(phase===0?"빈칸에 맞는 표현은?":(phase===1?"3초 안에 골라보세요":(phase===2?"정답은 이것입니다":"한 번에 기억하기")),270,122);
+  knRounded(ctx,26,151,488,337,20,cream,gold);ctx.fillStyle=ink;ctx.textAlign="center";
+  if(phase<2){
+    ctx.font="800 24px sans-serif";var q=knFitLines(ctx,d.scene,430,2);q.forEach(function(line,j){ctx.fillText(line,270,203+j*34);});
+    var opts=String(d.topic||"").split("/"),a=opts[0]||"A",b=opts[1]||"B";
+    knRounded(ctx,52,283,202,69,12,"#fff","#b89b68");knRounded(ctx,286,283,202,69,12,"#fff","#b89b68");
+    ctx.font="900 26px sans-serif";ctx.fillStyle=navy2;ctx.fillText("A  "+a,153,327);ctx.fillText("B  "+b,387,327);
+    if(phase===1){ctx.fillStyle="rgba(3,12,25,.76)";knRounded(ctx,26,151,488,337,20,"rgba(3,12,25,.76)",null);var remain=Math.max(1,Math.ceil(cutsafe(duration,sec)));ctx.fillStyle=gold;ctx.font="900 112px sans-serif";ctx.fillText(String(remain),270,348);ctx.font="800 18px sans-serif";ctx.fillStyle="#fff";ctx.fillText("정답을 골라보세요",270,395);}
+  }else if(phase===2){
+    ctx.fillStyle="#7d5d25";ctx.font="800 17px sans-serif";ctx.fillText("올바른 표현",270,202);ctx.fillStyle=navy;ctx.font="900 33px sans-serif";var ans=knFitLines(ctx,d.right,420,3);ans.forEach(function(line,j){ctx.fillText(line,270,263+j*46);});
+    knRounded(ctx,64,381,412,61,11,navy2,gold);ctx.fillStyle=gold;ctx.font="900 20px sans-serif";ctx.fillText("✓  정답",270,420);
+  }else{
+    ctx.fillStyle=navy;ctx.font="900 25px sans-serif";var memo=knFitLines(ctx,d.memory,418,4);var my=226-(memo.length-1)*5;memo.forEach(function(line,j){ctx.fillText(line,270,my+j*42);});
+    ctx.strokeStyle=gold;ctx.setLineDash([5,7]);ctx.beginPath();ctx.moveTo(74,397);ctx.lineTo(466,397);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#8a6c39";ctx.font="800 16px sans-serif";ctx.fillText("저장해 두고 헷갈릴 때 다시 보세요",270,433);
+  }
+  var pose=phase===0?0:(phase===1?1:2);knDrawPresenter(ctx,w,h,pose,sec);
+  ctx.fillStyle="rgba(7,22,45,.86)";knRounded(ctx,24,892,492,42,12,"rgba(7,22,45,.86)",gold);ctx.fillStyle=cream;ctx.font="800 14px sans-serif";ctx.textAlign="left";ctx.fillText("우리말 나들이 · "+d.topic,42,918);ctx.textAlign="right";ctx.fillText(Math.min(duration,Math.floor(sec)+1)+"초",496,918);
+  ctx.fillStyle="rgba(255,255,255,.18)";ctx.fillRect(24,947,492,5);ctx.fillStyle=coral;ctx.fillRect(24,947,492*Math.min(1,sec/duration),5);
+}
+function cutsafe(duration,sec){var c=knPhaseCuts(duration),left=c[2]-sec;return Math.min(3,Math.max(1,left));}
 async function knRenderBlob(d,onProgress,settings){
   if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream) throw new Error("이 브라우저에서는 영상 제작을 지원하지 않습니다. 최신 Chrome 또는 Edge를 사용해 주세요.");
+  if(d.studio!=="dark")await knLoadPresenter();
   settings=settings||knSettings();var canvas=document.createElement("canvas"),w=settings.w,h=settings.h,duration=settings.duration;canvas.width=w;canvas.height=h;var ctx=canvas.getContext("2d"),stream=canvas.captureStream(settings.fps),mime=knMime(),chunks=[];
   var rec=mime?new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:settings.bitrate}):new MediaRecorder(stream);
   rec.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data);};
@@ -7842,7 +7888,7 @@ function renderKorean(){
   var results=drafts.filter(function(d){return d.videoStatus;}).map(knResultHtml).join("")||'<div class="kn-empty">완성 영상이 여기에 나타납니다.</div>';
   viewEl.innerHTML='<div class="kn-wrap"><div class="kn-shell">'
     +'<section class="kn-hero"><div class="kn-eyebrow">HUKKLE HUB · KOREAN SHORTS LAB</div><h2 class="kn-title">말맞춤</h2><div class="kn-desc">소재 선택부터 영상 규격 설정·제작·미리보기·다운로드까지 이 탭 하나에서 끝냅니다.</div><div class="kn-pills"><span class="kn-pill">'+cfg.canvasSize.replace('x','×')+' · 9:16</span><span class="kn-pill">'+k.duration+'초 · '+k.fps+'fps</span><span class="kn-pill">하루 '+k.dailyTarget+'개 자동 제작</span><span class="kn-pill">자동 발행 꺼짐</span></div><div class="kn-io">'+(cur?'<button class="kn-btn" id="studioCopyCurrent" data-id="'+cur.id+'">현재 대본 복사</button>':'')+'<button class="kn-btn" id="studioExport" data-kind="korean">제작물 따로 저장</button><button class="kn-btn" id="studioImport" data-kind="korean">제작물 가져오기</button></div><div class="kn-kpis"><div class="kn-kpi"><b>'+nVideo+'</b><span>완성 영상</span></div><div class="kn-kpi"><b>'+nReview+'</b><span>검수 대기</span></div><div class="kn-kpi"><b>'+nReady+'</b><span>발행 준비</span></div><div class="kn-kpi"><b>'+nPublished+'</b><span>발행 완료</span></div></div></section>'
-    +'<div class="kn-grid"><section class="kn-card"><h3>오늘 영상 만들기</h3><div class="kn-sub">허용된 규격을 고르고 버튼을 누르면 같은 화면에서 실제 영상 파일을 만듭니다.</div>'+settingsHtml+'<div class="kn-auto"><strong>매일 자동 제작</strong><button class="kn-toggle'+(k.autoEnabled?' on':'')+'" id="knAuto">'+(k.autoEnabled?'켜짐':'꺼짐')+'</button><select class="kn-count" id="knCount"><option value="3"'+(k.dailyTarget===3?' selected':'')+'>하루 3개</option><option value="4"'+(k.dailyTarget===4?' selected':'')+'>하루 4개</option><option value="5"'+(k.dailyTarget===5?' selected':'')+'>하루 5개</option></select><span class="kn-auto-note">기본값은 켜짐·3개입니다. 자동 제작에도 위에서 선택한 규격이 적용됩니다.</span></div><div class="kn-topics">'+topics+'</div><input class="kn-field" id="knCustom" value="'+escapeHtml(k.customTopic||"")+'" placeholder="새 소재 입력 · 예: 맞히다 / 맞추다"><div class="kn-actions"><button class="kn-btn ghost" id="knRandom">소재 추천</button><button class="kn-btn ghost" id="knMake">대본만 만들기</button>'+(cur?'<button class="kn-btn pri" id="knProduce">완성 영상 제작</button>':'')+'</div>'+knSceneHtml(cur)+'<div class="kn-warn">무료 기기 내 제작본은 캐릭터 애니메이션과 큰 자막으로 완성됩니다. 자동 게시하지 않으며, 아래 결과를 확인한 뒤 내려받아 사용하세요.</div></section>'
+    +'<div class="kn-grid"><section class="kn-card"><h3>오늘 영상 만들기</h3><div class="kn-sub">허용된 규격을 고르고 버튼을 누르면 같은 화면에서 실제 영상 파일을 만듭니다.</div>'+settingsHtml+'<div class="kn-auto"><strong>매일 자동 제작</strong><button class="kn-toggle'+(k.autoEnabled?' on':'')+'" id="knAuto">'+(k.autoEnabled?'켜짐':'꺼짐')+'</button><select class="kn-count" id="knCount"><option value="3"'+(k.dailyTarget===3?' selected':'')+'>하루 3개</option><option value="4"'+(k.dailyTarget===4?' selected':'')+'>하루 4개</option><option value="5"'+(k.dailyTarget===5?' selected':'')+'>하루 5개</option></select><span class="kn-auto-note">기본값은 켜짐·3개입니다. 자동 제작에도 위에서 선택한 규격이 적용됩니다.</span></div><div class="kn-topics">'+topics+'</div><input class="kn-field" id="knCustom" value="'+escapeHtml(k.customTopic||"")+'" placeholder="새 소재 입력 · 예: 맞히다 / 맞추다"><div class="kn-actions"><button class="kn-btn ghost" id="knRandom">소재 추천</button><button class="kn-btn ghost" id="knMake">대본만 만들기</button>'+(cur?'<button class="kn-btn pri" id="knProduce">완성 영상 제작</button>':'')+'</div>'+knSceneHtml(cur)+'<div class="kn-warn">확정한 오피스룩 진행자가 문제 제시·고민·정답 설명 자세로 등장합니다. 자동 게시하지 않으며, 아래 결과를 확인한 뒤 내려받아 사용하세요.</div></section>'
     +'<aside><section class="kn-card"><h3>제작 흐름</h3><div class="kn-sub">사람의 검수·승인 없이 자동 발행하지 않습니다.</div><div class="kn-pipe">'+steps+'</div></section><section class="kn-card" style="margin-top:12px"><h3>오늘의 대기열</h3><div class="kn-sub">대본별 상태를 직접 확인하고 다음 단계로 넘기세요.</div><div class="kn-list">'+list+'</div></section></aside></div>'
     +'<section class="kn-card" id="knResults" style="margin-top:12px"><h3>완성 영상 · 다운로드</h3><div class="kn-sub">제작이 끝난 영상은 여기서 바로 재생하고 기기에 저장할 수 있습니다.</div><div class="kn-results">'+results+'</div></section>'
     +'</div></div>';
