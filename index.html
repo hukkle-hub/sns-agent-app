@@ -1299,6 +1299,7 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
 .kn-pipe{display:grid;gap:7px}.kn-step{display:grid;grid-template-columns:25px 1fr auto;align-items:center;gap:8px;padding:9px;border:1px solid #e1e7ed;border-radius:10px;background:#fafcfd}.kn-step-i{width:25px;height:25px;display:grid;place-items:center;border-radius:8px;background:#e9f4f3;font-size:12px}.kn-step b{font-size:11px;color:#273345}.kn-step small{display:block;font-size:9.5px;color:#8893a4;margin-top:2px}.kn-state{font-size:9px;font-weight:800;border-radius:999px;padding:4px 7px;background:#edf1f5;color:#6e7888}.kn-state.on{background:#e3f5ec;color:#137548}
 .kn-list{display:grid;gap:8px}.kn-empty{padding:18px 10px;text-align:center;color:#8a96a7;font-size:11px;border:1px dashed #d5dee7;border-radius:11px}.kn-draft{border:1px solid #e0e7ee;border-radius:11px;padding:10px;background:#fff}.kn-draft-h{display:flex;align-items:flex-start;gap:8px}.kn-draft-h strong{font-size:11.5px;flex:1}.kn-badge{font-size:9px;border-radius:999px;padding:4px 7px;background:#fff2d8;color:#9a6400;font-weight:800}.kn-draft p{font-size:10.5px;color:#667286;line-height:1.5;margin:6px 0 0}.kn-mini{border:0;background:none;color:#16746f;font-family:inherit;font-size:10px;font-weight:800;padding:5px 5px 0;cursor:pointer}
 .kn-auto{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;margin:10px 0;border:1px solid #cfe1df;border-radius:11px;background:#f0f8f7}.kn-auto strong{font-size:11px;color:#165f5b}.kn-auto-note{font-size:9.5px;color:#708091;line-height:1.45;flex:1 1 210px}.kn-toggle{border:0;border-radius:999px;padding:7px 10px;font-family:inherit;font-size:10px;font-weight:800;cursor:pointer;background:#dce5e8;color:#596675}.kn-toggle.on{background:#1b8078;color:#fff}.kn-count{border:1px solid #c9d8dc;border-radius:8px;background:#fff;padding:6px 8px;font-family:inherit;font-size:10px;font-weight:800;color:#27404a}
+.kn-manual{margin-top:14px;padding-top:13px;border-top:1px dashed #d8e0e8}.kn-manual-title{font-size:11px;font-weight:900;color:#42516a;margin-bottom:3px}.kn-manual-note{font-size:9.5px;color:#7c8798;line-height:1.45;margin-bottom:7px}
 .kn-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0;padding:10px;border:1px solid #d8e3eb;border-radius:11px;background:#f8fafc}.kn-setting{display:grid;gap:4px}.kn-setting label{font-size:9.5px;font-weight:800;color:#536174}.kn-setting select{width:100%;border:1px solid #cbd7e0;border-radius:8px;background:#fff;color:#273746;padding:7px 8px;font-family:inherit;font-size:10px;font-weight:700}.kn-setting-note{grid-column:1/-1;font-size:9px;color:#7c8796;line-height:1.45}
 .kn-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:10px}.kn-result{border:1px solid #dce5ed;border-radius:12px;background:#fff;overflow:hidden}.kn-video{aspect-ratio:9/16;background:linear-gradient(160deg,#123e68,#1b8b78);display:grid;place-items:center;color:#fff;font-size:10px;text-align:center;position:relative}.kn-video video{width:100%;height:100%;object-fit:cover;background:#102f46}.kn-video-msg{padding:12px;line-height:1.55}.kn-result-info{padding:9px}.kn-result-info strong{display:block;font-size:11px;color:#263546;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.kn-result-info small{display:block;font-size:9px;color:#7b8798;margin-top:3px}.kn-download{width:100%;margin-top:7px;border:0;border-radius:8px;padding:8px;background:#176f75;color:#fff;font-family:inherit;font-size:10.5px;font-weight:800;cursor:pointer}.kn-download:disabled{opacity:.45}.kn-progress{height:5px;border-radius:999px;background:#dce7e9;overflow:hidden;margin-top:8px}.kn-progress i{display:block;height:100%;background:#1b8b78;transition:width .25s}.kn-warn{font-size:9.5px;color:#8a6540;background:#fff7e8;border:1px solid #f0dfbf;border-radius:9px;padding:8px 9px;line-height:1.45;margin-top:9px}
 .kn-io{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.kn-io .kn-btn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25)}
@@ -1327,7 +1328,7 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v370</span>
+    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v372</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -7656,8 +7657,9 @@ var KN_TOPICS=[
   {key:"금세/금새",wrong:"금새 끝났네!",right:"금세 끝났네!",scene:"어려운 일을 순식간에 끝냈어요.",memory:"‘지금 바로’라는 뜻의 ‘금시에’가 줄어 ‘금세’가 됐어요."},
   {key:"어떻게/어떡해",wrong:"이걸 어떻해?",right:"이걸 어떡해?",scene:"갑자기 난처한 일이 생겼어요.",memory:"‘어떻게 해’가 줄어든 말은 ‘어떡해’예요."}
 ];
-var KN_DB_PROMISE=null, KN_RENDER_CHAIN=Promise.resolve(), KN_URLS={}, KN_PRESENTER_IMG=null, KN_PRESENTER_PROMISE=null;
+var KN_DB_PROMISE=null, KN_RENDER_CHAIN=Promise.resolve(), KN_URLS={}, KN_PRESENTER_IMG=null, KN_PRESENTER_PROMISE=null, KN_BGM_PROMISE=null;
 var KN_PRESENTER_SRC="./assets/malmatchum-presenter-poses.png";
+var KN_BGM_SRC="./assets/malmatchum-lounge-bgm-sfx.mp3", KN_VOICE="Gacrux";
 var KN_CANVAS_OPTIONS={"540x960":{w:540,h:960,label:"540×960 · 빠른 제작"},"720x1280":{w:720,h:1280,label:"720×1280 · 선명"},"1080x1920":{w:1080,h:1920,label:"1080×1920 · 고화질"}};
 var KN_DURATION_OPTIONS=[10,15,20], KN_FPS_OPTIONS=[24,30], KN_QUALITY_OPTIONS={standard:{label:"표준 · 1.8Mbps",bitrate:1800000},high:{label:"높음 · 3.5Mbps",bitrate:3500000}};
 function knData(){
@@ -7691,6 +7693,11 @@ function knDraftFromTopic(t){
     ]};
 }
 function knToday(){ var n=new Date(); return n.getFullYear()+"-"+("0"+(n.getMonth()+1)).slice(-2)+"-"+("0"+n.getDate()).slice(-2); }
+function knAutoTopics(count){
+  var k=knData(),lastUsed={};
+  k.drafts.forEach(function(d,i){if(knTopic(d.topic))lastUsed[d.topic]=i;});
+  return KN_TOPICS.slice().sort(function(a,b){return (lastUsed[a.key]===undefined?-1:lastUsed[a.key])-(lastUsed[b.key]===undefined?-1:lastUsed[b.key]);}).slice(0,count);
+}
 function knOpenDb(){
   if(KN_DB_PROMISE) return KN_DB_PROMISE;
   KN_DB_PROMISE=new Promise(function(resolve,reject){
@@ -7705,7 +7712,7 @@ async function knStoreVideo(id,blob){ var db=await knOpenDb(); return new Promis
 async function knGetVideo(id){ try{var db=await knOpenDb();return await new Promise(function(resolve,reject){var q=db.transaction("videos","readonly").objectStore("videos").get(id);q.onsuccess=function(){resolve(q.result||null);};q.onerror=function(){reject(q.error);};});}catch(e){return null;} }
 async function knDeleteVideo(id){ try{var db=await knOpenDb();return await new Promise(function(resolve){var tx=db.transaction("videos","readwrite");tx.objectStore("videos").delete(id);tx.oncomplete=resolve;tx.onerror=resolve;});}catch(e){} }
 function knMime(){
-  var types=["video/mp4;codecs=h264","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"];
+  var types=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4;codecs=h264,aac","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/mp4","video/webm"];
   for(var i=0;i<types.length;i++) if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(types[i])) return types[i];
   return "";
 }
@@ -7719,6 +7726,37 @@ function knLoadPresenter(){
   if(KN_PRESENTER_PROMISE)return KN_PRESENTER_PROMISE;
   KN_PRESENTER_PROMISE=new Promise(function(resolve,reject){var img=new Image();img.onload=function(){KN_PRESENTER_IMG=img;resolve(img);};img.onerror=function(){reject(new Error("말맞춤 진행자 이미지를 불러오지 못했습니다."));};img.src=KN_PRESENTER_SRC;});
   return KN_PRESENTER_PROMISE;
+}
+function knArrayBufferFromBase64(src){
+  var raw=atob(src),out=new Uint8Array(raw.length);for(var i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out.buffer;
+}
+function knLoadBgm(){
+  if(!KN_BGM_PROMISE)KN_BGM_PROMISE=fetch(KN_BGM_SRC).then(function(r){if(!r.ok)throw new Error("말맞춤 재즈 테마를 불러오지 못했습니다.");return r.arrayBuffer();});
+  return KN_BGM_PROMISE;
+}
+function knVoiceCues(d,duration){
+  var c=knPhaseCuts(duration);return [
+    {at:c[0]+.18,text:String(d.wrong||"")+" 맞는 표현일까요?"},
+    {at:c[1]+.16,text:"삼 초 안에 골라보세요."},
+    {at:c[2]+.15,text:"정답은, "+String(d.right||"")},
+    {at:c[3]+.10,text:String(d.memory||"")}
+  ];
+}
+async function knLoadVoiceCues(d,duration){
+  if(!useBackend())throw new Error("백엔드가 연결되지 않아 진행자 음성을 만들 수 없습니다.");
+  var cues=knVoiceCues(d,duration);
+  await Promise.all(cues.map(async function(c){
+    var r=await fetch(backendOrigin()+"/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:c.text,voice:KN_VOICE})});
+    var x=await r.json();if(!r.ok||x.error||!x.audio)throw new Error(x.error||"진행자 음성 생성 실패");c.bytes=knArrayBufferFromBase64(x.audio);
+  }));
+  return cues;
+}
+async function knPrepareAudio(d,duration){
+  if(d.studio==="dark")return null;
+  var result={bgm:null,cues:[],warning:""};
+  try{result.bgm=await knLoadBgm();}catch(e){result.warning=String(e.message||e);}
+  try{result.cues=await knLoadVoiceCues(d,duration);}catch(e){result.warning=(result.warning?result.warning+" · ":"")+String(e.message||e);}
+  return result;
 }
 function knDrawPlaceholder(ctx,x,y,t,accent,label){
   var bob=Math.sin(t*4)*7; ctx.save(); ctx.translate(x,y+bob);
@@ -7781,13 +7819,21 @@ function cutsafe(duration,sec){var c=knPhaseCuts(duration),left=c[2]-sec;return 
 async function knRenderBlob(d,onProgress,settings){
   if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream) throw new Error("이 브라우저에서는 영상 제작을 지원하지 않습니다. 최신 Chrome 또는 Edge를 사용해 주세요.");
   if(d.studio!=="dark")await knLoadPresenter();
-  settings=settings||knSettings();var canvas=document.createElement("canvas"),w=settings.w,h=settings.h,duration=settings.duration;canvas.width=w;canvas.height=h;var ctx=canvas.getContext("2d"),stream=canvas.captureStream(settings.fps),mime=knMime(),chunks=[];
+  settings=settings||knSettings();var canvas=document.createElement("canvas"),w=settings.w,h=settings.h,duration=settings.duration;canvas.width=w;canvas.height=h;var ctx=canvas.getContext("2d"),videoStream=canvas.captureStream(settings.fps),stream=videoStream,mime=knMime(),chunks=[],audioCtx=null,audioSources=[];
+  var prepared=await knPrepareAudio(d,duration);d.audioWarning=prepared&&prepared.warning||"";
+  if(prepared&&(prepared.bgm||prepared.cues.length)){
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();var dest=audioCtx.createMediaStreamDestination();
+    if(audioCtx.state==="suspended")try{await audioCtx.resume();}catch(_){}
+    if(prepared.bgm){var bb=await audioCtx.decodeAudioData(prepared.bgm.slice(0)),bs=audioCtx.createBufferSource(),bg=audioCtx.createGain();bs.buffer=bb;bg.gain.value=.68;bs.connect(bg);bg.connect(dest);audioSources.push({source:bs,at:0});}
+    for(var ai=0;ai<prepared.cues.length;ai++){var cue=prepared.cues[ai],vb=await audioCtx.decodeAudioData(cue.bytes.slice(0)),vs=audioCtx.createBufferSource(),vg=audioCtx.createGain();vs.buffer=vb;vg.gain.value=1;vs.connect(vg);vg.connect(dest);audioSources.push({source:vs,at:cue.at});}
+    stream=new MediaStream(videoStream.getVideoTracks().concat(dest.stream.getAudioTracks()));
+  }
   var rec=mime?new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:settings.bitrate}):new MediaRecorder(stream);
   rec.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data);};
   var stopped=new Promise(function(resolve,reject){rec.onstop=resolve;rec.onerror=function(e){reject((e&&e.error)||new Error("영상 렌더링 오류"));};});
-  rec.start(500);var start=performance.now(),last=-1;
+  rec.start(500);var audioStart=audioCtx?audioCtx.currentTime+.08:0;audioSources.forEach(function(s){s.source.start(audioStart+s.at);});var start=performance.now(),last=-1;
   await new Promise(function(resolve){function frame(now){var sec=Math.min(duration,(now-start)/1000);ctx.setTransform(w/540,0,0,h/960,0,0);knPaintFrame(ctx,540,960,d,sec,settings);var pct=Math.round(sec/duration*100);if(pct!==last){last=pct;if(onProgress)onProgress(pct);}if(sec<duration)requestAnimationFrame(frame);else resolve();}requestAnimationFrame(frame);});
-  rec.stop();await stopped;stream.getTracks().forEach(function(t){t.stop();});
+  rec.stop();await stopped;stream.getTracks().forEach(function(t){t.stop();});audioSources.forEach(function(s){try{s.source.stop();}catch(_){}});if(audioCtx)try{await audioCtx.close();}catch(_){}
   return new Blob(chunks,{type:rec.mimeType||mime||"video/webm"});
 }
 function studioDataForDraft(d){return d&&d.studio==="dark"?dpData():knData();}
@@ -7813,7 +7859,7 @@ function knResultHtml(d){
 }
 async function knHydrateResults(){
   var nodes=[].slice.call(document.querySelectorAll("[data-kn-preview]"));
-  nodes.forEach(async function(el){var id=el.getAttribute("data-kn-preview"),d=studioFindDraft(id);if(!d||d.videoStatus!=="done")return;var blob=await knGetVideo(id);if(!blob){el.innerHTML='<div class="kn-video-msg">저장된 영상이 없어 다시 제작해야 해요.</div>';return;}if(KN_URLS[id])URL.revokeObjectURL(KN_URLS[id]);var u=URL.createObjectURL(blob);KN_URLS[id]=u;el.innerHTML='<video controls muted playsinline preload="metadata" src="'+u+'"></video>';});
+  nodes.forEach(async function(el){var id=el.getAttribute("data-kn-preview"),d=studioFindDraft(id);if(!d||d.videoStatus!=="done")return;var blob=await knGetVideo(id);if(!blob){el.innerHTML='<div class="kn-video-msg">저장된 영상이 없어 다시 제작해야 해요.</div>';return;}if(KN_URLS[id])URL.revokeObjectURL(KN_URLS[id]);var u=URL.createObjectURL(blob);KN_URLS[id]=u;el.innerHTML='<video controls playsinline preload="metadata" src="'+u+'"></video>'+(d.audioWarning?'<div class="kn-video-msg" style="position:static;padding:8px;color:#a34c4c">음성 일부 제외: '+escapeHtml(d.audioWarning)+'</div>':'');});
 }
 async function knDownload(id){
   var d=studioFindDraft(id),blob=await knGetVideo(id);if(!d||!blob){alert("영상 파일을 찾지 못했어요. 다시 제작해 주세요.");return;}var ext=/mp4/i.test(blob.type)?"mp4":"webm",safe=String(d.topic||"studio").replace(/[\\/:*?"<>|\s]+/g,"_"),duration=(d.renderSettings&&d.renderSettings.duration)||15,prefix=d.studio==="dark"?"동심파괴":"말맞춤";var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=prefix+"_"+safe+"_"+duration+"초."+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},5000);
@@ -7843,9 +7889,9 @@ function bindStudioCommon(){
 async function knEnsureDaily(){
   var k=knData(),today=knToday();if(!k.autoEnabled||k.lastAutoDay===today)return;
   if(useBackend()){try{var rr=await fetch(backendOrigin()+"/api/studio/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({studio:"korean",dailyTarget:k.dailyTarget})}),remote=await rr.json();if(remote&&remote.ok){syncStudioQueue(remote.queue||[]);k.lastAutoDay=today;await saveState();return;}}catch(e){}}
-  k.lastAutoDay=today;var count=Math.max(3,Math.min(5,+k.dailyTarget||3)),made=[];
-  for(var i=0;i<count;i++){var t=KN_TOPICS[(k.autoCursor+i)%KN_TOPICS.length],d=knDraftFromTopic(t);d.autoDay=today;d.automatic=true;k.drafts.push(d);made.push(d);}
-  k.autoCursor=(k.autoCursor+count)%KN_TOPICS.length;k.currentDraftId=made[made.length-1].id;await saveState();if(STATE.view==="korean")render();made.forEach(function(d){knQueueVideo(d,true);});
+  k.lastAutoDay=today;var count=Math.max(3,Math.min(5,+k.dailyTarget||3)),made=[],autoTopics=knAutoTopics(count);
+  autoTopics.forEach(function(t){var d=knDraftFromTopic(t);d.autoDay=today;d.automatic=true;k.drafts.push(d);made.push(d);});
+  if(made.length)k.currentDraftId=made[made.length-1].id;await saveState();if(STATE.view==="korean")render();made.forEach(function(d){knQueueVideo(d,true);});
 }
 function knSceneHtml(d){
   var duration=knData().duration,cuts=knPhaseCuts(duration);
@@ -7887,8 +7933,8 @@ function renderKorean(){
   ].map(function(s){return '<div class="kn-step"><span class="kn-step-i">'+s[0]+'</span><span><b>'+s[1]+'</b><small>'+s[2]+'</small></span><span class="kn-state'+(s[3]?' on':'')+'">'+(s[3]?'진행':'대기')+'</span></div>';}).join("");
   var results=drafts.filter(function(d){return d.videoStatus;}).map(knResultHtml).join("")||'<div class="kn-empty">완성 영상이 여기에 나타납니다.</div>';
   viewEl.innerHTML='<div class="kn-wrap"><div class="kn-shell">'
-    +'<section class="kn-hero"><div class="kn-eyebrow">HUKKLE HUB · KOREAN SHORTS LAB</div><h2 class="kn-title">말맞춤</h2><div class="kn-desc">소재 선택부터 영상 규격 설정·제작·미리보기·다운로드까지 이 탭 하나에서 끝냅니다.</div><div class="kn-pills"><span class="kn-pill">'+cfg.canvasSize.replace('x','×')+' · 9:16</span><span class="kn-pill">'+k.duration+'초 · '+k.fps+'fps</span><span class="kn-pill">하루 '+k.dailyTarget+'개 자동 제작</span><span class="kn-pill">자동 발행 꺼짐</span></div><div class="kn-io">'+(cur?'<button class="kn-btn" id="studioCopyCurrent" data-id="'+cur.id+'">현재 대본 복사</button>':'')+'<button class="kn-btn" id="studioExport" data-kind="korean">제작물 따로 저장</button><button class="kn-btn" id="studioImport" data-kind="korean">제작물 가져오기</button></div><div class="kn-kpis"><div class="kn-kpi"><b>'+nVideo+'</b><span>완성 영상</span></div><div class="kn-kpi"><b>'+nReview+'</b><span>검수 대기</span></div><div class="kn-kpi"><b>'+nReady+'</b><span>발행 준비</span></div><div class="kn-kpi"><b>'+nPublished+'</b><span>발행 완료</span></div></div></section>'
-    +'<div class="kn-grid"><section class="kn-card"><h3>오늘 영상 만들기</h3><div class="kn-sub">허용된 규격을 고르고 버튼을 누르면 같은 화면에서 실제 영상 파일을 만듭니다.</div>'+settingsHtml+'<div class="kn-auto"><strong>매일 자동 제작</strong><button class="kn-toggle'+(k.autoEnabled?' on':'')+'" id="knAuto">'+(k.autoEnabled?'켜짐':'꺼짐')+'</button><select class="kn-count" id="knCount"><option value="3"'+(k.dailyTarget===3?' selected':'')+'>하루 3개</option><option value="4"'+(k.dailyTarget===4?' selected':'')+'>하루 4개</option><option value="5"'+(k.dailyTarget===5?' selected':'')+'>하루 5개</option></select><span class="kn-auto-note">기본값은 켜짐·3개입니다. 자동 제작에도 위에서 선택한 규격이 적용됩니다.</span></div><div class="kn-topics">'+topics+'</div><input class="kn-field" id="knCustom" value="'+escapeHtml(k.customTopic||"")+'" placeholder="새 소재 입력 · 예: 맞히다 / 맞추다"><div class="kn-actions"><button class="kn-btn ghost" id="knRandom">소재 추천</button><button class="kn-btn ghost" id="knMake">대본만 만들기</button>'+(cur?'<button class="kn-btn pri" id="knProduce">완성 영상 제작</button>':'')+'</div>'+knSceneHtml(cur)+'<div class="kn-warn">확정한 오피스룩 진행자가 문제 제시·고민·정답 설명 자세로 등장합니다. 자동 게시하지 않으며, 아래 결과를 확인한 뒤 내려받아 사용하세요.</div></section>'
+    +'<section class="kn-hero"><div class="kn-eyebrow">HUKKLE HUB · KOREAN SHORTS LAB</div><h2 class="kn-title">말맞춤</h2><div class="kn-desc">소재 선택부터 영상 규격 설정·제작·미리보기·다운로드까지 이 탭 하나에서 끝냅니다.</div><div class="kn-pills"><span class="kn-pill">'+cfg.canvasSize.replace('x','×')+' · 9:16</span><span class="kn-pill">'+k.duration+'초 · '+k.fps+'fps</span><span class="kn-pill">도도한 진행자 음성 · 재즈 라운지</span><span class="kn-pill">하루 '+k.dailyTarget+'개 자동 제작</span><span class="kn-pill">자동 발행 꺼짐</span></div><div class="kn-io">'+(cur?'<button class="kn-btn" id="studioCopyCurrent" data-id="'+cur.id+'">현재 대본 복사</button>':'')+'<button class="kn-btn" id="studioExport" data-kind="korean">제작물 따로 저장</button><button class="kn-btn" id="studioImport" data-kind="korean">제작물 가져오기</button></div><div class="kn-kpis"><div class="kn-kpi"><b>'+nVideo+'</b><span>완성 영상</span></div><div class="kn-kpi"><b>'+nReview+'</b><span>검수 대기</span></div><div class="kn-kpi"><b>'+nReady+'</b><span>발행 준비</span></div><div class="kn-kpi"><b>'+nPublished+'</b><span>발행 완료</span></div></div></section>'
+    +'<div class="kn-grid"><section class="kn-card"><h3>오늘 영상 만들기</h3><div class="kn-sub">허용된 규격을 고르면 매일 자동 제작에 그대로 적용됩니다.</div>'+settingsHtml+'<div class="kn-auto"><strong>매일 자동 제작</strong><button class="kn-toggle'+(k.autoEnabled?' on':'')+'" id="knAuto">'+(k.autoEnabled?'켜짐':'꺼짐')+'</button><select class="kn-count" id="knCount"><option value="3"'+(k.dailyTarget===3?' selected':'')+'>하루 3개</option><option value="4"'+(k.dailyTarget===4?' selected':'')+'>하루 4개</option><option value="5"'+(k.dailyTarget===5?' selected':'')+'>하루 5개</option></select><span class="kn-auto-note">단어도 자동으로 고릅니다. 최근 사용하지 않은 단어부터 선택하고, 모든 단어를 사용한 뒤 다시 순환합니다.</span></div><div class="kn-manual"><div class="kn-manual-title">직접 만들기 · 선택 사항</div><div class="kn-manual-note">아래 단어 목록은 자동제작에 필요하지 않습니다. 특정 소재를 따로 만들 때만 사용하세요.</div><div class="kn-topics">'+topics+'</div><input class="kn-field" id="knCustom" value="'+escapeHtml(k.customTopic||"")+'" placeholder="새 소재 입력 · 예: 맞히다 / 맞추다"><div class="kn-actions"><button class="kn-btn ghost" id="knRandom">소재 추천</button><button class="kn-btn ghost" id="knMake">대본만 만들기</button>'+(cur?'<button class="kn-btn pri" id="knProduce">음성 포함 완성 영상 제작</button>':'')+'</div></div>'+knSceneHtml(cur)+'<div class="kn-warn">확정한 오피스룩 진행자와 낮고 여유로운 여성 음성, 재즈 라운지 테마, 퀴즈 효과음이 함께 들어갑니다. 자동 게시하지 않으며, 아래 결과를 확인한 뒤 내려받아 사용하세요.</div></section>'
     +'<aside><section class="kn-card"><h3>제작 흐름</h3><div class="kn-sub">사람의 검수·승인 없이 자동 발행하지 않습니다.</div><div class="kn-pipe">'+steps+'</div></section><section class="kn-card" style="margin-top:12px"><h3>오늘의 대기열</h3><div class="kn-sub">대본별 상태를 직접 확인하고 다음 단계로 넘기세요.</div><div class="kn-list">'+list+'</div></section></aside></div>'
     +'<section class="kn-card" id="knResults" style="margin-top:12px"><h3>완성 영상 · 다운로드</h3><div class="kn-sub">제작이 끝난 영상은 여기서 바로 재생하고 기기에 저장할 수 있습니다.</div><div class="kn-results">'+results+'</div></section>'
     +'</div></div>';
