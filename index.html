@@ -3686,11 +3686,18 @@ function analyticsChannelHtml(ch, meta){
     +'<div style="flex:1;background:var(--card);border:1px solid #e3e9f2;border-radius:9px;padding:8px;text-align:center"><div style="font-size:16px;font-weight:800;color:#e8433a">'+(+t.views).toLocaleString()+'</div><div style="font-size:10px;color:#8a94a6">'+meta.viewLabel+'</div></div>'
     +'<div style="flex:1;background:var(--card);border:1px solid #e3e9f2;border-radius:9px;padding:8px;text-align:center"><div style="font-size:16px;font-weight:800;color:#2f6fe0">'+(+t.likes).toLocaleString()+'</div><div style="font-size:10px;color:#8a94a6">좋아요</div></div>'
     +'<div style="flex:1;background:var(--card);border:1px solid #e3e9f2;border-radius:9px;padding:8px;text-align:center"><div style="font-size:16px;font-weight:800;color:#0e7a52">'+(+t.comments).toLocaleString()+'</div><div style="font-size:10px;color:#8a94a6">댓글</div></div></div>';
+  if(ch.traffic&&ch.traffic.length){
+    h+='<div style="background:#f8fafc;border:1px solid #e3e9f2;border-radius:9px;padding:9px 10px;margin-bottom:8px"><div style="font-size:10.5px;font-weight:800;color:#34465e;margin-bottom:5px">유입경로 · 알고리즘 노출 추정</div>'
+      +ch.traffic.slice(0,5).map(function(x){return '<div style="display:flex;font-size:10.5px;margin:3px 0"><span style="flex:1">'+esc(x.label||x.type)+'</span><b>'+esc(String(x.share||0))+'%</b></div>';}).join('')
+      +'<div style="font-size:9px;color:#8a94a6;margin-top:5px">추천·탐색·쇼츠 피드 등 실제 유입 비중으로 추정하며 내부 알고리즘 값은 아닙니다.</div></div>';
+  }
   h+=ch.videos.slice(0,8).map(function(v){
-    return '<div style="border:1px solid #eef1f6;border-radius:9px;padding:7px 10px;margin-bottom:5px">'
+    return '<a href="'+esc(v.url||("https://youtu.be/"+v.id))+'" target="_blank" rel="noopener" style="display:block;text-decoration:none;border:1px solid #eef1f6;border-radius:9px;padding:7px 10px;margin-bottom:5px">'
       +'<div style="font-size:11.5px;font-weight:700;color:#1c2838;margin-bottom:2px">'+esc((v.title||v.id).slice(0,48))+'</div>'
-      +'<div style="font-size:10.5px;color:#5a6472">'+meta.viewIcon+' '+(+v.views).toLocaleString()+' · 👍 '+(+v.likes).toLocaleString()+' · 💬 '+(+v.comments).toLocaleString()+'</div></div>';
+      +'<div style="font-size:10.5px;color:#5a6472">'+meta.viewIcon+' '+(+v.views).toLocaleString()+' · 👍 '+(+v.likes).toLocaleString()+' · 💬 '+(+v.comments).toLocaleString()+(v.averageViewDuration!=null?' · 체류 '+Math.floor((+v.averageViewDuration||0)/60)+':'+String(Math.round(+v.averageViewDuration||0)%60).padStart(2,'0')+' / '+(+v.averageViewPercentage||0)+'%':'')+'</div></a>';
   }).join("");
+  if(ch.searchTerms&&ch.searchTerms.length) h+='<div style="font-size:10.5px;color:#34465e;margin:6px 0"><b>검색 유입어:</b> '+ch.searchTerms.slice(0,5).map(function(x){return esc(x.term);}).join(' · ')+'</div>';
+  if(ch.largestDrop&&ch.largestDrop.loss>.02) h+='<div style="font-size:10.5px;color:#b9651a;margin:6px 0"><b>최대 이탈:</b> 영상 '+Math.round(ch.largestDrop.position*100)+'% 지점에서 약 '+Math.round(ch.largestDrop.loss*100)+'%p 감소</div>';
   h+='<div style="font-size:10px;color:var(--on-bg2);margin:2px 0 4px;text-align:right">'+agoText(ch.collectedAt)+' 수집</div>';
   return h;
 }
@@ -3723,6 +3730,20 @@ function analyticsPanelHtml(){
     h+='<div class="note" style="padding:14px 8px;text-align:center;color:#8a94a6">아직 수집된 성과가 없어요.<br>유튜브·인스타·페북에 발행한 뒤 아래 <b>지금 수집</b>을 누르거나, 매일 저녁 자동 수집됩니다.</div>';
   }
   return h;
+}
+function youtubeCommentsHtml(rows){
+  if(!rows||!rows.length) return '<div class="note" style="padding:18px 8px;text-align:center">최근 댓글이 없어요.</div>';
+  return rows.map(function(c){
+    var replies=(c.replies||[]).slice(-3).map(function(r){return '<div style="margin:5px 0 0 18px;padding:6px 8px;background:#f6f8fb;border-radius:7px;font-size:10.5px"><b>'+esc(r.author||"채널")+'</b> · '+esc(r.text||"")+'</div>';}).join("");
+    return '<div class="yt-comment" data-ytcid="'+esc(c.id)+'" style="border:1px solid #e6eaf0;border-radius:10px;padding:9px 10px;margin-bottom:7px">'
+      +'<div style="display:flex;align-items:center;gap:7px"><img src="'+esc(c.authorImage||"")+'" alt="" style="width:25px;height:25px;border-radius:50%;background:#eef1f6"><div style="flex:1;font-size:11px"><b>'+esc(c.author||"시청자")+'</b><div style="color:#8a94a6;font-size:9.5px">'+esc(c.publishedAt?new Date(c.publishedAt).toLocaleString("ko-KR"):"")+' · 👍 '+(+c.likes||0)+'</div></div>'
+      +'<a href="https://youtu.be/'+esc(c.videoId||"")+'" target="_blank" rel="noopener" style="font-size:10px;color:#2f6fe0">영상</a></div>'
+      +'<div style="font-size:12px;line-height:1.5;color:#263342;margin:7px 0;white-space:pre-wrap">'+esc(c.text||"")+'</div>'+replies
+      +'<textarea data-ytreplyin="'+esc(c.id)+'" placeholder="정유진이 작성한 답글 초안이 여기에 표시됩니다" style="width:100%;box-sizing:border-box;min-height:45px;margin-top:7px;padding:7px 9px;border:1px solid #d9e0ea;border-radius:8px;font-family:inherit;font-size:11px"></textarea>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px"><button class="cbtn" data-ytdraft="'+esc(c.id)+'" style="font-size:10px;padding:5px 8px">정유진에게 초안 요청</button><button class="cbtn" data-ytcopy="'+esc(c.id)+'" style="font-size:10px;padding:5px 8px">초안 복사</button></div>'
+      +'<div class="note" style="margin-top:4px">실제 게시·삭제·숨김·차단은 이 화면에서 실행되지 않습니다.</div>'
+      +'<div class="note" data-ytstat="'+esc(c.id)+'" style="margin-top:4px"></div></div>';
+  }).join("");
 }
 // ===== 웹툰 스튜디오 모달 =====
 function charChipsHtml(){
@@ -7101,17 +7122,34 @@ function openWebtoonModal(){
 }
 function openAnalyticsModal(){
   var ov=document.createElement("div"); ov.className="modal-ov"; ov.id="anModal";
-  ov.innerHTML='<div class="modal-bx" style="max-width:540px">'
-    +'<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:16px;font-weight:800;flex:1">📈 채널 성과 <span style="font-size:11px;font-weight:600;color:#8a94a6">— 데이터 분석</span></div><button id="anClose" style="border:none;background:var(--bg);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
+  ov.innerHTML='<div class="modal-bx" style="max-width:600px">'
+    +'<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:16px;font-weight:800;flex:1">📊 유튜브 분석·댓글 <span style="font-size:11px;font-weight:600;color:#8a94a6">— 강민서</span></div><button id="anClose" style="border:none;background:var(--bg);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:15px">✕</button></div>'
+    +'<div style="display:flex;gap:6px;margin-bottom:9px"><button class="cbtn conn" data-antab="performance" style="flex:1;justify-content:center">영상 성과</button><button class="cbtn" data-antab="comments" style="flex:1;justify-content:center">댓글 관리</button></div>'
     +'<div id="anBody">'+analyticsPanelHtml()+'</div>'
-    +'<button class="cbtn conn" id="anCollect" style="width:100%;justify-content:center;margin-top:10px">🔄 지금 수집</button>'
+    +'<button class="cbtn conn" id="anCollect" style="width:100%;justify-content:center;margin-top:10px">🔄 실제 통계 수집</button>'
     +'<div class="note" id="anStat" style="margin-top:6px"></div>'
     +'</div>';
   document.body.appendChild(ov);
+  var tab="performance", comments=[];
   function close(){ try{ document.body.removeChild(ov); }catch(e){} }
+  function stat(msg,ok){ var s=ov.querySelector("#anStat"); if(s)s.innerHTML='<span style="color:'+(ok===false?'#c0392b':'#0e7a52')+'">'+esc(msg)+'</span>'; }
+  function setTab(next){
+    tab=next; ov.querySelectorAll("[data-antab]").forEach(function(b){var on=b.getAttribute("data-antab")===tab;b.classList.toggle("conn",on);});
+    var body=ov.querySelector("#anBody"), collect=ov.querySelector("#anCollect");
+    if(tab==="performance"){body.innerHTML=analyticsPanelHtml();collect.textContent="🔄 실제 통계 수집";}
+    else {body.innerHTML=youtubeCommentsHtml(comments);collect.textContent="🔄 최근 댓글 불러오기";}
+  }
+  async function loadComments(){
+    var btn=ov.querySelector("#anCollect"); btn.disabled=true;btn.textContent="댓글 불러오는 중…";
+    try{await wakeServer(50000);var r=await fetch(backendOrigin()+"/api/youtube/comments?limit=50");var d=await r.json();if(!r.ok||d.error)throw new Error(d.error||"댓글 수집 실패");comments=d.comments||[];setTab("comments");stat(comments.length+"개 댓글을 불러왔어요.",true);}
+    catch(e){stat("연결 필요 또는 수집 실패: "+(e.message||e),false);ov.querySelector("#anBody").innerHTML='<div class="note" style="padding:14px;text-align:center">유튜브를 한 번 연결하면 댓글을 확인하고 답글을 달 수 있어요.<br><button class="cbtn conn" id="anConnect" style="margin-top:8px">유튜브 연결</button></div>';var c=ov.querySelector("#anConnect");if(c)c.onclick=function(){window.open(backendOrigin()+"/api/connect/youtube","_blank");};}
+    btn.disabled=false;if(tab==="comments")btn.textContent="🔄 최근 댓글 불러오기";
+  }
   ov.addEventListener("click", function(e){ if(e.target===ov) close(); });
   ov.querySelector("#anClose").addEventListener("click", close);
+  ov.querySelectorAll("[data-antab]").forEach(function(b){b.addEventListener("click",function(){var n=b.getAttribute("data-antab");setTab(n);if(n==="comments"&&!comments.length)loadComments();});});
   ov.querySelector("#anCollect").addEventListener("click", async function(){
+    if(tab==="comments"){loadComments();return;}
     var st=ov.querySelector("#anStat"), btn=ov.querySelector("#anCollect");
     if(!useBackend()){ st.innerHTML='<span style="color:#c0392b">백엔드 연결이 필요해요.</span>'; return; }
     btn.disabled=true; btn.textContent="강민서가 수집·분석 중…";
@@ -7127,7 +7165,21 @@ function openAnalyticsModal(){
         st.innerHTML='<span style="color:#0e7a52">✔ '+(d.count||0)+'개 영상 성과를 수집했어요.</span>';
       }
     }catch(e){ st.innerHTML='<span style="color:#c0392b">실패: '+esc(e.message||String(e))+'</span>'; }
-    btn.disabled=false; btn.textContent="🔄 지금 수집";
+    btn.disabled=false; btn.textContent="🔄 실제 통계 수집";
+  });
+  ov.querySelector("#anBody").addEventListener("click",async function(e){
+    var draft=e.target.closest("[data-ytdraft]"),copy=e.target.closest("[data-ytcopy]");
+    var b=draft||copy;if(!b)return;var id=b.getAttribute(draft?"data-ytdraft":"data-ytcopy");
+    var c=comments.find(function(x){return x.id===id;});if(!c)return;var inp=ov.querySelector('[data-ytreplyin="'+id+'"]'),st=ov.querySelector('[data-ytstat="'+id+'"]');
+    b.disabled=true;
+    try{
+      if(draft){
+        var rr=await fetch(backendOrigin()+"/api/content/reply",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({dept:"advisory",content:"유튜브 영상 댓글 응대. 시청자 댓글: "+c.text,comment:"우리말 나들이 채널 톤으로 짧고 자연스러운 답글 초안 1개를 작성해줘. 답글 문장만 출력해줘. 실제 게시·삭제·숨김·차단은 절대 실행하지 마."})});var dd=await rr.json();if(dd.error)throw new Error(dd.error);inp.value=dd.reply||"";if(st)st.textContent="정유진이 초안만 만들었어요. 실제 게시 여부는 YouTube Studio에서 직접 결정하세요.";
+      }else{
+        var txt=String(inp.value||"").trim();if(!txt)throw new Error("복사할 초안이 없습니다");await navigator.clipboard.writeText(txt);if(st)st.textContent="초안을 복사했어요. YouTube Studio에서 확인 후 직접 게시하세요.";
+      }
+    }catch(err){if(st)st.innerHTML='<span style="color:#c0392b">'+esc(err.message||String(err))+'</span>';}
+    b.disabled=false;
   });
 }
 function openPubSchedModal(){
