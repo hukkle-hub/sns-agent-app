@@ -1328,7 +1328,7 @@ html[data-lay="stack"] .pv-d{position:fixed;left:0;right:0;bottom:0;top:auto;wid
   <div class="topbar">
     <span id="workstat">🟢 근무 중</span>
     <span id="savestat">저장 대기</span>
-    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v372</span>
+    <span id="appver" style="font-size:10px;color:var(--on-bg2);margin-left:8px">v374</span>
     <span id="srvver" style="font-size:10px;margin-left:5px"></span>
     <button class="dock-toggle" id="dockToggle" title="작업공간 패널 켜기/끄기 (윈도우·태블릿)">🗂 작업공간</button>
     <button class="memobtn" id="memobtn">💾 메모장 저장</button>
@@ -1576,8 +1576,8 @@ var STATE = {
   deptDirective:{},
   videoAuto:false,
   collections:[],
-  koreanTrip:{ selected:"웬일/왠일", customTopic:"", dailyTarget:3, autoEnabled:true, lastAutoDay:"", autoCursor:0, drafts:[] },
-  darkFairy:{ selected:"빨간 모자", customTopic:"", dailyTarget:3, autoEnabled:true, lastAutoDay:"", autoCursor:0, drafts:[], canvasSize:"540x960", duration:15, fps:24, quality:"standard" },
+  koreanTrip:{ selected:"웬일/왠일", customTopic:"", dailyTarget:1, autoEnabled:true, lastAutoDay:"", autoCursor:0, drafts:[], generatedTopics:["왠지/웬지"], completedTopics:["왠지/웬지"], completedQueueIds:[], migrationVersion:375, canvasSize:"1080x1920", duration:15, fps:24, quality:"high" },
+  darkFairy:{ selected:"빨간 모자", customTopic:"", dailyTarget:1, autoEnabled:true, lastAutoDay:"", autoCursor:0, drafts:[], generatedTopics:[], completedTopics:[], completedQueueIds:[], documentOnly:true, migrationVersion:375, canvasSize:"540x960", duration:15, fps:24, quality:"standard" },
   authToken:"", authed:false,
   metrics:null, calendar:null,
   backendUrl:"",
@@ -1952,9 +1952,9 @@ function applyLoadedState(d, isMerge){
     if(typeof d.voiceMode==="string") STATE.voiceMode=d.voiceMode;
     if(typeof d.authToken==="string") STATE.authToken=d.authToken;
     if(Array.isArray(d.collections)){ if(isMerge){ var ids=STATE.collections.map(function(x){return x.id;}); d.collections.forEach(function(c){ if(ids.indexOf(c.id)<0) STATE.collections.push(c); }); } else STATE.collections=d.collections; }
-    if(d.koreanTrip && typeof d.koreanTrip==="object") STATE.koreanTrip=Object.assign({selected:"웬일/왠일",customTopic:"",dailyTarget:3,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[]},d.koreanTrip);
+    if(d.koreanTrip && typeof d.koreanTrip==="object") STATE.koreanTrip=Object.assign({selected:"웬일/왠일",customTopic:"",dailyTarget:1,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[],generatedTopics:["왠지/웬지"],completedTopics:["왠지/웬지"],completedQueueIds:[],migrationVersion:0,canvasSize:"1080x1920",duration:15,fps:24,quality:"high"},d.koreanTrip);
     if(!Array.isArray(STATE.koreanTrip.drafts)) STATE.koreanTrip.drafts=[];
-    if(d.darkFairy && typeof d.darkFairy==="object") STATE.darkFairy=Object.assign({selected:"빨간 모자",customTopic:"",dailyTarget:3,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[],canvasSize:"540x960",duration:15,fps:24,quality:"standard"},d.darkFairy);
+    if(d.darkFairy && typeof d.darkFairy==="object") STATE.darkFairy=Object.assign({selected:"빨간 모자",customTopic:"",dailyTarget:1,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[],generatedTopics:[],completedTopics:[],completedQueueIds:[],documentOnly:true,migrationVersion:0,canvasSize:"540x960",duration:15,fps:24,quality:"standard"},d.darkFairy);
     if(!Array.isArray(STATE.darkFairy.drafts)) STATE.darkFairy.drafts=[];
     if(typeof d.backendUrl==="string" && d.backendUrl) STATE.backendUrl=d.backendUrl;
     if(Array.isArray(d.seenJobIds)) STATE.seenJobIds=d.seenJobIds;
@@ -7652,7 +7652,7 @@ var KN_TOPICS=[
   {key:"왠지/웬지",wrong:"오늘 웬지 기분이 좋아.",right:"오늘 왠지 기분이 좋아.",scene:"아침부터 좋은 일이 생길 것 같아요.",memory:"‘왠지’는 ‘왜인지’가 줄어든 말이에요."},
   {key:"돼/되",wrong:"이거 해도 되요?",right:"이거 해도 돼요?",scene:"친구에게 허락을 구하는 순간이에요.",memory:"‘되어요’로 바꿔 자연스러우면 ‘돼요’예요."},
   {key:"안/않",wrong:"숙제를 않 했어.",right:"숙제를 안 했어.",scene:"친구가 숙제를 깜빡했다고 말해요.",memory:"‘안’은 행동을 부정하고, ‘않다’는 ‘아니하다’가 줄어든 말이에요."},
-  {key:"낫다/낳다",wrong:"감기가 다 낳았어.",right:"감기가 다 나았어.",scene:"감기에서 회복한 친구가 말해요.",memory:"병이 좋아지면 ‘낫다’, 아기를 출산하면 ‘낳다’예요."},
+  {key:"낫다/낳다",answer:"낫다",wrong:"감기가 다 낳았어.",right:"감기가 다 나았어.",scene:"감기에서 회복한 친구가 말해요.",memory:"병이 좋아지면 ‘낫다’, 아기를 출산하면 ‘낳다’예요."},
   {key:"며칠/몇일",wrong:"몇 일 후에 만나?",right:"며칠 후에 만나?",scene:"다음 약속 날짜를 정하고 있어요.",memory:"날짜를 세거나 물을 때는 ‘며칠’로 적어요."},
   {key:"금세/금새",wrong:"금새 끝났네!",right:"금세 끝났네!",scene:"어려운 일을 순식간에 끝냈어요.",memory:"‘지금 바로’라는 뜻의 ‘금시에’가 줄어 ‘금세’가 됐어요."},
   {key:"어떻게/어떡해",wrong:"이걸 어떻해?",right:"이걸 어떡해?",scene:"갑자기 난처한 일이 생겼어요.",memory:"‘어떻게 해’가 줄어든 말은 ‘어떡해’예요."}
@@ -7661,16 +7661,24 @@ var KN_DB_PROMISE=null, KN_RENDER_CHAIN=Promise.resolve(), KN_URLS={}, KN_PRESEN
 var KN_PRESENTER_SRC="./assets/malmatchum-presenter-poses.png";
 var KN_BGM_SRC="./assets/malmatchum-lounge-bgm-sfx.mp3", KN_VOICE="Gacrux";
 var KN_CANVAS_OPTIONS={"540x960":{w:540,h:960,label:"540×960 · 빠른 제작"},"720x1280":{w:720,h:1280,label:"720×1280 · 선명"},"1080x1920":{w:1080,h:1920,label:"1080×1920 · 고화질"}};
-var KN_DURATION_OPTIONS=[10,15,20], KN_FPS_OPTIONS=[24,30], KN_QUALITY_OPTIONS={standard:{label:"표준 · 1.8Mbps",bitrate:1800000},high:{label:"높음 · 3.5Mbps",bitrate:3500000}};
+var KN_DURATION_OPTIONS=[10,15,20], KN_FPS_OPTIONS=[24,30], KN_QUALITY_OPTIONS={standard:{label:"표준 · 1.8Mbps",bitrate:1800000},high:{label:"고화질 · 8Mbps",bitrate:8000000}};
+var KN_FINAL_FORMAT={canvasSize:"1080x1920",duration:15,fps:24,quality:"high",speechRate:1.12};
 function knData(){
-  if(!STATE.koreanTrip||typeof STATE.koreanTrip!=="object") STATE.koreanTrip={selected:"웬일/왠일",customTopic:"",dailyTarget:3,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[],canvasSize:"540x960",duration:15,fps:24,quality:"standard"};
+  if(!STATE.koreanTrip||typeof STATE.koreanTrip!=="object") STATE.koreanTrip={selected:"웬일/왠일",customTopic:"",dailyTarget:1,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[],generatedTopics:["왠지/웬지"],completedTopics:["왠지/웬지"],completedQueueIds:[],migrationVersion:375,canvasSize:KN_FINAL_FORMAT.canvasSize,duration:KN_FINAL_FORMAT.duration,fps:KN_FINAL_FORMAT.fps,quality:KN_FINAL_FORMAT.quality};
   if(!Array.isArray(STATE.koreanTrip.drafts)) STATE.koreanTrip.drafts=[];
-  if(STATE.koreanTrip.dailyTarget<3||STATE.koreanTrip.dailyTarget>5) STATE.koreanTrip.dailyTarget=3;
+  if(!Array.isArray(STATE.koreanTrip.generatedTopics)) STATE.koreanTrip.generatedTopics=[];
+  if(!Array.isArray(STATE.koreanTrip.completedTopics)) STATE.koreanTrip.completedTopics=[];
+  if(STATE.koreanTrip.completedTopics.indexOf("왠지/웬지")<0) STATE.koreanTrip.completedTopics.push("왠지/웬지");
+  if(!Array.isArray(STATE.koreanTrip.completedQueueIds)) STATE.koreanTrip.completedQueueIds=[];
+  STATE.koreanTrip.dailyTarget=Math.max(1,Math.min(3,+STATE.koreanTrip.dailyTarget||1));
   if(typeof STATE.koreanTrip.autoEnabled!=="boolean") STATE.koreanTrip.autoEnabled=true;
-  if(!KN_CANVAS_OPTIONS[STATE.koreanTrip.canvasSize]) STATE.koreanTrip.canvasSize="540x960";
-  if(KN_DURATION_OPTIONS.indexOf(+STATE.koreanTrip.duration)<0) STATE.koreanTrip.duration=15; else STATE.koreanTrip.duration=+STATE.koreanTrip.duration;
-  if(KN_FPS_OPTIONS.indexOf(+STATE.koreanTrip.fps)<0) STATE.koreanTrip.fps=24; else STATE.koreanTrip.fps=+STATE.koreanTrip.fps;
-  if(!KN_QUALITY_OPTIONS[STATE.koreanTrip.quality]) STATE.koreanTrip.quality="standard";
+  // v373: 실제 첫 업로드에서 확정한 쇼츠 규격으로 고정한다.
+  STATE.koreanTrip.canvasSize=KN_FINAL_FORMAT.canvasSize;
+  STATE.koreanTrip.duration=KN_FINAL_FORMAT.duration;
+  STATE.koreanTrip.fps=KN_FINAL_FORMAT.fps;
+  STATE.koreanTrip.quality=KN_FINAL_FORMAT.quality;
+  knMigrateQueue(STATE.koreanTrip);
+  STATE.koreanTrip.drafts.forEach(knNormalizeDraft);
   return STATE.koreanTrip;
 }
 function knSettings(){var k=knData(),c=KN_CANVAS_OPTIONS[k.canvasSize];return {canvasSize:k.canvasSize,w:c.w,h:c.h,duration:k.duration,fps:k.fps,quality:k.quality,bitrate:KN_QUALITY_OPTIONS[k.quality].bitrate};}
@@ -7684,19 +7692,41 @@ function knVideoLabel(s){ return s==="done"?"영상 완성":(s==="rendering"?"�
 function knDraftFromTopic(t){
   var custom=!t;
   var k=knData(), topic=t||{key:(k.customTopic||"새 우리말 소재"),wrong:"오답 표현을 확인해 주세요.",right:"정답 표현을 확인해 주세요.",scene:"일상에서 자주 헷갈리는 표현을 발견했어요.",memory:"국립국어원 등 신뢰할 수 있는 근거로 정답과 기억법을 검수해 주세요."};
-  return {id:"kn_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),topic:topic.key,createdAt:Date.now(),status:custom?"review":"draft",videoStatus:"",videoProgress:0,needsFactCheck:custom,wrong:topic.wrong,right:topic.right,scene:topic.scene,memory:topic.memory,
-    scenes:[
-      {time:"0–3초",text:topic.scene+" “"+topic.wrong+"”"},
-      {time:"3–6초",text:"잠깐! 어느 표현이 맞을까요?"},
-      {time:"6–11초",text:"정답은 ‘"+topic.right+"’"},
-      {time:"11–15초",text:topic.memory}
-    ]};
+  return {id:"kn_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),topic:topic.key,createdAt:Date.now(),status:custom?"review":"draft",videoStatus:"",videoProgress:0,needsFactCheck:custom,answer:topic.answer||"",wrong:topic.wrong,right:topic.right,scene:topic.scene,memory:topic.memory,
+    scenes:knScenesForTopic(topic)};
+}
+function knChoices(d){return String(d&&d.topic||"").split("/").map(function(x){return x.trim();}).filter(Boolean);}
+function knCorrectChoice(d){if(d&&d.answer)return String(d.answer);var opts=knChoices(d),right=String(d&&d.right||"");for(var i=0;i<opts.length;i++)if(right.indexOf(opts[i])>=0)return opts[i];return right.replace(/[.!?]/g,"").trim();}
+function knScenesForTopic(topic){var opts=String(topic.key||"").split("/");return [
+  {time:"0–3초",text:(opts.length>1?opts.join(" / "):topic.key)+", 맞는 표현은 무엇일까요?"},
+  {time:"3–6초",text:"3 · 2 · 1"},
+  {time:"6–11초",text:"정답은 ‘"+knCorrectChoice(topic)+"’입니다."},
+  {time:"11–15초",text:topic.memory}
+];}
+function knNormalizeDraft(d){if(!d||d.studio==="dark")return d;var known=knTopic(d.topic)||{},t={key:d.topic||"",answer:d.answer||known.answer||"",right:d.right||"",memory:d.memory||""};if(t.answer)d.answer=t.answer;d.scenes=knScenesForTopic(t);return d;}
+function knTopicKey(v){return String(v||"").trim().replace(/\s+/g," ").toLowerCase();}
+function knCompleted(k,key){var nk=knTopicKey(key);return (k.completedTopics||[]).some(function(x){return knTopicKey(x)===nk;});}
+function knGenerated(k,key){var nk=knTopicKey(key);return (k.generatedTopics||[]).some(function(x){return knTopicKey(x)===nk;});}
+function knRememberGenerated(k,key){key=String(key||"").trim();if(!key)return;if(!Array.isArray(k.generatedTopics))k.generatedTopics=[];if(!knGenerated(k,key))k.generatedTopics.push(key);}
+function knHasTopic(k,key){var nk=knTopicKey(key);return knCompleted(k,key)||knGenerated(k,key)||(k.drafts||[]).some(function(x){return knTopicKey(x.topic)===nk;});}
+function knMigrateQueue(k){
+  if((+k.migrationVersion||0)>=375)return;
+  if(!Array.isArray(k.generatedTopics))k.generatedTopics=[];
+  (k.completedTopics||[]).forEach(function(x){knRememberGenerated(k,x);});
+  (k.drafts||[]).forEach(function(x){if(x&&x.topic)knRememberGenerated(k,x.topic);});
+  var completed={};(k.completedTopics||[]).forEach(function(x){completed[knTopicKey(x)]=1;});
+  var best={},score=function(x){return x.videoStatus==="done"?4:(x.status==="published"?3:(x.videoStatus==="rendering"||x.videoStatus==="queued"?1:2));};
+  (k.drafts||[]).forEach(function(x){var key=knTopicKey(x.topic);if(!key||completed[key]){if(x&&x.id)knDeleteVideo(x.id);return;}var old=best[key];if(!old||score(x)>score(old)){if(old&&old.id)knDeleteVideo(old.id);best[key]=x;}else if(x.id)knDeleteVideo(x.id);});
+  k.drafts=Object.keys(best).map(function(key){var x=best[key];var rs=x.renderSettings||{};if(x.videoStatus==="queued"||x.videoStatus==="rendering"||(x.videoStatus==="done"&&(rs.canvasSize!==KN_FINAL_FORMAT.canvasSize||rs.quality!==KN_FINAL_FORMAT.quality||(+rs.bitrate||0)<8000000))){knDeleteVideo(x.id);x.videoStatus="";x.videoProgress=0;x.videoError="";x.renderSettings=null;}return x;});
+  // 예전 자동 제작이 쌓아 둔 대기 항목은 한 편만 남기고 순차 제작으로 전환한다.
+  if(k.drafts.length>1){k.drafts.sort(function(a,b){var ad=a.videoStatus==="done"?1:0,bd=b.videoStatus==="done"?1:0;return bd-ad||(+a.createdAt||0)-(+b.createdAt||0);});k.drafts.slice(1).forEach(function(x){if(x.id)knDeleteVideo(x.id);});k.drafts=k.drafts.slice(0,1);}
+  k.currentDraftId=k.drafts.some(function(x){return x.id===k.currentDraftId;})?k.currentDraftId:(k.drafts.length?k.drafts[k.drafts.length-1].id:"");
+  k.migrationVersion=375;
 }
 function knToday(){ var n=new Date(); return n.getFullYear()+"-"+("0"+(n.getMonth()+1)).slice(-2)+"-"+("0"+n.getDate()).slice(-2); }
 function knAutoTopics(count){
-  var k=knData(),lastUsed={};
-  k.drafts.forEach(function(d,i){if(knTopic(d.topic))lastUsed[d.topic]=i;});
-  return KN_TOPICS.slice().sort(function(a,b){return (lastUsed[a.key]===undefined?-1:lastUsed[a.key])-(lastUsed[b.key]===undefined?-1:lastUsed[b.key]);}).slice(0,count);
+  var k=knData();
+  return KN_TOPICS.filter(function(t){return !knHasTopic(k,t.key);}).slice(0,count);
 }
 function knOpenDb(){
   if(KN_DB_PROMISE) return KN_DB_PROMISE;
@@ -7735,11 +7765,13 @@ function knLoadBgm(){
   return KN_BGM_PROMISE;
 }
 function knVoiceCues(d,duration){
-  var c=knPhaseCuts(duration);return [
-    {at:c[0]+.18,text:String(d.wrong||"")+" 맞는 표현일까요?"},
-    {at:c[1]+.16,text:"삼 초 안에 골라보세요."},
-    {at:c[2]+.15,text:"정답은, "+String(d.right||"")},
-    {at:c[3]+.10,text:String(d.memory||"")}
+  var c=knPhaseCuts(duration),opts=knChoices(d),question=(opts.length?opts.join(", "):String(d.topic||""))+". 맞는 표현은 무엇일까요?";return [
+    {at:c[0]+.07,text:question,rate:KN_FINAL_FORMAT.speechRate},
+    {at:c[1]+.10,text:"삼",rate:1},
+    {at:c[1]+1.10,text:"이",rate:1},
+    {at:c[1]+2.10,text:"일",rate:1},
+    {at:c[2]+.10,text:"정답은, "+knCorrectChoice(d)+"입니다.",rate:KN_FINAL_FORMAT.speechRate},
+    {at:c[3]+.05,text:String(d.memory||""),rate:KN_FINAL_FORMAT.speechRate}
   ];
 }
 async function knLoadVoiceCues(d,duration){
@@ -7755,7 +7787,8 @@ async function knPrepareAudio(d,duration){
   if(d.studio==="dark")return null;
   var result={bgm:null,cues:[],warning:""};
   try{result.bgm=await knLoadBgm();}catch(e){result.warning=String(e.message||e);}
-  try{result.cues=await knLoadVoiceCues(d,duration);}catch(e){result.warning=(result.warning?result.warning+" · ":"")+String(e.message||e);}
+  result.cues=await knLoadVoiceCues(d,duration);
+  if(result.cues.length!==6)throw new Error("진행자 음성이 모두 준비되지 않아 영상을 저장하지 않았습니다.");
   return result;
 }
 function knDrawPlaceholder(ctx,x,y,t,accent,label){
@@ -7824,8 +7857,9 @@ async function knRenderBlob(d,onProgress,settings){
   if(prepared&&(prepared.bgm||prepared.cues.length)){
     audioCtx=new (window.AudioContext||window.webkitAudioContext)();var dest=audioCtx.createMediaStreamDestination();
     if(audioCtx.state==="suspended")try{await audioCtx.resume();}catch(_){}
+    if(audioCtx.state!=="running")throw new Error("브라우저가 음성 재생을 막았습니다. 화면을 한 번 누른 뒤 다시 제작해 주세요.");
     if(prepared.bgm){var bb=await audioCtx.decodeAudioData(prepared.bgm.slice(0)),bs=audioCtx.createBufferSource(),bg=audioCtx.createGain();bs.buffer=bb;bg.gain.value=.68;bs.connect(bg);bg.connect(dest);audioSources.push({source:bs,at:0});}
-    for(var ai=0;ai<prepared.cues.length;ai++){var cue=prepared.cues[ai],vb=await audioCtx.decodeAudioData(cue.bytes.slice(0)),vs=audioCtx.createBufferSource(),vg=audioCtx.createGain();vs.buffer=vb;vg.gain.value=1;vs.connect(vg);vg.connect(dest);audioSources.push({source:vs,at:cue.at});}
+    for(var ai=0;ai<prepared.cues.length;ai++){var cue=prepared.cues[ai],vb=await audioCtx.decodeAudioData(cue.bytes.slice(0)),vs=audioCtx.createBufferSource(),vg=audioCtx.createGain();vs.buffer=vb;vs.playbackRate.value=cue.rate||1;vg.gain.value=1;vs.connect(vg);vg.connect(dest);audioSources.push({source:vs,at:cue.at});}
     stream=new MediaStream(videoStream.getVideoTracks().concat(dest.stream.getAudioTracks()));
   }
   var rec=mime?new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:settings.bitrate}):new MediaRecorder(stream);
@@ -7842,6 +7876,8 @@ function studioViewForDraft(d){return d&&d.studio==="dark"?"dark":"korean";}
 function studioFindDraft(id){return knData().drafts.concat(dpData().drafts).find(function(x){return x.id===id;});}
 function knQueueVideo(d,automatic){
   if(!d||d.videoStatus==="rendering"||d.videoStatus==="queued") return KN_RENDER_CHAIN;
+  var active=knData().drafts.concat(dpData().drafts).find(function(x){return x.id!==d.id&&(x.videoStatus==="rendering"||x.videoStatus==="queued");});
+  if(active){if(!automatic)alert("현재 ‘"+active.topic+"’ 영상을 먼저 만들고 있어요. 완료·다운로드 후 다음 영상을 시작해 주세요.");return KN_RENDER_CHAIN;}
   var targetView=studioViewForDraft(d),renderSettings=studioSettingsForDraft(d);d.renderSettings=renderSettings;d.videoStatus="queued";d.videoProgress=0;d.videoError="";d.automatic=!!automatic;saveState();if(STATE.view===targetView)render();
   KN_RENDER_CHAIN=KN_RENDER_CHAIN.then(async function(){
     d.videoStatus="rendering";d.videoProgress=0;await saveState();if(STATE.view===targetView)render();
@@ -7854,15 +7890,36 @@ function knQueueVideo(d,automatic){
   return KN_RENDER_CHAIN;
 }
 function knResultHtml(d){
-  var rs=d.renderSettings||{canvasSize:"540x960",duration:15},done=d.videoStatus==="done", msg=done?"미리보기 불러오는 중…":(d.videoStatus==="error"?(d.videoError||"제작 오류"):(d.videoStatus==="rendering"?rs.duration+"초 영상을 만들고 있어요…":"제작 순서를 기다리고 있어요…"));
-  return '<article class="kn-result"><div class="kn-video" data-kn-preview="'+d.id+'"><div class="kn-video-msg">'+escapeHtml(msg)+(d.videoStatus==="rendering"?'<div class="kn-progress"><i data-kn-progress="'+d.id+'" style="width:'+(d.videoProgress||0)+'%"></i></div>':'')+'</div></div><div class="kn-result-info"><strong>'+escapeHtml(d.topic)+'</strong><small>'+knVideoLabel(d.videoStatus)+(done?' · '+rs.canvasSize.replace('x','×')+' · '+rs.duration+'초 · '+Math.max(1,Math.round((d.videoSize||0)/1024/1024*10)/10)+'MB':'')+'</small><button class="kn-download" data-studio-copy="'+d.id+'">대본 복사</button><button class="kn-download" data-kn-download="'+d.id+'" '+(done?'':'disabled')+'>영상 다운로드</button></div></article>';
+  var rs=d.renderSettings||(d.studio==="dark"?{canvasSize:"540x960",duration:15}:KN_FINAL_FORMAT),done=d.videoStatus==="done", msg=done?"미리보기 불러오는 중…":(d.videoStatus==="error"?(d.videoError||"제작 오류"):(d.videoStatus==="rendering"?rs.duration+"초 영상을 만들고 있어요…":"제작 순서를 기다리고 있어요…"));
+  return '<article class="kn-result"><div class="kn-video" data-kn-preview="'+d.id+'"><div class="kn-video-msg">'+escapeHtml(msg)+(d.videoStatus==="rendering"?'<div class="kn-progress"><i data-kn-progress="'+d.id+'" style="width:'+(d.videoProgress||0)+'%"></i></div>':'')+'</div></div><div class="kn-result-info"><strong>'+escapeHtml(d.topic)+'</strong><small>'+knVideoLabel(d.videoStatus)+(done?' · '+rs.canvasSize.replace('x','×')+' · '+rs.duration+'초 · '+Math.max(1,Math.round((d.videoSize||0)/1024/1024*10)/10)+'MB':'')+'</small><button class="kn-download" data-studio-copy="'+d.id+'">대본 복사</button><button class="kn-download" data-kn-download="'+d.id+'" '+(done?'':'disabled')+'>영상 다운로드</button><button class="kn-download" data-kn-remove="'+d.id+'" style="color:#a34c4c">영상 삭제</button></div></article>';
 }
 async function knHydrateResults(){
   var nodes=[].slice.call(document.querySelectorAll("[data-kn-preview]"));
-  nodes.forEach(async function(el){var id=el.getAttribute("data-kn-preview"),d=studioFindDraft(id);if(!d||d.videoStatus!=="done")return;var blob=await knGetVideo(id);if(!blob){el.innerHTML='<div class="kn-video-msg">저장된 영상이 없어 다시 제작해야 해요.</div>';return;}if(KN_URLS[id])URL.revokeObjectURL(KN_URLS[id]);var u=URL.createObjectURL(blob);KN_URLS[id]=u;el.innerHTML='<video controls playsinline preload="metadata" src="'+u+'"></video>'+(d.audioWarning?'<div class="kn-video-msg" style="position:static;padding:8px;color:#a34c4c">음성 일부 제외: '+escapeHtml(d.audioWarning)+'</div>':'');});
+  nodes.forEach(async function(el){var id=el.getAttribute("data-kn-preview"),d=studioFindDraft(id);if(!d||d.videoStatus!=="done")return;var blob=await knGetVideo(id);if(!blob){el.innerHTML='<div class="kn-video-msg">저장된 영상이 없어 삭제 후 다시 제작해 주세요.</div>';return;}if(KN_URLS[id])URL.revokeObjectURL(KN_URLS[id]);var u=URL.createObjectURL(blob);KN_URLS[id]=u;el.innerHTML='<video controls playsinline preload="metadata" src="'+u+'"></video>'+(d.audioWarning?'<div class="kn-video-msg" style="position:static;padding:8px;color:#8a6c39">배경음 안내: '+escapeHtml(d.audioWarning)+'</div>':'');var v=el.querySelector("video");if(v)v.onerror=function(){el.innerHTML='<div class="kn-video-msg">이 영상 파일을 재생할 수 없습니다. 아래 삭제 버튼으로 지운 뒤 다시 제작해 주세요.</div>';};});
+}
+async function knRemoveDraft(id){
+  var d=studioFindDraft(id);if(!d||!confirm("이 제작물과 저장된 영상을 삭제할까요?\n소재 생성 기록은 남아 같은 단어가 자동 재생성되지 않습니다."))return;
+  var data=studioDataForDraft(d);knRememberGenerated(data,d.topic);if(KN_URLS[id]){URL.revokeObjectURL(KN_URLS[id]);delete KN_URLS[id];}await knDeleteVideo(id);data.drafts=data.drafts.filter(function(x){return x.id!==id;});if(data.currentDraftId===id)data.currentDraftId="";data.lastAutoDay="";
+  await saveState();if(useBackend())try{await fetch(backendOrigin()+"/api/studio/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:d.serverQueueId||"",studio:d.studio==="dark"?"dark":"korean",key:d.topic})});}catch(e){}render();setTimeout(function(){if(data.autoEnabled)(d.studio==="dark"?dpEnsureDaily():knEnsureDaily());},300);
+}
+async function knDeleteRenderedVideo(id){
+  var d=studioFindDraft(id);if(!d||!confirm("저장된 영상만 삭제할까요?\n대본과 소재 생성 기록은 남고, 같은 대본으로 다시 제작할 수 있습니다."))return;
+  var data=studioDataForDraft(d);knRememberGenerated(data,d.topic);if(KN_URLS[id]){URL.revokeObjectURL(KN_URLS[id]);delete KN_URLS[id];}await knDeleteVideo(id);d.videoStatus="";d.videoProgress=0;d.videoError="";d.videoMime="";d.videoSize=0;d.renderedAt=0;d.audioWarning="";d.renderSettings=null;await saveState();render();
 }
 async function knDownload(id){
-  var d=studioFindDraft(id),blob=await knGetVideo(id);if(!d||!blob){alert("영상 파일을 찾지 못했어요. 다시 제작해 주세요.");return;}var ext=/mp4/i.test(blob.type)?"mp4":"webm",safe=String(d.topic||"studio").replace(/[\\/:*?"<>|\s]+/g,"_"),duration=(d.renderSettings&&d.renderSettings.duration)||15,prefix=d.studio==="dark"?"동심파괴":"말맞춤";var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=prefix+"_"+safe+"_"+duration+"초."+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},5000);
+  var d=studioFindDraft(id),blob=await knGetVideo(id);if(!d||!blob){alert("영상 파일을 찾지 못했어요. 다시 제작해 주세요.");return;}var ext=/mp4/i.test(blob.type)?"mp4":"webm",safe=String(d.topic||"studio").replace(/[\\/:*?"<>|\s]+/g,"_"),duration=(d.renderSettings&&d.renderSettings.duration)||15,prefix=d.studio==="dark"?"동심파괴":"말맞춤";var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=prefix+"_"+safe+"_"+duration+"초."+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},5000);await knCompleteDownloaded(d);
+}
+async function knCompleteDownloaded(d){
+  var data=d.studio==="dark"?dpData():knData();
+  knRememberGenerated(data,d.topic);
+  if(!Array.isArray(data.completedTopics))data.completedTopics=[];
+  if(!knCompleted(data,d.topic))data.completedTopics.push(d.topic);
+  if(!Array.isArray(data.completedQueueIds))data.completedQueueIds=[];
+  if(d.serverQueueId&&data.completedQueueIds.indexOf(d.serverQueueId)<0)data.completedQueueIds.push(d.serverQueueId);
+  if(KN_URLS[d.id]){URL.revokeObjectURL(KN_URLS[d.id]);delete KN_URLS[d.id];}
+  await knDeleteVideo(d.id);data.drafts=data.drafts.filter(function(x){return x.id!==d.id;});if(data.currentDraftId===d.id)data.currentDraftId="";data.lastAutoDay="";
+  await saveState();if(useBackend())try{await fetch(backendOrigin()+"/api/studio/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:d.serverQueueId||"",studio:d.studio==="dark"?"dark":"korean",key:d.topic})});}catch(e){}
+  render();setTimeout(function(){if(data.autoEnabled)(d.studio==="dark"?dpEnsureDaily():knEnsureDaily());},300);
 }
 function studioDraftText(d){
   if(!d)return "";var brand=d.studio==="dark"?"동심파괴":"말맞춤",lines=["["+brand+"] "+(d.topic||"제목 없음")];
@@ -7879,18 +7936,23 @@ function studioExport(kind){
   var data=kind==="dark"?dpData():knData(),brand=kind==="dark"?"동심파괴":"말맞춤",pack={format:"hukkle-studio-v1",studio:kind,brand:brand,exportedAt:new Date().toISOString(),settings:{canvasSize:data.canvasSize,duration:data.duration,fps:data.fps,quality:data.quality,dailyTarget:data.dailyTarget,autoEnabled:data.autoEnabled},drafts:data.drafts.map(studioSafeDraft)};
   var blob=new Blob([JSON.stringify(pack,null,2)],{type:"application/json"}),u=URL.createObjectURL(blob),a=document.createElement("a"),day=knToday().replace(/-/g,"");a.href=u;a.download=brand+"_제작물_"+day+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},1500);
 }
+function studioDownloadDocument(id){
+  var d=studioFindDraft(id);if(!d){alert("내려받을 문서를 찾지 못했어요.");return;}var safe=String(d.topic||"동심파괴").replace(/[\\/:*?"<>|\s]+/g,"_"),blob=new Blob([studioDraftText(d)+"\n"],{type:"text/plain;charset=utf-8"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="동심파괴_"+safe+"_기획문서.txt";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},1500);var data=dpData();knRememberGenerated(data,d.topic);if(!knCompleted(data,d.topic)){if(!Array.isArray(data.completedTopics))data.completedTopics=[];data.completedTopics.push(d.topic);}saveState();
+}
 function studioImport(kind){
-  var fi=document.createElement("input");fi.type="file";fi.accept=".json,application/json";fi.onchange=function(){var file=fi.files&&fi.files[0];if(!file)return;var rd=new FileReader();rd.onload=async function(){try{var p=JSON.parse(String(rd.result||""));if(p.format!=="hukkle-studio-v1"||!Array.isArray(p.drafts))throw new Error("지원하지 않는 제작물 파일입니다.");if(p.studio&&p.studio!==kind&&!confirm("다른 탭에서 저장한 파일입니다. 그래도 이 탭으로 가져올까요?"))return;var data=kind==="dark"?dpData():knData(),ids={};data.drafts.forEach(function(d){ids[d.id]=1;});var added=0;p.drafts.forEach(function(src){var d=JSON.parse(JSON.stringify(src));if(!d||!d.topic||!Array.isArray(d.scenes))return;if(ids[d.id])d.id=(kind==="dark"?"dp_":"kn_")+Date.now()+"_"+Math.random().toString(36).slice(2,7);d.studio=kind;d.videoStatus="";d.videoProgress=0;d.videoError="";data.drafts.push(d);ids[d.id]=1;added++;});if(p.settings&&typeof p.settings==="object"){["canvasSize","duration","fps","quality","dailyTarget","autoEnabled"].forEach(function(k){if(p.settings[k]!==undefined)data[k]=p.settings[k];});}if(added)data.currentDraftId=data.drafts[data.drafts.length-1].id;await saveState();render();alert(added+"개 제작물을 가져왔어요. 영상은 필요할 때 다시 제작하면 됩니다.");}catch(e){alert("가져오기 실패: "+(e.message||e));}};rd.readAsText(file,"utf-8");};fi.click();
+  var fi=document.createElement("input");fi.type="file";fi.accept=".json,application/json";fi.onchange=function(){var file=fi.files&&fi.files[0];if(!file)return;var rd=new FileReader();rd.onload=async function(){try{var p=JSON.parse(String(rd.result||""));if(p.format!=="hukkle-studio-v1"||!Array.isArray(p.drafts))throw new Error("지원하지 않는 제작물 파일입니다.");if(p.studio&&p.studio!==kind&&!confirm("다른 탭에서 저장한 파일입니다. 그래도 이 탭으로 가져올까요?"))return;var data=kind==="dark"?dpData():knData(),ids={};data.drafts.forEach(function(d){ids[d.id]=1;});var added=0;p.drafts.forEach(function(src){var d=JSON.parse(JSON.stringify(src));if(!d||!d.topic||!Array.isArray(d.scenes)||knHasTopic(data,d.topic)||(kind==="dark"&&dpExisting(d.topic,data.drafts)))return;if(kind!=="dark"&&data.drafts.length>=1)return;if(ids[d.id])d.id=(kind==="dark"?"dp_":"kn_")+Date.now()+"_"+Math.random().toString(36).slice(2,7);d.studio=kind;d.videoStatus="";d.videoProgress=0;d.videoError="";knRememberGenerated(data,d.topic);data.drafts.push(d);ids[d.id]=1;added++;});if(p.settings&&typeof p.settings==="object"){["dailyTarget","autoEnabled"].forEach(function(k){if(p.settings[k]!==undefined)data[k]=p.settings[k];});}if(added)data.currentDraftId=data.drafts[data.drafts.length-1].id;await saveState();render();alert(added+"개 제작물을 가져왔어요. 중복·완료 소재는 제외했습니다.");}catch(e){alert("가져오기 실패: "+(e.message||e));}};rd.readAsText(file,"utf-8");};fi.click();
 }
 function bindStudioCommon(){
   document.querySelectorAll("[data-studio-copy]").forEach(function(b){b.addEventListener("click",function(){studioCopy(b.getAttribute("data-studio-copy"));});});
   var ex=document.getElementById("studioExport"),im=document.getElementById("studioImport"),cp=document.getElementById("studioCopyCurrent");if(ex)ex.onclick=function(){studioExport(ex.getAttribute("data-kind"));};if(im)im.onclick=function(){studioImport(im.getAttribute("data-kind"));};if(cp)cp.onclick=function(){studioCopy(cp.getAttribute("data-id"));};
+  document.querySelectorAll("[data-kn-remove]").forEach(function(b){b.addEventListener("click",function(){knDeleteRenderedVideo(b.getAttribute("data-kn-remove"));});});
 }
 async function knEnsureDaily(){
   var k=knData(),today=knToday();if(!k.autoEnabled||k.lastAutoDay===today)return;
-  if(useBackend()){try{var rr=await fetch(backendOrigin()+"/api/studio/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({studio:"korean",dailyTarget:k.dailyTarget})}),remote=await rr.json();if(remote&&remote.ok){syncStudioQueue(remote.queue||[]);k.lastAutoDay=today;await saveState();return;}}catch(e){}}
-  k.lastAutoDay=today;var count=Math.max(3,Math.min(5,+k.dailyTarget||3)),made=[],autoTopics=knAutoTopics(count);
-  autoTopics.forEach(function(t){var d=knDraftFromTopic(t);d.autoDay=today;d.automatic=true;k.drafts.push(d);made.push(d);});
+  if(useBackend()){try{var rr=await fetch(backendOrigin()+"/api/studio/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({studio:"korean",dailyTarget:k.dailyTarget,completedKeys:(k.generatedTopics||[]).concat(k.completedTopics||[])})}),remote=await rr.json();if(remote&&remote.ok){syncStudioQueue(remote.queue||[]);k.lastAutoDay=today;await saveState();return;}}catch(e){}}
+  if(k.drafts.length)return;
+  k.lastAutoDay=today;var count=1,made=[],autoTopics=knAutoTopics(count);
+  autoTopics.forEach(function(t){var d=knDraftFromTopic(t);d.autoDay=today;d.automatic=true;knRememberGenerated(k,t.key);k.drafts.push(d);made.push(d);});
   if(made.length)k.currentDraftId=made[made.length-1].id;await saveState();if(STATE.view==="korean")render();made.forEach(function(d){knQueueVideo(d,true);});
 }
 function knSceneHtml(d){
@@ -7913,13 +7975,13 @@ function renderKorean(){
   var nReady=k.drafts.filter(function(d){return d.status==="ready";}).length;
   var nPublished=k.drafts.filter(function(d){return d.status==="published";}).length;
   var nVideo=k.drafts.filter(function(d){return d.videoStatus==="done";}).length;
-  var topics=KN_TOPICS.map(function(t){return '<button class="kn-topic'+(k.selected===t.key?' on':'')+'" data-kn-topic="'+escapeHtml(t.key)+'">'+escapeHtml(t.key)+'</button>';}).join("");
+  var topics=KN_TOPICS.map(function(t){var done=knCompleted(k,t.key),active=!done&&k.drafts.some(function(x){return knTopicKey(x.topic)===knTopicKey(t.key);}),used=knGenerated(k,t.key);return '<button class="kn-topic'+(k.selected===t.key?' on':'')+'" data-kn-topic="'+escapeHtml(t.key)+'"'+(done||active||used?' disabled':'')+'>'+escapeHtml(t.key)+(done?' · 완료':(active?' · 제작 중':(used?' · 생성 기록':'')))+'</button>';}).join("");
   var settingsHtml='<div class="kn-settings">'
-    +'<div class="kn-setting"><label for="knCanvas">캔버스 크기</label><select id="knCanvas"><option value="540x960"'+(k.canvasSize==="540x960"?' selected':'')+'>540×960 · 빠른 제작</option><option value="720x1280"'+(k.canvasSize==="720x1280"?' selected':'')+'>720×1280 · 선명</option><option value="1080x1920"'+(k.canvasSize==="1080x1920"?' selected':'')+'>1080×1920 · 고화질</option></select></div>'
-    +'<div class="kn-setting"><label for="knDuration">영상 길이</label><select id="knDuration"><option value="10"'+(k.duration===10?' selected':'')+'>10초 · 짧게</option><option value="15"'+(k.duration===15?' selected':'')+'>15초 · 기본</option><option value="20"'+(k.duration===20?' selected':'')+'>20초 · 여유 있게</option></select></div>'
-    +'<div class="kn-setting"><label for="knFps">프레임률</label><select id="knFps"><option value="24"'+(k.fps===24?' selected':'')+'>24fps · 기본</option><option value="30"'+(k.fps===30?' selected':'')+'>30fps · 부드럽게</option></select></div>'
-    +'<div class="kn-setting"><label for="knQuality">영상 품질</label><select id="knQuality"><option value="standard"'+(k.quality==="standard"?' selected':'')+'>표준 · 1.8Mbps</option><option value="high"'+(k.quality==="high"?' selected':'')+'>높음 · 3.5Mbps</option></select></div>'
-    +'<div class="kn-setting-note">정해진 선택지 안에서만 바꿀 수 있습니다. 처음 기본값은 540×960 · 15초 · 24fps · 표준입니다.</div></div>';
+    +'<div class="kn-setting"><label>캔버스</label><strong>1080×1920 · 9:16</strong></div>'
+    +'<div class="kn-setting"><label>영상 길이</label><strong>15초</strong></div>'
+    +'<div class="kn-setting"><label>프레임률</label><strong>24fps</strong></div>'
+    +'<div class="kn-setting"><label>음성 속도</label><strong>핵심 문장 12% 빠르게</strong></div>'
+    +'<div class="kn-setting-note">첫 공개 영상에서 확정한 규격입니다. 질문·정답·기억법은 빠르게, 3·2·1은 원속도로 장면마다 따로 맞춥니다.</div></div>';
   var list=drafts.length?drafts.map(function(d){
     var act=d.status==="draft"?'<button class="kn-mini" data-kn-act="review" data-id="'+d.id+'">검수 요청</button>':(d.status==="review"?'<button class="kn-mini" data-kn-act="ready" data-id="'+d.id+'">검수 통과</button>':(d.status==="ready"?'<button class="kn-mini" data-kn-act="published" data-id="'+d.id+'">발행 완료</button>':''));
     var make=d.videoStatus==="done"?'<button class="kn-mini" data-kn-result="'+d.id+'">결과 보기</button>':((d.videoStatus==="rendering"||d.videoStatus==="queued")?'<button class="kn-mini" disabled>'+knVideoLabel(d.videoStatus)+'</button>':'<button class="kn-mini" data-kn-produce="'+d.id+'">완성 영상 만들기</button>');
@@ -7934,7 +7996,7 @@ function renderKorean(){
   var results=drafts.filter(function(d){return d.videoStatus;}).map(knResultHtml).join("")||'<div class="kn-empty">완성 영상이 여기에 나타납니다.</div>';
   viewEl.innerHTML='<div class="kn-wrap"><div class="kn-shell">'
     +'<section class="kn-hero"><div class="kn-eyebrow">HUKKLE HUB · KOREAN SHORTS LAB</div><h2 class="kn-title">말맞춤</h2><div class="kn-desc">소재 선택부터 영상 규격 설정·제작·미리보기·다운로드까지 이 탭 하나에서 끝냅니다.</div><div class="kn-pills"><span class="kn-pill">'+cfg.canvasSize.replace('x','×')+' · 9:16</span><span class="kn-pill">'+k.duration+'초 · '+k.fps+'fps</span><span class="kn-pill">도도한 진행자 음성 · 재즈 라운지</span><span class="kn-pill">하루 '+k.dailyTarget+'개 자동 제작</span><span class="kn-pill">자동 발행 꺼짐</span></div><div class="kn-io">'+(cur?'<button class="kn-btn" id="studioCopyCurrent" data-id="'+cur.id+'">현재 대본 복사</button>':'')+'<button class="kn-btn" id="studioExport" data-kind="korean">제작물 따로 저장</button><button class="kn-btn" id="studioImport" data-kind="korean">제작물 가져오기</button></div><div class="kn-kpis"><div class="kn-kpi"><b>'+nVideo+'</b><span>완성 영상</span></div><div class="kn-kpi"><b>'+nReview+'</b><span>검수 대기</span></div><div class="kn-kpi"><b>'+nReady+'</b><span>발행 준비</span></div><div class="kn-kpi"><b>'+nPublished+'</b><span>발행 완료</span></div></div></section>'
-    +'<div class="kn-grid"><section class="kn-card"><h3>오늘 영상 만들기</h3><div class="kn-sub">허용된 규격을 고르면 매일 자동 제작에 그대로 적용됩니다.</div>'+settingsHtml+'<div class="kn-auto"><strong>매일 자동 제작</strong><button class="kn-toggle'+(k.autoEnabled?' on':'')+'" id="knAuto">'+(k.autoEnabled?'켜짐':'꺼짐')+'</button><select class="kn-count" id="knCount"><option value="3"'+(k.dailyTarget===3?' selected':'')+'>하루 3개</option><option value="4"'+(k.dailyTarget===4?' selected':'')+'>하루 4개</option><option value="5"'+(k.dailyTarget===5?' selected':'')+'>하루 5개</option></select><span class="kn-auto-note">단어도 자동으로 고릅니다. 최근 사용하지 않은 단어부터 선택하고, 모든 단어를 사용한 뒤 다시 순환합니다.</span></div><div class="kn-manual"><div class="kn-manual-title">직접 만들기 · 선택 사항</div><div class="kn-manual-note">아래 단어 목록은 자동제작에 필요하지 않습니다. 특정 소재를 따로 만들 때만 사용하세요.</div><div class="kn-topics">'+topics+'</div><input class="kn-field" id="knCustom" value="'+escapeHtml(k.customTopic||"")+'" placeholder="새 소재 입력 · 예: 맞히다 / 맞추다"><div class="kn-actions"><button class="kn-btn ghost" id="knRandom">소재 추천</button><button class="kn-btn ghost" id="knMake">대본만 만들기</button>'+(cur?'<button class="kn-btn pri" id="knProduce">음성 포함 완성 영상 제작</button>':'')+'</div></div>'+knSceneHtml(cur)+'<div class="kn-warn">확정한 오피스룩 진행자와 낮고 여유로운 여성 음성, 재즈 라운지 테마, 퀴즈 효과음이 함께 들어갑니다. 자동 게시하지 않으며, 아래 결과를 확인한 뒤 내려받아 사용하세요.</div></section>'
+    +'<div class="kn-grid"><section class="kn-card"><h3>오늘 영상 만들기</h3><div class="kn-sub">확정된 15초 형식으로 화면과 음성을 장면별 동기화합니다.</div>'+settingsHtml+'<div class="kn-auto"><strong>자동 제작</strong><button class="kn-toggle'+(k.autoEnabled?' on':'')+'" id="knAuto">'+(k.autoEnabled?'켜짐':'꺼짐')+'</button><select class="kn-count" id="knCount"><option value="1"'+(k.dailyTarget===1?' selected':'')+'>하루 1개</option><option value="2"'+(k.dailyTarget===2?' selected':'')+'>하루 2개</option><option value="3"'+(k.dailyTarget===3?' selected':'')+'>하루 3개</option></select><span class="kn-auto-note">한 번에 한 편만 만듭니다. 다운로드하면 완료 기록 후 목록에서 사라지고 다음 미완료 소재로 넘어갑니다.</span></div><div class="kn-manual"><div class="kn-manual-title">직접 만들기 · 선택 사항</div><div class="kn-manual-note">완료했거나 현재 제작 중인 소재는 다시 만들 수 없습니다.</div><div class="kn-topics">'+topics+'</div><input class="kn-field" id="knCustom" value="'+escapeHtml(k.customTopic||"")+'" placeholder="새 소재 입력 · 예: 맞히다 / 맞추다"><div class="kn-actions"><button class="kn-btn ghost" id="knRandom">소재 추천</button><button class="kn-btn ghost" id="knMake">대본만 만들기</button>'+(cur?'<button class="kn-btn pri" id="knProduce">음성 포함 완성 영상 제작</button>':'')+'</div></div>'+knSceneHtml(cur)+'<div class="kn-warn">확정한 오피스룩 진행자와 경쾌한 여성 음성, 재즈 라운지 테마, 퀴즈 효과음이 함께 들어갑니다. 자동 게시하지 않으며, 아래 결과를 확인한 뒤 내려받아 사용하세요.</div></section>'
     +'<aside><section class="kn-card"><h3>제작 흐름</h3><div class="kn-sub">사람의 검수·승인 없이 자동 발행하지 않습니다.</div><div class="kn-pipe">'+steps+'</div></section><section class="kn-card" style="margin-top:12px"><h3>오늘의 대기열</h3><div class="kn-sub">대본별 상태를 직접 확인하고 다음 단계로 넘기세요.</div><div class="kn-list">'+list+'</div></section></aside></div>'
     +'<section class="kn-card" id="knResults" style="margin-top:12px"><h3>완성 영상 · 다운로드</h3><div class="kn-sub">제작이 끝난 영상은 여기서 바로 재생하고 기기에 저장할 수 있습니다.</div><div class="kn-results">'+results+'</div></section>'
     +'</div></div>';
@@ -7948,17 +8010,17 @@ function bindKorean(){
   bindSetting("knQuality","quality",Object.keys(KN_QUALITY_OPTIONS),"standard");
   document.querySelectorAll("[data-kn-topic]").forEach(function(b){b.addEventListener("click",function(){k.selected=b.getAttribute("data-kn-topic");k.customTopic="";saveState();render();});});
   if(custom) custom.addEventListener("input",function(){k.customTopic=custom.value;k.selected="";saveState();document.querySelectorAll("[data-kn-topic]").forEach(function(b){b.classList.remove("on");});});
-  var random=document.getElementById("knRandom"); if(random) random.addEventListener("click",function(){var choices=KN_TOPICS.filter(function(t){return t.key!==k.selected;});var t=choices[Math.floor(Math.random()*choices.length)];k.selected=t.key;k.customTopic="";saveState();render();});
-  var make=document.getElementById("knMake"); if(make) make.addEventListener("click",function(){var t=knTopic(k.selected);if(!t&&!String(k.customTopic||"").trim()){alert("소재를 고르거나 새 소재를 입력하세요.");return;}var d=knDraftFromTopic(t);if(!t)d.topic=String(k.customTopic).trim();k.drafts.push(d);k.currentDraftId=d.id;saveState();render();});
+  var random=document.getElementById("knRandom"); if(random) random.addEventListener("click",function(){var choices=KN_TOPICS.filter(function(t){return !knHasTopic(k,t.key);});if(!choices.length){alert("준비된 소재를 모두 완료했어요.");return;}var t=choices[Math.floor(Math.random()*choices.length)];k.selected=t.key;k.customTopic="";saveState();render();});
+  var make=document.getElementById("knMake"); if(make) make.addEventListener("click",function(){var t=knTopic(k.selected),key=t?t.key:String(k.customTopic||"").trim();if(!key){alert("소재를 고르거나 새 소재를 입력하세요.");return;}if(knHasTopic(k,key)){alert("이미 생성 기록이 있거나 제작 중인 소재예요.");return;}var d=knDraftFromTopic(t);if(!t)d.topic=key;knRememberGenerated(k,key);k.drafts.push(d);k.currentDraftId=d.id;saveState();render();});
   var produce=document.getElementById("knProduce"); if(produce) produce.addEventListener("click",function(){var d=k.drafts.find(function(x){return x.id===k.currentDraftId;})||k.drafts[k.drafts.length-1];knQueueVideo(d,false);});
   var auto=document.getElementById("knAuto");if(auto)auto.addEventListener("click",function(){k.autoEnabled=!k.autoEnabled;saveState();pushState();render();if(k.autoEnabled)knEnsureDaily();});
-  var count=document.getElementById("knCount");if(count)count.addEventListener("change",function(){k.dailyTarget=Math.max(3,Math.min(5,+count.value||3));saveState();pushState();render();});
+  var count=document.getElementById("knCount");if(count)count.addEventListener("change",function(){k.dailyTarget=Math.max(1,Math.min(3,+count.value||1));saveState();pushState();render();});
   document.querySelectorAll("[data-kn-open]").forEach(function(b){b.addEventListener("click",function(){k.currentDraftId=b.getAttribute("data-kn-open");saveState();render();});});
   document.querySelectorAll("[data-kn-produce]").forEach(function(b){b.addEventListener("click",function(){knQueueVideo(k.drafts.find(function(x){return x.id===b.getAttribute("data-kn-produce");}),false);});});
   document.querySelectorAll("[data-kn-result]").forEach(function(b){b.addEventListener("click",function(){var box=document.getElementById("knResults");if(box)box.scrollIntoView({behavior:"smooth",block:"start"});});});
   document.querySelectorAll("[data-kn-download]").forEach(function(b){b.addEventListener("click",function(){knDownload(b.getAttribute("data-kn-download"));});});
   document.querySelectorAll("[data-kn-act]").forEach(function(b){b.addEventListener("click",function(){var d=k.drafts.find(function(x){return x.id===b.getAttribute("data-id");});if(d){d.status=b.getAttribute("data-kn-act");saveState();render();}});});
-  document.querySelectorAll("[data-kn-del]").forEach(function(b){b.addEventListener("click",function(){var id=b.getAttribute("data-kn-del");if(!confirm("이 대본과 완성 영상을 삭제할까요?"))return;knDeleteVideo(id);k.drafts=k.drafts.filter(function(x){return x.id!==id;});if(k.currentDraftId===id)k.currentDraftId="";saveState();render();});});
+  document.querySelectorAll("[data-kn-del]").forEach(function(b){b.addEventListener("click",function(){knRemoveDraft(b.getAttribute("data-kn-del"));});});
   bindStudioCommon();
   knHydrateResults();
 }
@@ -7973,25 +8035,43 @@ var DP_TOPICS=[
   {key:"피노키오",thesis:"코가 자라는 벌은 거짓말을 고치는 교육이 아니라 거짓말을 측정하는 실험이었을 수 있습니다.",evidence:["피노키오는 거짓말할 때마다 즉시 눈에 보이는 변화를 겪습니다.","주변 어른들은 이유보다 변화의 크기에 관심을 보입니다.","착한 아이가 되라는 기준은 늘 다른 사람이 정합니다."],question:"진실을 가르친 것일까요, 복종을 학습시킨 것일까요?"}
 ];
 function dpData(){
-  if(!STATE.darkFairy||typeof STATE.darkFairy!=="object")STATE.darkFairy={selected:"빨간 모자",customTopic:"",dailyTarget:3,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[],canvasSize:"540x960",duration:15,fps:24,quality:"standard"};
-  var d=STATE.darkFairy;if(!Array.isArray(d.drafts))d.drafts=[];d.dailyTarget=Math.max(3,Math.min(5,+d.dailyTarget||3));if(!KN_CANVAS_OPTIONS[d.canvasSize])d.canvasSize="540x960";if(KN_DURATION_OPTIONS.indexOf(+d.duration)<0)d.duration=15;else d.duration=+d.duration;if(KN_FPS_OPTIONS.indexOf(+d.fps)<0)d.fps=24;else d.fps=+d.fps;if(!KN_QUALITY_OPTIONS[d.quality])d.quality="standard";return d;
+  if(!STATE.darkFairy||typeof STATE.darkFairy!=="object")STATE.darkFairy={selected:"빨간 모자",customTopic:"",dailyTarget:1,autoEnabled:true,lastAutoDay:"",autoCursor:0,drafts:[],generatedTopics:[],completedTopics:[],completedQueueIds:[],documentOnly:true,migrationVersion:375};
+  var d=STATE.darkFairy;if(!Array.isArray(d.drafts))d.drafts=[];if(!Array.isArray(d.generatedTopics))d.generatedTopics=[];if(!Array.isArray(d.completedTopics))d.completedTopics=[];if(!Array.isArray(d.completedQueueIds))d.completedQueueIds=[];d.documentOnly=true;d.dailyTarget=Math.max(1,Math.min(3,+d.dailyTarget||1));
+  if((+d.migrationVersion||0)<375){d.drafts.forEach(function(x){if(x&&x.topic)knRememberGenerated(d,x.topic);if(x&&x.id)knDeleteVideo(x.id);if(x){x.videoStatus="";x.videoProgress=0;x.videoError="";x.audioWarning="";}});d.migrationVersion=375;}
+  return d;
 }
 function dpSettings(){var d=dpData(),c=KN_CANVAS_OPTIONS[d.canvasSize];return{canvasSize:d.canvasSize,w:c.w,h:c.h,duration:d.duration,fps:d.fps,quality:d.quality,bitrate:KN_QUALITY_OPTIONS[d.quality].bitrate};}
 function dpTopic(key){return DP_TOPICS.find(function(t){return t.key===key;});}
-function dpDraftFromTopic(t){var d=dpData(),src=t||{key:String(d.customTopic||"새 원작").trim()||"새 원작",thesis:"아직 아무도 의심하지 않은 장면에서 새로운 가설을 세워 보세요.",evidence:["원작의 공통 장면에서 첫 번째 단서를 찾으세요.","행동의 반복이나 설명되지 않은 우연을 두 번째 증거로 놓으세요.","영웅과 악역의 역할을 뒤집어도 성립하는지 확인하세요."],question:"결론을 보여주지 말고 독자가 스스로 도달하게 만들 수 있을까요?"};return{id:"dp_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),studio:"dark",topic:src.key,thesis:src.thesis,openQuestion:src.question,status:"draft",createdAt:Date.now(),videoStatus:"",videoProgress:0,scenes:[{text:src.thesis},{text:src.evidence[0]},{text:src.evidence[1]},{text:src.evidence[2]+" "+src.question}]};}
-async function dpEnsureDaily(){var d=dpData(),today=knToday();if(!d.autoEnabled||d.lastAutoDay===today)return;if(useBackend()){try{var rr=await fetch(backendOrigin()+"/api/studio/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({studio:"dark",dailyTarget:d.dailyTarget})}),remote=await rr.json();if(remote&&remote.ok){syncStudioQueue(remote.queue||[]);d.lastAutoDay=today;await saveState();return;}}catch(e){}}d.lastAutoDay=today;var made=[],count=d.dailyTarget;for(var i=0;i<count;i++){var x=dpDraftFromTopic(DP_TOPICS[(d.autoCursor+i)%DP_TOPICS.length]);x.autoDay=today;x.automatic=true;d.drafts.push(x);made.push(x);}d.autoCursor=(d.autoCursor+count)%DP_TOPICS.length;d.currentDraftId=made[made.length-1].id;await saveState();if(STATE.view==="dark")render();made.forEach(function(x){knQueueVideo(x,true);});}
-function dpSceneHtml(x){var cuts=knPhaseCuts(dpData().duration);if(!x)return'<div class="kn-empty">원작을 고르고, 독자가 스스로 결론에 도달할 증거 순서를 만드세요.</div>';return'<div class="kn-preview">'+x.scenes.map(function(s,i){return'<div class="kn-scene"><span class="kn-time">'+cuts[i]+'–'+cuts[i+1]+'초</span><span class="kn-line">'+(i===0?'<em>'+escapeHtml(s.text)+'</em>':escapeHtml(s.text))+'</span></div>';}).join('')+'</div>';}
+function dpTopicKey(v){return String(v||"").trim().replace(/\s+/g," ").toLowerCase();}
+function dpExisting(topic,drafts){var key=dpTopicKey(topic);return (drafts||dpData().drafts).find(function(x){return dpTopicKey(x.topic)===key;});}
+function dpPrimaryDrafts(rows){var seen={};return (rows||[]).filter(function(x){var key=dpTopicKey(x.topic);if(!key||seen[key])return false;seen[key]=1;return true;});}
+function dpAvailableTopics(d){return DP_TOPICS.filter(function(t){return !knHasTopic(d,t.key);});}
+function dpDraftFromTopic(t){var d=dpData(),src=t||{key:String(d.customTopic||"새 원작").trim()||"새 원작",thesis:"원작의 실제 장면에서 하나의 구조적 질문과 대표 해석을 세워 보세요.",evidence:["원작 안에서 독립된 첫 번째 단서를 찾으세요.","같은 해석을 지지하는 두 번째 단서를 놓으세요.","가장 강한 반론을 견디는 결정적 단서를 확인하세요."],question:"이 장면을 우리는 왜 당연하게 받아들였을까요?"};return{id:"dp_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),studio:"dark",topic:src.key,originalKey:dpTopicKey(src.key),contentRule:"one-original-one-story",thesis:src.thesis,openQuestion:src.question,status:t?"draft":"review",needsFactCheck:!t,createdAt:Date.now(),videoStatus:"",videoProgress:0,scenes:[{text:src.thesis},{text:src.evidence[0]},{text:src.evidence[1]},{text:src.evidence[2]+" "+src.question}]};}
+async function dpEnsureDaily(){var d=dpData(),today=knToday();if(!d.autoEnabled||d.lastAutoDay===today)return;if(useBackend()){try{var rr=await fetch(backendOrigin()+"/api/studio/run",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({studio:"dark",dailyTarget:d.dailyTarget,completedKeys:(d.generatedTopics||[]).concat(d.completedTopics||[])})}),remote=await rr.json();if(remote&&remote.ok){syncStudioQueue(remote.queue||[]);d.lastAutoDay=today;await saveState();return;}}catch(e){}}d.lastAutoDay=today;var made=[],available=dpAvailableTopics(d).slice(0,d.dailyTarget);available.forEach(function(t){var x=dpDraftFromTopic(t);x.autoDay=today;x.automatic=true;knRememberGenerated(d,t.key);d.drafts.push(x);made.push(x);});if(made.length)d.currentDraftId=made[made.length-1].id;await saveState();if(STATE.view==="dark")render();}
+function dpSceneHtml(x){if(!x)return'<div class="kn-empty">원작을 고르고, 다시 제작할 수 있는 기획 문서를 만드세요.</div>';var labels=["대표 가설","단서 1","단서 2","결정적 단서·열린 질문"];return'<div class="kn-preview">'+x.scenes.map(function(s,i){return'<div class="kn-scene"><span class="kn-time">'+labels[i]+'</span><span class="kn-line">'+(i===0?'<em>'+escapeHtml(s.text)+'</em>':escapeHtml(s.text))+'</span></div>';}).join('')+'</div>';}
 function studioSettingsHtml(prefix,d){return'<div class="kn-settings"><div class="kn-setting"><label>캔버스 크기</label><select id="'+prefix+'Canvas"><option value="540x960"'+(d.canvasSize==="540x960"?' selected':'')+'>540×960 · 빠른 제작</option><option value="720x1280"'+(d.canvasSize==="720x1280"?' selected':'')+'>720×1280 · 선명</option><option value="1080x1920"'+(d.canvasSize==="1080x1920"?' selected':'')+'>1080×1920 · 고화질</option></select></div><div class="kn-setting"><label>영상 길이</label><select id="'+prefix+'Duration"><option value="10"'+(d.duration===10?' selected':'')+'>10초</option><option value="15"'+(d.duration===15?' selected':'')+'>15초 · 기본</option><option value="20"'+(d.duration===20?' selected':'')+'>20초</option></select></div><div class="kn-setting"><label>프레임률</label><select id="'+prefix+'Fps"><option value="24"'+(d.fps===24?' selected':'')+'>24fps</option><option value="30"'+(d.fps===30?' selected':'')+'>30fps</option></select></div><div class="kn-setting"><label>영상 품질</label><select id="'+prefix+'Quality"><option value="standard"'+(d.quality==="standard"?' selected':'')+'>표준</option><option value="high"'+(d.quality==="high"?' selected':'')+'>높음</option></select></div><div class="kn-setting-note">정해진 선택지 안에서만 바꿀 수 있으며 자동 제작에도 그대로 적용됩니다.</div></div>';}
 function renderDark(){
-  hideApprove();var d=dpData(),cfg=dpSettings(),drafts=d.drafts.slice().reverse(),cur=d.drafts.find(function(x){return x.id===d.currentDraftId;})||d.drafts[d.drafts.length-1],done=d.drafts.filter(function(x){return x.videoStatus==="done";}).length,review=d.drafts.filter(function(x){return x.status==="review";}).length,topics=DP_TOPICS.map(function(t){return'<button class="kn-topic'+(d.selected===t.key?' on':'')+'" data-dp-topic="'+escapeHtml(t.key)+'">'+escapeHtml(t.key)+'</button>';}).join('');
-  var list=drafts.length?drafts.map(function(x){return'<div class="kn-draft"><div class="kn-draft-h"><strong>'+escapeHtml(x.topic)+'</strong><span class="kn-badge">'+knVideoLabel(x.videoStatus)+'</span></div><p>'+escapeHtml(x.thesis||"")+'</p><div><button class="kn-mini" data-dp-open="'+x.id+'">구성 보기</button><button class="kn-mini" data-studio-copy="'+x.id+'">복사</button>'+(x.videoStatus==="done"?'<button class="kn-mini" data-dp-result="'+x.id+'">결과 보기</button>':((x.videoStatus==="queued"||x.videoStatus==="rendering")?'<button class="kn-mini" disabled>제작 중</button>':'<button class="kn-mini" data-dp-produce="'+x.id+'">완성 영상 만들기</button>'))+'<button class="kn-mini" data-dp-del="'+x.id+'" style="color:#a34c4c">삭제</button></div></div>';}).join(''):'<div class="kn-empty">아직 제작물이 없습니다.</div>',results=drafts.filter(function(x){return x.videoStatus;}).map(knResultHtml).join('')||'<div class="kn-empty">완성 영상이 이 안에 나타납니다.</div>';
-  viewEl.innerHTML='<div class="kn-wrap dp-wrap"><div class="kn-shell"><section class="kn-hero"><div class="kn-eyebrow">HUKKLE HUB · EVIDENCE STORY LAB</div><h2 class="kn-title">동심파괴</h2><div class="kn-desc">익숙한 원작의 공통 장면을 낯설게 만들고, 결론 대신 증거를 쌓아 독자가 스스로 추리하게 합니다.</div><div class="kn-pills"><span class="kn-pill">'+cfg.canvasSize.replace('x','×')+'</span><span class="kn-pill">'+d.duration+'초 · '+d.fps+'fps</span><span class="kn-pill">하루 '+d.dailyTarget+'개 자동 제작</span></div><div class="kn-io">'+(cur?'<button class="kn-btn" id="studioCopyCurrent" data-id="'+cur.id+'">현재 제작물 복사</button>':'')+'<button class="kn-btn" id="studioExport" data-kind="dark">제작물 따로 저장</button><button class="kn-btn" id="studioImport" data-kind="dark">제작물 가져오기</button></div><div class="kn-kpis"><div class="kn-kpi"><b>'+done+'</b><span>완성 영상</span></div><div class="kn-kpi"><b>'+drafts.length+'</b><span>전체 제작물</span></div><div class="kn-kpi"><b>'+review+'</b><span>검수 대기</span></div><div class="kn-kpi"><b>0</b><span>자동 발행</span></div></div></section><div class="kn-grid"><section class="kn-card"><h3>증거형 쇼츠 만들기</h3><div class="kn-sub">가설을 먼저 던지고 증거를 차례로 쌓되 결론은 화면에 직접 보여주지 않습니다.</div>'+studioSettingsHtml('dp',d)+'<div class="kn-auto"><strong>매일 자동 제작</strong><button class="kn-toggle'+(d.autoEnabled?' on':'')+'" id="dpAuto">'+(d.autoEnabled?'켜짐':'꺼짐')+'</button><select class="kn-count" id="dpCount"><option value="3"'+(d.dailyTarget===3?' selected':'')+'>하루 3개</option><option value="4"'+(d.dailyTarget===4?' selected':'')+'>하루 4개</option><option value="5"'+(d.dailyTarget===5?' selected':'')+'>하루 5개</option></select><span class="kn-auto-note">서버 연결 시 닫힌 동안 제작안이 대기열에 쌓입니다.</span></div><div class="kn-topics">'+topics+'</div><input class="kn-field" id="dpCustom" value="'+escapeHtml(d.customTopic||'')+'" placeholder="새 원작 입력"><div class="kn-actions"><button class="kn-btn ghost" id="dpRandom">원작 추천</button><button class="kn-btn ghost" id="dpMake">증거 구성 만들기</button>'+(cur?'<button class="kn-btn pri" id="dpProduce">완성 영상 제작</button>':'')+'</div>'+dpSceneHtml(cur)+'<div class="kn-warn">가설은 원작의 실제 공통 장면으로 지지되어야 합니다. 허위 사실을 단정하지 말고 해석·추리 콘텐츠임을 유지하세요.</div></section><aside><section class="kn-card"><h3>제작 원칙</h3><div class="kn-pipe"><div class="kn-step"><span class="kn-step-i">1</span><span><b>원작을 낯설게</b><small>익숙한 장면의 의미 뒤집기</small></span></div><div class="kn-step"><span class="kn-step-i">2</span><span><b>증거를 누적</b><small>어거지가 되지 않게 공통 장면 사용</small></span></div><div class="kn-step"><span class="kn-step-i">3</span><span><b>결론은 감추기</b><small>댓글에서 반론과 추리 유도</small></span></div></div></section><section class="kn-card" style="margin-top:12px"><h3>제작 대기열</h3><div class="kn-list">'+list+'</div></section></aside></div><section class="kn-card" id="dpResults" style="margin-top:12px"><h3>완성 영상 · 다운로드</h3><div class="kn-sub">이 탭 안에서 재생·복사·다운로드합니다.</div><div class="kn-results">'+results+'</div></section></div></div>';
+  hideApprove();var d=dpData(),primary=dpPrimaryDrafts(d.drafts),drafts=primary.slice().reverse(),cur=primary.find(function(x){return x.id===d.currentDraftId;})||primary[primary.length-1],review=primary.filter(function(x){return x.status==="review";}).length,topics=DP_TOPICS.map(function(t){var used=knHasTopic(d,t.key);return'<button class="kn-topic'+(d.selected===t.key?' on':'')+'" data-dp-topic="'+escapeHtml(t.key)+'"'+(used?' disabled title="이미 기획 문서를 만들었습니다"':'')+'>'+escapeHtml(t.key)+(used?' · 생성 기록':'')+'</button>';}).join('');
+  var list=drafts.length?drafts.map(function(x){return'<div class="kn-draft"><div class="kn-draft-h"><strong>'+escapeHtml(x.topic)+'</strong><span class="kn-badge">문서 준비</span></div><p>'+escapeHtml(x.thesis||"")+'</p><div><button class="kn-mini" data-dp-open="'+x.id+'">구성 보기</button><button class="kn-mini" data-studio-copy="'+x.id+'">복사</button><button class="kn-mini" data-dp-document="'+x.id+'">문서 다운로드</button><button class="kn-mini" data-dp-del="'+x.id+'" style="color:#a34c4c">삭제</button></div></div>';}).join(''):'<div class="kn-empty">아직 기획 문서가 없습니다.</div>';
+  viewEl.innerHTML='<div class="kn-wrap dp-wrap"><div class="kn-shell"><section class="kn-hero"><div class="kn-eyebrow">HUKKLE HUB · EVIDENCE DOCUMENT LAB</div><h2 class="kn-title">동심파괴</h2><div class="kn-desc">영상은 만들지 않고, 원작 하나당 대표 해석 하나를 기획 문서로 받습니다.</div><div class="kn-pills"><span class="kn-pill">문서 전용</span><span class="kn-pill">새 원작 하루 '+d.dailyTarget+'편</span><span class="kn-pill">원작당 대표 콘텐츠 1편</span><span class="kn-pill">영상 제작 없음</span></div><div class="kn-io">'+(cur?'<button class="kn-btn" id="studioCopyCurrent" data-id="'+cur.id+'">현재 문서 복사</button>':'')+'<button class="kn-btn" id="studioExport" data-kind="dark">전체 문서 저장</button><button class="kn-btn" id="studioImport" data-kind="dark">문서 가져오기</button></div><div class="kn-kpis"><div class="kn-kpi"><b>'+drafts.length+'</b><span>기획 문서</span></div><div class="kn-kpi"><b>'+d.generatedTopics.length+'</b><span>생성 기록</span></div><div class="kn-kpi"><b>'+review+'</b><span>검수 대기</span></div><div class="kn-kpi"><b>0</b><span>제작 영상</span></div></div></section><div class="kn-grid"><section class="kn-card"><h3>원작당 대표 문서 1편</h3><div class="kn-sub">이 문서를 내려받아 우리가 검토한 뒤 별도 영상 제작 단계에서 다시 만듭니다.</div><div class="kn-auto"><strong>매일 문서 생성</strong><button class="kn-toggle'+(d.autoEnabled?' on':'')+'" id="dpAuto">'+(d.autoEnabled?'켜짐':'꺼짐')+'</button><select class="kn-count" id="dpCount"><option value="1"'+(d.dailyTarget===1?' selected':'')+'>하루 1편</option><option value="2"'+(d.dailyTarget===2?' selected':'')+'>하루 2편</option><option value="3"'+(d.dailyTarget===3?' selected':'')+'>하루 3편</option></select><span class="kn-auto-note">아직 다루지 않은 원작만 문서로 만듭니다. 생성 기록은 삭제 후에도 남습니다.</span></div><div class="kn-topics">'+topics+'</div><input class="kn-field" id="dpCustom" value="'+escapeHtml(d.customTopic||'')+'" placeholder="새 원작 입력"><div class="kn-actions"><button class="kn-btn ghost" id="dpRandom">원작 추천</button><button class="kn-btn pri" id="dpMake">기획 문서 만들기</button>'+(cur?'<button class="kn-btn" data-dp-document="'+cur.id+'">현재 문서 다운로드</button>':'')+'</div>'+dpSceneHtml(cur)+'<div class="kn-warn">원작 1개 → 구조적 질문 1개 → 대표 해석 1개 → 기획 문서 1편. 이 탭에서는 영상을 생성하지 않습니다.</div></section><aside><section class="kn-card"><h3>문서 제작 원칙</h3><div class="kn-pipe"><div class="kn-step"><span class="kn-step-i">1</span><span><b>질문 하나</b><small>원작의 공통 장면에서 구조적 질문 1개</small></span></div><div class="kn-step"><span class="kn-step-i">2</span><span><b>대표 해석 하나</b><small>독립 단서 2~3개와 최강 반론 검토</small></span></div><div class="kn-step"><span class="kn-step-i">3</span><span><b>문서로 전달</b><small>검토 후 별도 영상 제작에 사용</small></span></div></div></section><section class="kn-card" style="margin-top:12px"><h3>기획 문서 목록</h3><div class="kn-list">'+list+'</div></section></aside></div></div></div>';
 }
-function bindDark(){var d=dpData();function bs(id,key,allowed,fallback){var e=document.getElementById(id);if(e)e.onchange=function(){var v=(key==="duration"||key==="fps")?+e.value:e.value;d[key]=allowed.indexOf(v)>=0?v:fallback;saveState();render();};}bs('dpCanvas','canvasSize',Object.keys(KN_CANVAS_OPTIONS),'540x960');bs('dpDuration','duration',KN_DURATION_OPTIONS,15);bs('dpFps','fps',KN_FPS_OPTIONS,24);bs('dpQuality','quality',Object.keys(KN_QUALITY_OPTIONS),'standard');document.querySelectorAll('[data-dp-topic]').forEach(function(b){b.onclick=function(){d.selected=b.getAttribute('data-dp-topic');d.customTopic='';saveState();render();};});var c=document.getElementById('dpCustom');if(c)c.oninput=function(){d.customTopic=c.value;d.selected='';saveState();};var rnd=document.getElementById('dpRandom');if(rnd)rnd.onclick=function(){var t=DP_TOPICS[Math.floor(Math.random()*DP_TOPICS.length)];d.selected=t.key;d.customTopic='';saveState();render();};var mk=document.getElementById('dpMake');if(mk)mk.onclick=function(){var x=dpDraftFromTopic(dpTopic(d.selected));d.drafts.push(x);d.currentDraftId=x.id;saveState();render();};var pr=document.getElementById('dpProduce');if(pr)pr.onclick=function(){knQueueVideo(d.drafts.find(function(x){return x.id===d.currentDraftId;})||d.drafts[d.drafts.length-1],false);};var au=document.getElementById('dpAuto');if(au)au.onclick=function(){d.autoEnabled=!d.autoEnabled;saveState();pushState();render();if(d.autoEnabled)dpEnsureDaily();};var ct=document.getElementById('dpCount');if(ct)ct.onchange=function(){d.dailyTarget=Math.max(3,Math.min(5,+ct.value||3));saveState();pushState();render();};document.querySelectorAll('[data-dp-open]').forEach(function(b){b.onclick=function(){d.currentDraftId=b.getAttribute('data-dp-open');saveState();render();};});document.querySelectorAll('[data-dp-produce]').forEach(function(b){b.onclick=function(){knQueueVideo(d.drafts.find(function(x){return x.id===b.getAttribute('data-dp-produce');}),false);};});document.querySelectorAll('[data-dp-result]').forEach(function(b){b.onclick=function(){var e=document.getElementById('dpResults');if(e)e.scrollIntoView({behavior:'smooth'});};});document.querySelectorAll('[data-dp-del]').forEach(function(b){b.onclick=function(){var id=b.getAttribute('data-dp-del');if(!confirm('이 제작물과 영상을 삭제할까요?'))return;knDeleteVideo(id);d.drafts=d.drafts.filter(function(x){return x.id!==id;});if(d.currentDraftId===id)d.currentDraftId='';saveState();render();};});document.querySelectorAll('[data-kn-download]').forEach(function(b){b.onclick=function(){knDownload(b.getAttribute('data-kn-download'));};});bindStudioCommon();knHydrateResults();}
+function bindDark(){
+  var d=dpData();
+  document.querySelectorAll("[data-dp-topic]").forEach(function(b){b.onclick=function(){d.selected=b.getAttribute("data-dp-topic");d.customTopic="";saveState();render();};});
+  var c=document.getElementById("dpCustom");if(c)c.oninput=function(){d.customTopic=c.value;d.selected="";saveState();};
+  var rnd=document.getElementById("dpRandom");if(rnd)rnd.onclick=function(){var choices=dpAvailableTopics(d);if(!choices.length){alert("준비된 모든 원작의 대표 콘텐츠를 이미 만들었습니다.");return;}var t=choices[Math.floor(Math.random()*choices.length)];d.selected=t.key;d.customTopic="";saveState();render();};
+  var mk=document.getElementById("dpMake");if(mk)mk.onclick=function(){var topic=String(d.selected||d.customTopic||"").trim();if(!topic){alert("원작을 고르거나 새 원작을 입력하세요.");return;}if(knHasTopic(d,topic)){var existing=dpExisting(topic,d.drafts);if(existing){d.currentDraftId=existing.id;saveState();render();}alert("이 원작은 이미 기획 문서 생성 기록이 있습니다. 두 번째 문서는 만들지 않습니다.");return;}var x=dpDraftFromTopic(dpTopic(d.selected));knRememberGenerated(d,topic);d.drafts.push(x);d.currentDraftId=x.id;saveState();render();};
+  var au=document.getElementById("dpAuto");if(au)au.onclick=function(){d.autoEnabled=!d.autoEnabled;saveState();pushState();render();if(d.autoEnabled)dpEnsureDaily();};
+  var ct=document.getElementById("dpCount");if(ct)ct.onchange=function(){d.dailyTarget=Math.max(1,Math.min(3,+ct.value||1));saveState();pushState();render();};
+  document.querySelectorAll("[data-dp-open]").forEach(function(b){b.onclick=function(){d.currentDraftId=b.getAttribute("data-dp-open");saveState();render();};});
+  document.querySelectorAll("[data-dp-document]").forEach(function(b){b.onclick=function(){studioDownloadDocument(b.getAttribute("data-dp-document"));};});
+  document.querySelectorAll("[data-dp-del]").forEach(function(b){b.onclick=async function(){var id=b.getAttribute("data-dp-del"),x=studioFindDraft(id);if(!x||!confirm("이 기획 문서를 목록에서 삭제할까요?\n원작 생성 기록은 남아 자동 재생성되지 않습니다."))return;knRememberGenerated(d,x.topic);await knDeleteVideo(id);d.drafts=d.drafts.filter(function(v){return v.id!==id;});if(d.currentDraftId===id)d.currentDraftId="";await saveState();if(useBackend())try{await fetch(backendOrigin()+"/api/studio/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:x.serverQueueId||"",studio:"dark",key:x.topic})});}catch(e){}render();};});
+  bindStudioCommon();
+}
 function syncStudioQueue(rows){
   if(!Array.isArray(rows))return 0;var added=[],seen={};knData().drafts.concat(dpData().drafts).forEach(function(x){if(x.serverQueueId)seen[x.serverQueueId]=1;});
-  rows.forEach(function(q){if(!q||seen[q.id]||!q.studio||!q.key)return;var target=q.studio==="dark"?dpData():knData(),src=q.studio==="dark"?dpDraftFromTopic(dpTopic(q.key)):knDraftFromTopic(knTopic(q.key));src.id="sq_"+q.id;src.serverQueueId=q.id;src.autoDay=q.day;src.automatic=true;target.drafts.push(src);target.currentDraftId=src.id;seen[q.id]=1;added.push(src);});
-  if(added.length){saveState();setTimeout(function(){added.forEach(function(x){knQueueVideo(x,true);});},500);}return added.length;
+  rows.forEach(function(q){if(!q||seen[q.id]||!q.studio||!q.key||q.status==="completed"||q.status==="duplicate")return;var target=q.studio==="dark"?dpData():knData();if((target.completedQueueIds||[]).indexOf(q.id)>=0||knHasTopic(target,q.key)||(q.studio==="dark"&&dpExisting(q.key,target.drafts))){seen[q.id]=1;return;}if(q.studio!=="dark"&&target.drafts.length)return;var topic=q.studio==="dark"?dpTopic(q.key):knTopic(q.key);if(!topic)return;var src=q.studio==="dark"?dpDraftFromTopic(topic):knDraftFromTopic(topic);src.id="sq_"+q.id;src.serverQueueId=q.id;src.autoDay=q.day;src.automatic=true;knRememberGenerated(target,q.key);target.drafts.push(src);target.currentDraftId=src.id;seen[q.id]=1;added.push(src);});
+  if(added.length){saveState();setTimeout(function(){added.filter(function(x){return x.studio!=="dark";}).forEach(function(x){knQueueVideo(x,true);});},500);}return added.length;
 }
 
 function render(){
