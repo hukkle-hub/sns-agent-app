@@ -3736,12 +3736,15 @@ function youtubeCommentsHtml(rows){
   if(!rows||!rows.length) return '<div class="note" style="padding:18px 8px;text-align:center">최근 댓글이 없어요.</div>';
   return rows.map(function(c){
     var replies=(c.replies||[]).slice(-3).map(function(r){return '<div style="margin:5px 0 0 18px;padding:6px 8px;background:#f6f8fb;border-radius:7px;font-size:10.5px"><b>'+esc(r.author||"채널")+'</b> · '+esc(r.text||"")+'</div>';}).join("");
+    var a=c.analysis||null, ac=a?(a.accuracy||"확인 필요"):"분석 대기";
+    var acColor=ac==="정확"?"#0e7a52":(ac==="교정 필요"?"#c66a1a":"#657084");
+    var analysis=a?('<div style="margin-top:7px;padding:8px 9px;background:#f5f8fc;border:1px solid #dde5ef;border-radius:8px;font-size:10.5px;line-height:1.55"><b style="color:#37506b">💬 정유진 자동 분석</b> · '+esc(a.type||"의견")+' · <b style="color:'+acColor+'">'+esc(ac)+'</b><br><span style="color:#526173">'+esc(a.reason||"")+'</span></div>'):'<div class="note" style="margin-top:6px">자동 감시가 다음 수집 때 분석합니다.</div>';
     return '<div class="yt-comment" data-ytcid="'+esc(c.id)+'" style="border:1px solid #e6eaf0;border-radius:10px;padding:9px 10px;margin-bottom:7px">'
       +'<div style="display:flex;align-items:center;gap:7px"><img src="'+esc(c.authorImage||"")+'" alt="" style="width:25px;height:25px;border-radius:50%;background:#eef1f6"><div style="flex:1;font-size:11px"><b>'+esc(c.author||"시청자")+'</b><div style="color:#8a94a6;font-size:9.5px">'+esc(c.publishedAt?new Date(c.publishedAt).toLocaleString("ko-KR"):"")+' · 👍 '+(+c.likes||0)+'</div></div>'
       +'<a href="https://youtu.be/'+esc(c.videoId||"")+'" target="_blank" rel="noopener" style="font-size:10px;color:#2f6fe0">영상</a></div>'
-      +'<div style="font-size:12px;line-height:1.5;color:#263342;margin:7px 0;white-space:pre-wrap">'+esc(c.text||"")+'</div>'+replies
-      +'<textarea data-ytreplyin="'+esc(c.id)+'" placeholder="정유진이 작성한 답글 초안이 여기에 표시됩니다" style="width:100%;box-sizing:border-box;min-height:45px;margin-top:7px;padding:7px 9px;border:1px solid #d9e0ea;border-radius:8px;font-family:inherit;font-size:11px"></textarea>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px"><button class="cbtn" data-ytdraft="'+esc(c.id)+'" style="font-size:10px;padding:5px 8px">정유진에게 초안 요청</button><button class="cbtn" data-ytcopy="'+esc(c.id)+'" style="font-size:10px;padding:5px 8px">초안 복사</button></div>'
+      +'<div style="font-size:12px;line-height:1.5;color:#263342;margin:7px 0;white-space:pre-wrap">'+esc(c.text||"")+'</div>'+replies+analysis
+      +'<textarea data-ytreplyin="'+esc(c.id)+'" placeholder="정유진이 작성한 답글 초안이 여기에 표시됩니다" style="width:100%;box-sizing:border-box;min-height:45px;margin-top:7px;padding:7px 9px;border:1px solid #d9e0ea;border-radius:8px;font-family:inherit;font-size:11px">'+esc(a&&a.draft||"")+'</textarea>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px">'+(a&&a.draft?'':'<button class="cbtn" data-ytdraft="'+esc(c.id)+'" style="font-size:10px;padding:5px 8px">초안 다시 요청</button>')+'<button class="cbtn" data-ytcopy="'+esc(c.id)+'" style="font-size:10px;padding:5px 8px">초안 복사</button></div>'
       +'<div class="note" style="margin-top:4px">실제 게시·삭제·숨김·차단은 이 화면에서 실행되지 않습니다.</div>'
       +'<div class="note" data-ytstat="'+esc(c.id)+'" style="margin-top:4px"></div></div>';
   }).join("");
@@ -7142,7 +7145,7 @@ function openAnalyticsModal(){
   }
   async function loadComments(){
     var btn=ov.querySelector("#anCollect"); btn.disabled=true;btn.textContent="댓글 불러오는 중…";
-    try{await wakeServer(50000);var r=await fetch(backendOrigin()+"/api/youtube/comments?limit=50");var d=await r.json();if(!r.ok||d.error)throw new Error(d.error||"댓글 수집 실패");comments=d.comments||[];setTab("comments");stat(comments.length+"개 댓글을 불러왔어요.",true);}
+    try{await wakeServer(50000);await fetch(backendOrigin()+"/api/youtube/comment-monitor/run",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});var r=await fetch(backendOrigin()+"/api/youtube/comments?limit=50");var d=await r.json();if(!r.ok||d.error)throw new Error(d.error||"댓글 수집 실패");comments=d.comments||[];setTab("comments");stat("자동 감시 중 · "+comments.length+"개 댓글의 분석·답글 초안을 확인했어요.",true);}
     catch(e){stat("연결 필요 또는 수집 실패: "+(e.message||e),false);ov.querySelector("#anBody").innerHTML='<div class="note" style="padding:14px;text-align:center">유튜브를 한 번 연결하면 댓글을 확인하고 답글을 달 수 있어요.<br><button class="cbtn conn" id="anConnect" style="margin-top:8px">유튜브 연결</button></div>';var c=ov.querySelector("#anConnect");if(c)c.onclick=function(){window.open(backendOrigin()+"/api/connect/youtube","_blank");};}
     btn.disabled=false;if(tab==="comments")btn.textContent="🔄 최근 댓글 불러오기";
   }
